@@ -50,3 +50,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/Libraries/Ca.Core/obj
+/Libraries/Ca.Data/obj
+/Libraries/Ca.Services/obj
