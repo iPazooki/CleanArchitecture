@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
@@ -6,13 +7,15 @@ namespace Ca.Services.Caching
 {
     public class MemoryCacheManager : ICacheManager
     {
-        private const int slidingExpirationSec = 10, absoluteExpirationSec = 60;
+        private readonly int slidingExpirationSec, absoluteExpirationSec;
 
         private readonly IMemoryCache _memoryCache;
 
-        public MemoryCacheManager(IMemoryCache memoryCache)
+        public MemoryCacheManager(IMemoryCache memoryCache, IOptions<CacheOptions> options)
         {
             _memoryCache = memoryCache;
+            slidingExpirationSec = options.Value.SlidingExpirationSec;
+            absoluteExpirationSec = options.Value.AbsoluteExpirationSec;
         }
 
         public async Task<TEntity> Get<TEntity>(string key, Func<string, Task<TEntity>> acquire)
@@ -26,6 +29,11 @@ namespace Ca.Services.Caching
                 Set(key, result);
 
             return result;
+        }
+
+        public void Delete(string key)
+        {
+            _memoryCache.Remove(key);
         }
 
         private void Set<TEntity>(string key, TEntity result)

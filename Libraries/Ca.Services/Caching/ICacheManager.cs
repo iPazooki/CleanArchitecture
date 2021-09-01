@@ -16,5 +16,7 @@ namespace Ca.Services.Caching
         /// <param name="acquire">Function to load item if it's not in the cache yet</param>
         /// <returns>A task that represents the asynchronous operation</returns>
         Task<TEntity> Get<TEntity>(string key, Func<string, Task<TEntity>> acquire);
+
+        void Delete(string key);
     }
 }
