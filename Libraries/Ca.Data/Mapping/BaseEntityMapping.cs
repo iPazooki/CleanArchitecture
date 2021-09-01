@@ -1,5 +1,4 @@
-﻿using Ca.Core;
-using Ca.SharedKernel;
+﻿using Ca.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

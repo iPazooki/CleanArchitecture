@@ -7,10 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="6.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="coverlet.collector" Version="3.0.2" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Ca.Core\Ca.Core.csproj" />
+    <ProjectReference Include="..\..\Libraries\Ca.Data\Ca.Data.csproj" />
+    <ProjectReference Include="..\..\Libraries\Ca.Services\Ca.Services.csproj" />
+    <ProjectReference Include="..\..\Libraries\Ca.SharedKernel\Ca.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

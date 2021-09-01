@@ -1,5 +1,5 @@
-﻿using System;
-using Ca.SharedKernel;
+﻿using Ca.SharedKernel;
+using System;
 using System.Collections.Generic;
 
 namespace Ca.Core.Domain.Blog

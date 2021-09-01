@@ -7,10 +7,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ca.Core\Ca.Core.csproj" />
+    <ProjectReference Include="..\Ca.Data\Ca.Data.csproj" />
     <ProjectReference Include="..\Ca.SharedKernel\Ca.SharedKernel.csproj" />
   </ItemGroup>
 
