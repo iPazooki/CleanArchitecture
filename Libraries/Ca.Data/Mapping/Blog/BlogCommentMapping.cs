@@ -1,17 +1,11 @@
 ﻿using Ca.Core.Domain.Blog;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ca.Data.Mapping.Blog
 {
-    public class BlogCommentMapping : IEntityTypeConfiguration<BlogComment>
+    public class BlogCommentMapping : BaseEntityMapping<BlogComment>
     {
-        public void Configure(EntityTypeBuilder<BlogComment> builder)
+        public override void ConfigureDetail(EntityTypeBuilder<BlogComment> builder)
         {
             builder.HasKey(x => x.Id);
 

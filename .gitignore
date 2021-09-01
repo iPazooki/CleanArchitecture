@@ -53,3 +53,9 @@ dkms.conf
 /Libraries/Ca.Core/obj
 /Libraries/Ca.Data/obj
 /Libraries/Ca.Services/obj
+/.vs/CleanArchitecture
+/Libraries/Ca.Core/bin/Debug/net5.0
+/Libraries/Ca.Data/bin/Debug/net5.0
+/Libraries/Ca.Services/bin/Debug/net5.0
+/Libraries/Ca.SharedKernel/obj
+/Libraries/Ca.SharedKernel/bin/Debug/net5.0

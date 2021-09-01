@@ -1,43 +1,59 @@
-﻿using Ca.Core;
+﻿using Ca.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ca.Data
 {
-    public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity, IAggregateRoot
     {
-        private readonly DbSet<TEntity> Table;
+        private readonly AppDbContext _context;
 
-        public Repository(EfDbContext context)
+        public Repository(AppDbContext context)
         {
-            Table = context.Set<TEntity>();
+            _context = context;
         }
 
-        public void Delete(TEntity entity) => Table.Remove(entity);
+        public async ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+        {
+            await _context.Set<TEntity>().AddAsync(entity, cancellationToken);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return entity;
+        }
+
+        public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+        {
+            _context.Set<TEntity>().Remove(entity);
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         public async Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression)
         {
-            return (await Table.Where(expression).ToListAsync()).AsReadOnly();
+            var list = await _context.Set<TEntity>().Where(expression).ToListAsync();
+
+            return list.AsReadOnly();
         }
 
-        public Task<TEntity> GetByIdAsync(Guid id)
+        public async Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Set<TEntity>().SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
-        public Task InsertAsync(TEntity entity)
+        public async ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
-        }
+            _context.Set<TEntity>().Update(entity);
 
-        public Task UpdateAsync(TEntity entity)
-        {
-            throw new NotImplementedException();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return entity;
         }
     }
 }

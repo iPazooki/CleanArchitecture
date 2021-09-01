@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ca.Core
+namespace Ca.SharedKernel
 {
     /// <summary>
     /// Represents the base class for entities
@@ -12,6 +12,6 @@ namespace Ca.Core
             Id = Guid.NewGuid();
         }
 
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
     }
 }

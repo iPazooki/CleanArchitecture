@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
+using Ca.SharedKernel;
 using System.Collections.Generic;
 
 namespace Ca.Core.Domain.Blog
 {
-    public class BlogPost : BaseEntity
+    public class BlogPost : BaseEntity, IAggregateRoot
     {
         public string Title { get; set; }
 

@@ -4,12 +4,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Ca.Data.Mapping
 {
-    public class BlogPostMapping : IEntityTypeConfiguration<BlogPost>
+    public class BlogPostMapping : BaseEntityMapping<BlogPost>
     {
-        public void Configure(EntityTypeBuilder<BlogPost> builder)
+        public override void ConfigureDetail(EntityTypeBuilder<BlogPost> builder)
         {
-            builder.HasKey(x => x.Id);
-
             builder.Property(x => x.Title)
                 .IsRequired()
                 .HasMaxLength(250);

@@ -4,9 +4,9 @@ using System.Reflection;
 
 namespace Ca.Data
 {
-    public class EfDbContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public EfDbContext(DbContextOptions<EfDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
@@ -16,6 +16,8 @@ namespace Ca.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Seed data
