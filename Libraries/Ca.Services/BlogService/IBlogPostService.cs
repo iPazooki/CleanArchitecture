@@ -8,11 +8,11 @@ namespace Ca.Services.BlogService
 {
     public interface IBlogPostService
     {
-        Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression);
+        Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression = default);
 
         Task DeleteBlogPost(BlogPost entity);
 
-        ValueTask<BlogPost> InsertBlogPost(BlogPost entity);
+        ValueTask<BlogPost> AddBlogPost(BlogPost entity);
 
         ValueTask<BlogPost> UpdateBlogPost(BlogPost entity);
 

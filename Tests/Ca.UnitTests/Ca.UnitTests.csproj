@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.1.0" />
+    <PackageReference Include="GenFu" Version="1.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />

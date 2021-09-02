@@ -34,11 +34,17 @@ namespace Ca.Data
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression)
+        public async Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression = default)
         {
-            var list = await _context.Set<TEntity>().Where(expression).ToListAsync();
+            async Task<List<TEntity>> getList()
+            {
+                if (expression is null)
+                    return await _context.Set<TEntity>().ToListAsync();
+                else
+                    return await _context.Set<TEntity>().Where(expression).ToListAsync();
+            }
 
-            return list.AsReadOnly();
+            return (await getList()).AsReadOnly();
         }
 
         public async Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

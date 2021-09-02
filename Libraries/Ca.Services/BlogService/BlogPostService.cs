@@ -19,7 +19,7 @@ namespace Ca.Services.BlogService
             _repository = repository;
         }
 
-        public async Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression)
+        public async Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression = default)
         {
             return await _repository.GetAllAsync(expression);
         }
@@ -36,7 +36,7 @@ namespace Ca.Services.BlogService
             return await _repository.UpdateAsync(entity);
         }
 
-        public virtual async ValueTask<BlogPost> InsertBlogPost(BlogPost entity)
+        public virtual async ValueTask<BlogPost> AddBlogPost(BlogPost entity)
         {
             return await _repository.AddAsync(entity);
         }

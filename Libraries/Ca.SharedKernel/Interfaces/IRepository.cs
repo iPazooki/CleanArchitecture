@@ -10,7 +10,7 @@ namespace Ca.SharedKernel
     {
         Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-        Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression);
+        Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression = default);
 
         ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 

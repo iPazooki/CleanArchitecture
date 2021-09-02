@@ -61,3 +61,4 @@ dkms.conf
 /Libraries/Ca.SharedKernel/bin/Debug/net5.0
 /Tests/Ca.UnitTests/bin/Debug/net5.0
 /Tests/Ca.UnitTests/obj
+/TestResults
