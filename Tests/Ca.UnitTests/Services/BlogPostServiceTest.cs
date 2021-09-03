@@ -1,5 +1,6 @@
 ﻿using Ca.Core.Domain.Blog;
 using Ca.Services.BlogService;
+using Ca.Services.DTOs.Blog;
 using FluentAssertions;
 using GenFu;
 using NUnit.Framework;
@@ -21,7 +22,7 @@ namespace Ca.UnitTests.Services
 
         [Test]
         [TestCase("New blog post", "Blog post content")]
-        public async Task Creat_BlogPost(string title, string body)
+        public async Task Add_BlogPost(string title, string body)
         {
             var blogPost = await CreateNewBlogPost(title, body, DateTime.UtcNow);
 
@@ -36,11 +37,11 @@ namespace Ca.UnitTests.Services
         [Test]
         public async Task List_BlogPosts()
         {
-            A.Configure<BlogPost>()
+            A.Configure<BlogPostDto>()
                 .Fill(x => x.Body).AsLoremIpsumSentences(5)
                 .Fill(x => x.Title).AsArticleTitle();
 
-            foreach (var blogPost in A.ListOf<BlogPost>(10))
+            foreach (var blogPost in A.ListOf<BlogPostDto>(10))
                 await _blogPostService.AddBlogPost(blogPost);
 
             var blogPosts = await _blogPostService.GetAll();
@@ -73,7 +74,7 @@ namespace Ca.UnitTests.Services
 
             blogPost.Should().NotBeNull();
 
-            await _blogPostService.DeleteBlogPost(blogPost);
+            await _blogPostService.DeleteBlogPost(blogPost.Id);
 
             var bogPost = await _blogPostService.GetBlogPostById(blogPost.Id);
 
@@ -132,7 +133,7 @@ namespace Ca.UnitTests.Services
 
             addedComment.Should().NotBeNull();
 
-            await _blogPostService.DeleteComment(addedComment);
+            await _blogPostService.DeleteComment(addedComment.Id);
 
             var deletedComment = await _blogPostService.GetCommentById(comment.Id);
 
@@ -173,21 +174,21 @@ namespace Ca.UnitTests.Services
             allComments.Should().HaveCount(2);
         }
 
-        private async Task<BlogPost> CreateNewBlogPost()
+        private async Task<BlogPostDto> CreateNewBlogPost()
         {
-            A.Configure<BlogPost>()
+            A.Configure<BlogPostDto>()
                 .Fill(x => x.Body).AsLoremIpsumSentences(5)
                 .Fill(x => x.Title).AsArticleTitle()
                 .Fill(x => x.CreatedOn).AsPastDate();
 
-            var blogPost = A.New<BlogPost>();
+            var blogPost = A.New<BlogPostDto>();
 
             return await CreateNewBlogPost(blogPost.Title, blogPost.Body, blogPost.CreatedOn);
         }
 
-        private async Task<BlogPost> CreateNewBlogPost(string title, string body, DateTime createdOn)
+        private async Task<BlogPostDto> CreateNewBlogPost(string title, string body, DateTime createdOn)
         {
-            var blogPost = new BlogPost
+            var blogPost = new BlogPostDto
             {
                 Title = title,
                 Body = body,
@@ -199,15 +200,14 @@ namespace Ca.UnitTests.Services
             return blogPost;
         }
 
-        private async Task<BlogComment> CreateComment(BlogPost blogPost)
+        private async Task<BlogCommentDto> CreateComment(BlogPostDto blogPost)
         {
-            A.Configure<BlogComment>()
+            A.Configure<BlogCommentDto>()
                 .Fill(x => x.CommentText).AsLoremIpsumSentences(2)
                 .Fill(x => x.CreatedOn).AsFutureDate();
 
-            var comment = A.New<BlogComment>();
+            var comment = A.New<BlogCommentDto>();
 
-            comment.BlogPost = blogPost;
             comment.BlogPostId = blogPost.Id;
 
             await _blogPostService.AddComment(comment);

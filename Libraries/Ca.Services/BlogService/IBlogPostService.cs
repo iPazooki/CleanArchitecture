@@ -1,4 +1,5 @@
 ﻿using Ca.Core.Domain.Blog;
+using Ca.Services.DTOs.Blog;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -8,26 +9,26 @@ namespace Ca.Services.BlogService
 {
     public interface IBlogPostService
     {
-        Task<BlogPost> GetBlogPostById(Guid id);
+        Task<BlogPostDto> GetBlogPostById(Guid id);
 
-        Task<BlogPost> GetBlogPostByIdWithComments(Guid id);
+        Task<BlogPostWithCommentDto> GetBlogPostByIdWithComments(Guid id);
 
-        Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression = default);
+        Task<IReadOnlyList<BlogPostDto>> GetAll(Expression<Func<BlogPost, bool>> expression = default);
 
-        Task<IReadOnlyList<BlogComment>> GetAllComments(Guid blogPostId);
+        Task<IReadOnlyList<BlogCommentDto>> GetAllComments(Guid blogPostId);
 
-        ValueTask<BlogPost> AddBlogPost(BlogPost entity);
+        ValueTask<BlogPostDto> AddBlogPost(BlogPostDto entity);
 
-        ValueTask<BlogPost> UpdateBlogPost(BlogPost entity);
+        ValueTask<BlogPostDto> UpdateBlogPost(BlogPostDto entity);
 
-        Task DeleteBlogPost(BlogPost entity);
+        Task DeleteBlogPost(Guid entity);
 
-        Task AddComment(BlogComment comment);
+        Task AddComment(BlogCommentDto comment);
 
-        Task UpdateComment(BlogComment comment);
+        Task UpdateComment(BlogCommentDto comment);
 
-        Task DeleteComment(BlogComment comment);
+        Task DeleteComment(Guid comment);
 
-        Task<BlogComment> GetCommentById(Guid id);
+        Task<BlogCommentDto> GetCommentById(Guid id);
     }
 }

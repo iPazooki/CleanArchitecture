@@ -3,6 +3,7 @@ using Ca.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace Ca.UnitTests
@@ -37,6 +38,8 @@ namespace Ca.UnitTests
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(myConfiguration)
                 .Build();
+
+            services.AddLogging(l => l.AddConsole());
 
             services.RegisterAllServices(configuration);
 
