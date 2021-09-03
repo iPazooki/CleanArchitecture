@@ -139,6 +139,23 @@ namespace Ca.UnitTests.Services
             deletedComment.Should().BeNull();
         }
 
+        [Test]
+        public async Task Get_Post_Comment()
+        {
+            var blogPost = await CreateNewBlogPost();
+
+            blogPost.Should().NotBeNull();
+
+            await CreateComment(blogPost);
+            await CreateComment(blogPost);
+
+            var fullPost = await _blogPostService.GetBlogPostByIdWithComments(blogPost.Id);
+
+            fullPost.Should().NotBeNull();
+
+            fullPost.Comments.Should().HaveCount(2);
+        }
+
         private async Task<BlogPost> CreateNewBlogPost()
         {
             A.Configure<BlogPost>()
