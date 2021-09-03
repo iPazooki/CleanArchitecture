@@ -1,5 +1,6 @@
 ﻿using Ca.SharedKernel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,32 +13,50 @@ namespace Ca.Data
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<Repository<TEntity>> _logger;
 
-        public Repository(AppDbContext context)
+        public Repository(AppDbContext context, ILogger<Repository<TEntity>> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            await _context
-                .Set<TEntity>()
-                .AddAsync(entity, cancellationToken);
+            try
+            {
+                await _context
+                        .Set<TEntity>()
+                        .AddAsync(entity, cancellationToken);
 
-            await _context
-                .SaveChangesAsync(cancellationToken);
+                await _context
+                    .SaveChangesAsync(cancellationToken);
 
-            return entity;
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+
+                return null;
+            }
         }
 
         public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            _context
-                .Set<TEntity>()
-                .Remove(entity);
+            try
+            {
+                _context
+                        .Set<TEntity>()
+                        .Remove(entity);
 
-            await _context
-                .SaveChangesAsync(cancellationToken);
+                await _context
+                    .SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
         }
 
         public async Task<IReadOnlyList<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression = default)
@@ -78,11 +97,20 @@ namespace Ca.Data
 
         public async ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            _context.Set<TEntity>().Update(entity);
+            try
+            {
+                _context.Set<TEntity>().Update(entity);
 
-            await _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return entity;
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+
+                return null;
+            }
         }
     }
 }

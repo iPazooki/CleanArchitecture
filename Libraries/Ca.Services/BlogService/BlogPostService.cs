@@ -14,7 +14,10 @@ namespace Ca.Services.BlogService
         private readonly IRepository<BlogPost> _blogRepository;
         private readonly IRepository<BlogComment> _blogCommentRepository;
 
-        public BlogPostService(ICacheManager cacheManager, IRepository<BlogPost> blogRepository, IRepository<BlogComment> blogCommentRepository)
+        public BlogPostService(
+            ICacheManager cacheManager,
+            IRepository<BlogPost> blogRepository,
+            IRepository<BlogComment> blogCommentRepository)
         {
             _cacheManager = cacheManager;
             _blogRepository = blogRepository;

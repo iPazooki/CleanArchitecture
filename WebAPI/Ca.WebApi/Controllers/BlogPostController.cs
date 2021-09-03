@@ -2,7 +2,6 @@
 using Ca.Services.BlogService;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
 
 namespace Ca.WebApi
@@ -62,6 +63,8 @@ namespace Ca.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ca.WebApi v1"));
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseRouting();
 

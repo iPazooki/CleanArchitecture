@@ -13,11 +13,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\Ca.Data\Ca.Data.csproj" />
     <ProjectReference Include="..\..\Libraries\Ca.Services\Ca.Services.csproj" />
   </ItemGroup>
 
