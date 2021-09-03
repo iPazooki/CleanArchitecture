@@ -156,6 +156,23 @@ namespace Ca.UnitTests.Services
             fullPost.Comments.Should().HaveCount(2);
         }
 
+        [Test]
+        public async Task Get_Comments()
+        {
+            var blogPost = await CreateNewBlogPost();
+
+            blogPost.Should().NotBeNull();
+
+            await CreateComment(blogPost);
+            await CreateComment(blogPost);
+
+            var allComments = await _blogPostService.GetAllComments(blogPost.Id);
+
+            allComments.Should().NotBeNull();
+
+            allComments.Should().HaveCount(2);
+        }
+
         private async Task<BlogPost> CreateNewBlogPost()
         {
             A.Configure<BlogPost>()
