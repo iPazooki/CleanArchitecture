@@ -21,12 +21,12 @@ namespace Ca.Data
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Seed data
-            modelBuilder.Entity<BlogPost>().HasData(new BlogPost
-            {
-                Title = "Welcome to my blog",
-                Body = "Content here ...",
-                CreatedOn = System.DateTime.UtcNow
-            });
+            //modelBuilder.Entity<BlogPost>().HasData(new BlogPost
+            //{
+            //    Title = "Welcome to my blog",
+            //    Body = "Content here ...",
+            //    CreatedOn = System.DateTime.UtcNow
+            //});
         }
     }
 }

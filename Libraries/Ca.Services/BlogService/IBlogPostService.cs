@@ -8,14 +8,26 @@ namespace Ca.Services.BlogService
 {
     public interface IBlogPostService
     {
+        Task<BlogPost> GetBlogPostById(Guid id);
+
+        Task<BlogPost> GetBlogPostByIdWithComments(Guid id);
+
         Task<IReadOnlyList<BlogPost>> GetAll(Expression<Func<BlogPost, bool>> expression = default);
 
-        Task DeleteBlogPost(BlogPost entity);
+        Task<IReadOnlyList<BlogComment>> GetAllComments(Guid blogPostId);
 
         ValueTask<BlogPost> AddBlogPost(BlogPost entity);
 
         ValueTask<BlogPost> UpdateBlogPost(BlogPost entity);
 
-        Task<BlogPost> GetBlogPostById(Guid id);
+        Task DeleteBlogPost(BlogPost entity);
+
+        Task AddComment(BlogComment comment);
+
+        Task UpdateComment(BlogComment comment);
+
+        Task DeleteComment(BlogComment comment);
+
+        Task<BlogComment> GetCommentById(Guid id);
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Ca.Core.Domain.Blog
 {
-    public class BlogPost : BaseEntity, IAggregateRoot
+    public class BlogPost : BaseEntity
     {
         public string Title { get; set; }
 

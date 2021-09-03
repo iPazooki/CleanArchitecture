@@ -14,7 +14,9 @@ namespace Ca.Data.Mapping.Blog
                 .HasMaxLength(500);
 
             builder.HasOne(x => x.BlogPost)
-                .WithMany(b => b.Comments);
+                .WithMany(b => b.Comments)
+                .HasForeignKey(c => c.BlogPostId)
+                .IsRequired();
         }
     }
 }

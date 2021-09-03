@@ -4,9 +4,6 @@ using FluentAssertions;
 using GenFu;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Ca.UnitTests.Services
@@ -26,14 +23,7 @@ namespace Ca.UnitTests.Services
         [TestCase("New blog post", "Blog post content")]
         public async Task Creat_BlogPost(string title, string body)
         {
-            var blogPost = new BlogPost
-            {
-                Title = title,
-                Body = body,
-                CreatedOn = DateTime.UtcNow
-            };
-
-            await _blogPostService.AddBlogPost(blogPost);
+            var blogPost = await CreateNewBlogPost(title, body, DateTime.UtcNow);
 
             var result = await _blogPostService.GetBlogPostById(blogPost.Id);
 
@@ -60,18 +50,16 @@ namespace Ca.UnitTests.Services
         }
 
         [Test]
-        [TestCase("New title")]
+        [TestCase("New Title")]
         public async Task Update_BlogPost(string title)
         {
-            await Creat_BlogPost(title, string.Empty);
+            var blogPost = await CreateNewBlogPost();
 
-            var firstBlogPost = (await _blogPostService.GetAll())[0];
+            blogPost.Title = title;
 
-            firstBlogPost.Title = title;
+            await _blogPostService.UpdateBlogPost(blogPost);
 
-            await _blogPostService.UpdateBlogPost(firstBlogPost);
-
-            var updatedBlogPost = await _blogPostService.GetBlogPostById(firstBlogPost.Id);
+            var updatedBlogPost = await _blogPostService.GetBlogPostById(blogPost.Id);
 
             updatedBlogPost.Should().NotBeNull();
 
@@ -81,17 +69,116 @@ namespace Ca.UnitTests.Services
         [Test]
         public async Task Delete_BlogPost()
         {
-            await Creat_BlogPost("Sample Title", "Sample Content");
+            var blogPost = await CreateNewBlogPost();
 
-            var firstBlogPost = (await _blogPostService.GetAll())[0];
+            blogPost.Should().NotBeNull();
 
-            firstBlogPost.Should().NotBeNull();
+            await _blogPostService.DeleteBlogPost(blogPost);
 
-            await _blogPostService.DeleteBlogPost(firstBlogPost);
-
-            var bogPost = await _blogPostService.GetBlogPostById(firstBlogPost.Id);
+            var bogPost = await _blogPostService.GetBlogPostById(blogPost.Id);
 
             bogPost.Should().BeNull();
+        }
+
+        [Test]
+        public async Task Add_Comment()
+        {
+            var blogPost = await CreateNewBlogPost();
+
+            blogPost.Should().NotBeNull();
+
+            var comment = await CreateComment(blogPost);
+
+            comment.Should().NotBeNull();
+
+            comment.CommentText.Should().NotBeEmpty();
+        }
+
+        [Test]
+        [TestCase("New Comment Text")]
+        public async Task Update_Comment(string commentText)
+        {
+            var blogPost = await CreateNewBlogPost();
+
+            blogPost.Should().NotBeNull();
+
+            var comment = await CreateComment(blogPost);
+
+            comment.Should().NotBeNull();
+
+            comment.CommentText.Should().NotBeEmpty();
+
+            comment.CommentText = commentText;
+
+            await _blogPostService.UpdateComment(comment);
+
+            var updatedComment = await _blogPostService.GetCommentById(comment.Id);
+
+            updatedComment.CommentText.Should().Be(commentText);
+        }
+
+        [Test]
+        public async Task Delete_Comment()
+        {
+            var blogPost = await CreateNewBlogPost();
+
+            blogPost.Should().NotBeNull();
+
+            var comment = await CreateComment(blogPost);
+
+            comment.Should().NotBeNull();
+
+            var addedComment = await _blogPostService.GetCommentById(comment.Id);
+
+            addedComment.Should().NotBeNull();
+
+            await _blogPostService.DeleteComment(addedComment);
+
+            var deletedComment = await _blogPostService.GetCommentById(comment.Id);
+
+            deletedComment.Should().BeNull();
+        }
+
+        private async Task<BlogPost> CreateNewBlogPost()
+        {
+            A.Configure<BlogPost>()
+                .Fill(x => x.Body).AsLoremIpsumSentences(5)
+                .Fill(x => x.Title).AsArticleTitle()
+                .Fill(x => x.CreatedOn).AsPastDate();
+
+            var blogPost = A.New<BlogPost>();
+
+            return await CreateNewBlogPost(blogPost.Title, blogPost.Body, blogPost.CreatedOn);
+        }
+
+        private async Task<BlogPost> CreateNewBlogPost(string title, string body, DateTime createdOn)
+        {
+            var blogPost = new BlogPost
+            {
+                Title = title,
+                Body = body,
+                CreatedOn = createdOn
+            };
+
+            await _blogPostService.AddBlogPost(blogPost);
+
+            return blogPost;
+        }
+
+        private async Task<BlogComment> CreateComment(BlogPost blogPost)
+        {
+            A.Configure<BlogComment>()
+                .Fill(x => x.CommentText).AsLoremIpsumSentences(2)
+                .Fill(x => x.CreatedOn).AsFutureDate();
+
+            var comment = A.New<BlogComment>();
+
+            comment.BlogPost = blogPost;
+            comment.BlogPostId = blogPost.Id;
+
+            await _blogPostService.AddComment(comment);
+
+            return comment;
         }
     }
 }
