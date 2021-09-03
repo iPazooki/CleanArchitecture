@@ -62,3 +62,5 @@ dkms.conf
 /Tests/Ca.UnitTests/bin/Debug/net5.0
 /Tests/Ca.UnitTests/obj
 /TestResults
+/WebAPI/Ca.WebApi/bin/Debug/net5.0
+/WebAPI/Ca.WebApi/obj

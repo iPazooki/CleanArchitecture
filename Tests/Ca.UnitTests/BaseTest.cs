@@ -4,9 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Configuration;
 
 namespace Ca.UnitTests
 {
@@ -40,10 +38,6 @@ namespace Ca.UnitTests
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(myConfiguration)
                 .Build();
-
-            var memoryCache = new MemoryCache(new MemoryCacheOptions());
-
-            services.AddSingleton<IMemoryCache>(memoryCache);
 
             services.RegisterAllServices(configuration);
 
