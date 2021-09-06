@@ -11,7 +11,7 @@ namespace Ca.WebApi
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                //.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341") // run Seq Docker.

@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+    
+    seq:
+        image: datalust/seq:latest
+        environment:
+            - ACCEPT_EULA=Y
+        ports: 
+            - "5341:80"
+            
+    clean_architecture:
+        image: clean_architecture:1
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Production
+            - ConnectionStrings__Default=CleanArchitecture; Data Source=.\\SQLExpress; Integrated Security=SSPI; MultipleActiveResultSets=True;
+        volumes:
+            - "./WebApi-Logs:/app/App_Data/Logs"
+        ports:
+            - "5003:80"

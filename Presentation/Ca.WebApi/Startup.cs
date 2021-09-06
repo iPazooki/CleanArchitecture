@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System;
+using System.Reflection;
 
 namespace Ca.WebApi
 {
@@ -60,9 +61,14 @@ namespace Ca.WebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ca.WebApi v1"));
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ca.WebApi v1");
+                c.DisplayRequestDuration();
+            });
 
             app.UseSerilogRequestLogging();
 

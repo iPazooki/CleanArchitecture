@@ -1,0 +1,1 @@
+docker build -t clean_architecture:1 .
