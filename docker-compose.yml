@@ -2,6 +2,18 @@ version: '2'
 
 services:
     
+    clean_architecture:
+        image: clean_architecture:1
+        environment:        
+            ASPNETCORE_ENVIRONMENT: "Production"
+            SEQ_URL: "http://172.16.1.146:5341"
+            ConnectionStrings__Default: "Data Source=172.16.1.146,1476;Initial Catalog=CleanArchitecture;Persist Security Info=True;User ID=sa;Password=yourStrong(!)Password"
+        ports:
+            - "5003:80"
+        depends_on:
+            - db
+            - seq
+    
     seq:
         image: datalust/seq:latest
         environment:
@@ -9,12 +21,11 @@ services:
         ports: 
             - "5341:80"
             
-    clean_architecture:
-        image: clean_architecture:1
-        environment:
-            - ASPNETCORE_ENVIRONMENT=Production
-            - ConnectionStrings__Default=CleanArchitecture; Data Source=.\\SQLExpress; Integrated Security=SSPI; MultipleActiveResultSets=True;
-        volumes:
-            - "./WebApi-Logs:/app/App_Data/Logs"
+    db:
+        image: "mcr.microsoft.com/mssql/server:2019-CU12-ubuntu-20.04"
         ports:
-            - "5003:80"
+            - "1476:1433"
+        environment:
+            SA_PASSWORD: "yourStrong(!)Password"
+            ACCEPT_EULA: "Y"
+            MSSQL_PID: "Express"

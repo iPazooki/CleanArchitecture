@@ -11,17 +11,19 @@ namespace Ca.WebApi
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                //.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.Seq("http://localhost:5341") // run Seq Docker.
+                .WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://localhost:5341")
                 .CreateLogger();
 
             try
             {
                 Log.Information("Starting WebAPI");
 
-                CreateHostBuilder(args).Build().Run();
+                CreateHostBuilder(args)
+                    .Build()
+                    .Run();
             }
             catch (Exception ex)
             {
