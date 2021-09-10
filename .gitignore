@@ -67,3 +67,5 @@ dkms.conf
 /Presentation/Ca.WebApi/obj/Debug/net5.0
 /Presentation/Ca.WebApi/obj
 /Presentation/Ca.WebApi/bin/Debug/net5.0
+/Tests/Ca.IntegrationTests/bin/Debug/net5.0
+/Tests/Ca.IntegrationTests/obj
