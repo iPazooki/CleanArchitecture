@@ -19,5 +19,15 @@ This project is using [Serilog](https://serilog.net/) and [Seq](https://datalust
  
 ### Using Docker
 To use [Docker](https://www.docker.com/) for this project, please first open the `docker-compose.yml` file and the change `ConnectionStrings__Default`, `SEQ_URL` base on your prefered configuration and then just run `Create-Docker.ps1` in the **PowerShell** console.
+
+#### Technologies and libraries
+
+This project has used these technologies and libraries:
+
+ - .NET 5
+ - TDD, SOLID, Dependancy Injection, Repository.
+ - EF Core, EF Migration, AutoMapper, FluentValidation.
+ - NUnit, xUnit, GenFu.
+ - Serilog, Seq, Swagger.
  
  
