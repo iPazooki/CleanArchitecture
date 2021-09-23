@@ -17,6 +17,6 @@ jobs:
         with:
           dotnet-version: 5.0.401
       - name: Build with dotnet
-        run: dotnet build .\CleanArchitecture.sln
+        run: dotnet build ./CleanArchitecture.sln
       - name: Test with dotnet
-        run: dotnet test .\Tests\Ca.UnitTests\Ca.UnitTests.csproj
+        run: dotnet test ./Tests/Ca.UnitTests/Ca.UnitTests.csproj
