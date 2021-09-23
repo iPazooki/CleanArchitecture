@@ -1,3 +1,5 @@
+[![.NET Core](https://github.com/iPazooki/CleanArchitecture/workflows/dotnet-badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions)
+
 # Clean Architecture
  
 A starter template for **ASP.Net API (5.0)**, In this project, you will see loosely-coupled, dependency-inverted architecture based on [Mircosoft .Net 5.0](https://dotnet.microsoft.com/download/dotnet/5.0).
