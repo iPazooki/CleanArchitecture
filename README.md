@@ -1,4 +1,4 @@
-[![.NET Core](https://github.com/iPazooki/CleanArchitecture/workflows/dotnet-badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions)
+[![.NET Core](https://raw.githubusercontent.com/iPazooki/CleanArchitecture/0af20283340661015b7d023846b211a719751c5f/.github/workflows/dotnet-badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions)
 
 # Clean Architecture
  
