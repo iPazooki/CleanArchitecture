@@ -1,0 +1,22 @@
+# This is a basic workflow for running unit test after each commit.
+
+name: Run Unit Test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.401
+      - name: Build with dotnet
+        run: dotnet build .\CleanArchitecture.sln
+      - name: Test with dotnet
+        run: dotnet test .\Tests\Ca.UnitTests\Ca.UnitTests.csproj
