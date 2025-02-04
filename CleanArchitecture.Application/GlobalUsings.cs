@@ -1,0 +1,9 @@
+﻿global using MediatR;
+global using DomainValidation;
+global using FluentValidation;
+global using FluentValidation.Results;
+global using Microsoft.EntityFrameworkCore;
+global using CleanArchitecture.Domain.Entities;
+global using CleanArchitecture.Application.Common;
+global using CleanArchitecture.Domain.ValueObjects;
+global using CleanArchitecture.Application.Common.Exceptions;

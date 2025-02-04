@@ -1,0 +1,35 @@
+@HostAddress = https://localhost:7281
+
+### Create a new book
+POST {{HostAddress}}/create-book/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Clean Architecture",
+  "genre": "F"
+}
+
+### Update an existing book
+PUT {{HostAddress}}/update-book/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": 1,
+  "title": "Updated Title",
+  "genre": "NF"
+}
+
+### Delete an existing book
+DELETE {{HostAddress}}/delete-book/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": 1
+}
+
+### Get a book by ID
+GET {{HostAddress}}/get-book/1
+Accept: application/json
