@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace CleanArchitecture.Presentation;
+namespace CleanArchitecture.Presentation.Configuration;
 
 public static class DependencyInjection
 {

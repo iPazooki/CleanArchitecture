@@ -1,3 +1,4 @@
+using CleanArchitecture.Presentation.Configuration;
 using CleanArchitecture.Presentation.Endpoints;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

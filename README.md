@@ -1,9 +1,20 @@
-﻿## Clean Architecture 🏗️
+﻿![GitHub](https://img.shields.io/github/license/ipazooki/CleanArchitecture)
+![GitHub contributors](https://img.shields.io/github/contributors/ipazooki/CleanArchitecture)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ipazooki/CleanArchitecture/dotnet.yml)
+
+## Clean Architecture 🏗️
 
 Welcome to the Clean Architecture template with Minimal API! This project serves as a starting point for building robust and maintainable applications using Clean Architecture principles.
 
 ### Overview
 This template targets .NET 8 and is organized into distinct layers, each with a specific responsibility. It's designed to help developers quickly set up a new project that adheres to best practices in software architecture.
+
+**If you find this project useful, please give it a star. Thanks! ⭐**
+
+### Getting Started
+
+The following prerequisites are required to build and run the solution:
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (latest version)
 
 ### Layers Explained
 
@@ -42,6 +53,15 @@ dotnet restore
    dotnet build
 ```
 
+### Database
+The template is set to use SQLite by default. If you would like to use SQL Server instead, please open the `CleanArchitecture.Infrastructure.Persistence.csproj` file and remove the `UseSQLite` constant from the `DefineConstants` property. Then, update the connection string in the `appsettings.json` file.
+
+```json:
+
+```xml
+<DefineConstants>UseSQLite</DefineConstants>
+```
+
 ### Database Migrations 📂
 To add migrations and update the database, run the following commands:
 
@@ -51,6 +71,13 @@ dotnet ef migrations add InitialCreate --project CleanArchitecture.Infrastructur
 dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
 ```
 
+## Support
+
+If you are having problems, please let me know by [raising a new issue](https://github.com/iPazooki/CleanArchitecture/issues/new?template=Blank+issue).
+
+## License
+
+This project is licensed with the [MIT license](LICENSE).
 
 ### Contributing 🤝
 Contributions are welcome! If you have ideas for improvements or encounter any bugs, feel free to open an issue or submit a pull request. Let's collaborate to make this project better. 😊

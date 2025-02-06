@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 
-namespace CleanArchitecture.Presentation;
+namespace CleanArchitecture.Presentation.Configuration;
 
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
