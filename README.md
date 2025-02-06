@@ -56,8 +56,6 @@ dotnet restore
 ### Database
 The template is set to use SQLite by default. If you would like to use SQL Server instead, please open the `CleanArchitecture.Infrastructure.Persistence.csproj` file and remove the `UseSQLite` constant from the `DefineConstants` property. Then, update the connection string in the `appsettings.json` file.
 
-```json:
-
 ```xml
 <DefineConstants>UseSQLite</DefineConstants>
 ```
