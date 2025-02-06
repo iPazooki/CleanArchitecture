@@ -36,6 +36,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTests", "Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Architecture.UnitTests", "Tests\Architecture.UnitTests\Architecture.UnitTests.csproj", "{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.IntegrationTests", "Tests\CleanArchitecture.IntegrationTests\CleanArchitecture.IntegrationTests.csproj", "{EDF75E85-4453-4022-9018-C725C8B158BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.FunctionalTests", "Tests\CleanArchitecture.FunctionalTests\CleanArchitecture.FunctionalTests.csproj", "{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +78,14 @@ Global
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDF75E85-4453-4022-9018-C725C8B158BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDF75E85-4453-4022-9018-C725C8B158BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +102,7 @@ Global
 		{D84176B7-C8DD-4A94-82E7-79BB81F8D314} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{D046E753-0463-4919-9795-581CA031C229} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
+		{EDF75E85-4453-4022-9018-C725C8B158BB} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
+		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 	EndGlobalSection
 EndGlobal

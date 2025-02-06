@@ -52,6 +52,7 @@ public class CreateBookCommandHandlerTests
 
         // Assert
         Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Errors);
         Assert.Equal("An error occurred while creating the book.", result.Errors.First().Message);
         mockBooksDbSet.Verify(repo => repo.Add(It.IsAny<Book>()), Times.Once);
         mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

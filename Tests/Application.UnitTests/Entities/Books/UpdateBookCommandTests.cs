@@ -59,6 +59,7 @@ public class UpdateBookCommandHandlerTests
 
         // Assert
         Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Errors);
         Assert.True(result.Errors.Count() == 1);
         Assert.Equal("Book Not Found.", result.Errors.First().Message);
         mockBooksDbSet.Verify(dbSet => dbSet.FindAsync(new object[] { 1 }, It.IsAny<CancellationToken>()), Times.Once);

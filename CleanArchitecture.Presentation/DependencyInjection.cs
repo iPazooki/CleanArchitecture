@@ -4,7 +4,7 @@ namespace CleanArchitecture.Presentation;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentationServices(this IServiceCollection services)
+    public static void AddPresentationServices(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
         
@@ -18,6 +18,6 @@ public static class DependencyInjection
         
         services.AddProblemDetails();
 
-        return services;
+        services.AddHealthChecks();
     }
 }

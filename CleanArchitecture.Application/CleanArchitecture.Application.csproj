@@ -8,7 +8,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="DomainValidation.NET" Version="2.4.0" />
+      <PackageReference Include="DomainValidation.NET" Version="2.6.0" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
       <PackageReference Include="MediatR" Version="12.4.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />

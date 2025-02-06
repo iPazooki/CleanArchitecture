@@ -29,19 +29,24 @@ public static class DependencyInjection
         // Adds the AuditableEntityInterceptor as a scoped service.
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
-        // Configures the ApplicationDbContext with the connection string and interceptors.
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        // Check if the environment is testing
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
         {
-            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+            // Configures the ApplicationDbContext with the connection string and interceptors.
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
+            {
+                options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
 
-            #if (UseSQLite)
-            // Configures the context to use SQLite if the UseSQLite symbol is defined.
-            options.UseSqlite(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
-            #else
-            // Configures the context to use SQL Server if the UseSQLite symbol is not defined.
-            options.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
-            #endif
-        });
+                #if (UseSQLite)
+                            // Configures the context to use SQLite if the UseSQLite symbol is defined.
+                            options.UseSqlite(connectionString,
+                                builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+                #else
+                            // Configures the context to use SQL Server if the UseSQLite symbol is not defined.
+                            options.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+                #endif
+            });
+        }
 
         // Adds the ApplicationUnitOfWork as a scoped service.
         services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
