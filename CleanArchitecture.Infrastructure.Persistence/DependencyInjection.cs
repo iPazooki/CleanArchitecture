@@ -28,6 +28,7 @@ public static class DependencyInjection
 
         // Adds the AuditableEntityInterceptor as a scoped service.
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
         // Check if the environment is testing
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")

@@ -1,4 +1,8 @@
-﻿namespace CleanArchitecture.Application.Common;
+﻿using CleanArchitecture.Domain.Entities.Book;
+using CleanArchitecture.Domain.Entities.Order;
+using CleanArchitecture.Domain.Entities.Person;
+
+namespace CleanArchitecture.Application.Common;
 
 /// <summary>
 /// Represents a unit of work that manages the persistence of changes.
@@ -27,4 +31,6 @@ public interface IApplicationUnitOfWork : IUnitOfWork
     /// Gets the DbSet for <see cref="Book"/> entities.
     /// </summary>
     public DbSet<Book> Books { get; }
+
+    public DbSet<Order> Orders { get; }
 }

@@ -1,32 +1,39 @@
-﻿namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
+﻿using CleanArchitecture.Domain.Entities.Person;
+
+namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
 /// <summary>
 /// Configures the Person entity.
 /// </summary>
-public class PersonConfiguration : IEntityTypeConfiguration<Person>
+public class PersonConfiguration : BaseAggregateRootConfiguration<Person>
 {
     /// <summary>
     /// Configures the properties and relationships of the Person entity.
     /// </summary>
     /// <param name="builder">The builder used to configure the Person entity.</param>
-    public void Configure(EntityTypeBuilder<Person> builder)
+    public override void Configure(EntityTypeBuilder<Person> builder)
     {
-        // Configures the FirstName property with a maximum length of 50 and makes it required.
+        base.Configure(builder);
+
         builder.Property(p => p.FirstName)
             .HasMaxLength(50)
             .IsRequired();
 
-        // Configures the LastName property with a maximum length of 50 and makes it required.
         builder.Property(p => p.LastName)
             .HasMaxLength(50)
             .IsRequired();
+        
+        builder.OwnsOne(p => p.Address, address =>
+        {
+            address.Property(a => a.Street).HasMaxLength(100).IsRequired();
+            address.Property(a => a.City).HasMaxLength(50).IsRequired();
+            address.Property(a => a.PostalCode).HasMaxLength(10).IsRequired();
+        });
 
-        // Configures the Address property as an owned entity.
-        builder.OwnsOne(b => b.Address);
-
-        // Configures the Gender property with a string conversion and makes it optional.
         builder.Property(p => p.Gender)
             .HasConversion<string>()
             .IsRequired(false);
+
+        builder.HasIndex(p => p.LastName);
     }
 }

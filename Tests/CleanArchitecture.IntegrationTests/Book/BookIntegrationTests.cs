@@ -1,6 +1,4 @@
-﻿using DomainValidation;
-using CleanArchitecture.IntegrationTests.Abstractions;
-using CleanArchitecture.Application.Entities.Books.Queries.Get;
+﻿using CleanArchitecture.Application.Entities.Books.Queries.Get;
 using CleanArchitecture.Application.Entities.Books.Commands.Create;
 using CleanArchitecture.Application.Entities.Books.Commands.Delete;
 using CleanArchitecture.Application.Entities.Books.Commands.Update;
@@ -19,57 +17,82 @@ public class BookIntegrationTests : BaseIntegrationTest
     [Fact]
     public async Task CreateBookCommand_WithValidRequest_CreatesBook()
     {
-        // Act
         int bookId = await CreateBookAsync("Test Book", "F");
-
-        // Assert
         Assert.NotEqual(0, bookId);
     }
 
     [Fact]
     public async Task GetBookQuery_WithValidRequest_ReturnsBook()
     {
-        // Arrange
-        int bookId = await CreateBookAsync("Test Book", "F");
-        GetBookQuery query = new(bookId);
+        int bookId = await CreateBookAsync("Another Book", "F");
+        Result<BookResponse> result = await Sender.Send(new GetBookQuery(bookId));
 
-        // Act
-        Result<BookDto> result = await Sender.Send(query);
-
-        // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Value);
-        Assert.Equal("Test Book", result.Value.Title);
-        Assert.Equal("F", result.Value.Genre);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Another Book", result.Value!.Title);
     }
 
     [Fact]
     public async Task UpdateBookCommand_WithValidRequest_UpdatesBook()
     {
-        // Arrange
-        int bookId = await CreateBookAsync("Test Book", "F");
-        UpdateBookCommand updateCommand = new(bookId, "Updated Book", "M");
+        int bookId = await CreateBookAsync("Updatable Book", "F");
+        Result updateResult = await Sender.Send(new UpdateBookCommand(bookId, "Updated Title", "M"));
 
-        // Act
-        Result result = await Sender.Send(updateCommand);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
+        Assert.NotNull(updateResult);
+        Assert.True(updateResult.IsSuccess);
     }
 
     [Fact]
     public async Task DeleteBookCommand_WithValidRequest_DeletesBook()
     {
-        // Arrange
-        int bookId = await CreateBookAsync("Test Book", "F");
-        DeleteBookCommand deleteCommand = new(bookId);
+        int bookId = await CreateBookAsync("Removable Book", "F");
+        Result deleteResult = await Sender.Send(new DeleteBookCommand(bookId));
 
-        // Act
-        Result result = await Sender.Send(deleteCommand);
+        Assert.NotNull(deleteResult);
+        Assert.True(deleteResult.IsSuccess);
+    }
 
-        // Assert
+    [Fact]
+    public async Task CreateBookCommand_WithEmptyTitle_ThrowsException()
+    {
+        await Assert.ThrowsAsync<CommonValidationException>(
+            () => CreateBookAsync(" ", "F"));
+    }
+
+    [Fact]
+    public async Task CreateBookCommand_WithUnsupportedGenre_ThrowsException()
+    {
+        await Assert.ThrowsAsync<UnsupportedGenreException>(
+            () => CreateBookAsync("Any Book", "InvalidGenre"));
+    }
+
+    [Fact]
+    public async Task GetBookQuery_WithNotFound_ReturnsFailure()
+    {
+        Result<BookResponse> result = await Sender.Send(new GetBookQuery(9999));
+
         Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
+        Assert.False(result.IsSuccess);
+        Assert.Single(result.Errors);
+    }
+
+    [Fact]
+    public async Task UpdateBookCommand_WithNotFoundBook_ReturnsFailure()
+    {
+        Result updateResult = await Sender.Send(new UpdateBookCommand(9999, "No Book", "F"));
+
+        Assert.NotNull(updateResult);
+        Assert.False(updateResult.IsSuccess);
+        Assert.Single(updateResult.Errors);
+    }
+
+    [Fact]
+    public async Task DeleteBookCommand_WithNotFoundBook_ReturnsFailure()
+    {
+        Result deleteResult = await Sender.Send(new DeleteBookCommand(9999));
+
+        Assert.NotNull(deleteResult);
+        Assert.False(deleteResult.IsSuccess);
+        Assert.Single(deleteResult.Errors);
     }
 }

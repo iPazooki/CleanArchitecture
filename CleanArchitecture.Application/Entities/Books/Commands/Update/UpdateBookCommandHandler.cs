@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
+﻿using CleanArchitecture.Domain.Entities.Book;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
 /// <summary>
 /// Handles the update of a book.

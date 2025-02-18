@@ -17,7 +17,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,10 +36,72 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Title");
+
                     b.ToTable("Book");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("PurchasedDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItem");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,10 +122,12 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LastName");
+
                     b.ToTable("Person");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Genre", "Genre", b1 =>
                         {
@@ -86,7 +150,35 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+                {
+                    b.HasOne("CleanArchitecture.Domain.Entities.Person.Person", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.OrderItem", b =>
+                {
+                    b.HasOne("CleanArchitecture.Domain.Entities.Book.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CleanArchitecture.Domain.Entities.Order.Order", null)
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person.Person", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Address", "Address", b1 =>
                         {
@@ -95,14 +187,17 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                             b1.Property<string>("City")
                                 .IsRequired()
+                                .HasMaxLength(50)
                                 .HasColumnType("TEXT");
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
+                                .HasMaxLength(10)
                                 .HasColumnType("TEXT");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
+                                .HasMaxLength(100)
                                 .HasColumnType("TEXT");
 
                             b1.HasKey("PersonId");
@@ -114,6 +209,11 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

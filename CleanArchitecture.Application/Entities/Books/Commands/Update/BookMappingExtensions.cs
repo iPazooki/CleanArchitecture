@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
+﻿using CleanArchitecture.Domain.Entities.Book;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
 /// <summary>
 /// Provides extension methods for mapping book update commands to book entities.

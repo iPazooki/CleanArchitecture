@@ -1,11 +1,4 @@
-﻿using CleanArchitecture.Application.Common.Behaviours;
-using CleanArchitecture.Application.Common.Exceptions;
-using FluentValidation;
-using FluentValidation.Results;
-using MediatR;
-using Moq;
-
-namespace Application.UnitTests.Common;
+﻿namespace Application.UnitTests.Common;
 
 public class ValidationTest
 {

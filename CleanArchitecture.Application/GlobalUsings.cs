@@ -2,8 +2,12 @@
 global using DomainValidation;
 global using FluentValidation;
 global using FluentValidation.Results;
+global using Microsoft.Extensions.Logging;
 global using Microsoft.EntityFrameworkCore;
+global using CleanArchitecture.Domain.Enums;
 global using CleanArchitecture.Domain.Entities;
+global using CleanArchitecture.Application.Errors;
 global using CleanArchitecture.Application.Common;
 global using CleanArchitecture.Domain.ValueObjects;
+global using CleanArchitecture.Domain.Events.Order;
 global using CleanArchitecture.Application.Common.Exceptions;

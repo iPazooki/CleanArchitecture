@@ -32,14 +32,14 @@ public static class BookEndpoints
             .WithOpenApi()
             .WithSummary("Gets a book by ID")
             .WithDescription("Gets a book with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The book was found", typeof(BookDto)))
+            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The book was found", typeof(BookResponse)))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The book was not found"))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
     }
 
     private static async Task<IResult> GetBook(ISender sender, int id)
     {
-        Result<BookDto> result = await sender.Send(new GetBookQuery(id));
+        Result<BookResponse> result = await sender.Send(new GetBookQuery(id));
 
         return result.IsSuccess
             ? Results.Ok(result)
@@ -67,7 +67,9 @@ public static class BookEndpoints
     private static async Task<IResult> CreateBook(ISender sender, CreateBookCommand command)
     {
         Result<int> result = await sender.Send(command);
-
-        return Results.Created($"/create-book/{result.Value}", result.Value);
+        
+        return !result.IsSuccess 
+            ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message))) 
+            : Results.Created($"/create-book/{result.Value}", result);
     }
 }

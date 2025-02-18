@@ -5,4 +5,4 @@ namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 /// </summary>
 /// <param name="Title">The title of the book.</param>
 /// <param name="Genre">The genre of the book.</param>
-public record BookDto(string Title, string Genre);
+public record BookResponse(string Title, string Genre);

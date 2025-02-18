@@ -48,7 +48,7 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
             return;
         }
 
-        foreach (EntityEntry<BaseAuditableEntity> entry in context.ChangeTracker.Entries<BaseAuditableEntity>())
+        foreach (EntityEntry<EntityAuditable> entry in context.ChangeTracker.Entries<EntityAuditable>())
         {
             if (entry.State is not (EntityState.Added or EntityState.Modified) && !entry.HasChangedOwnedEntities())
             {

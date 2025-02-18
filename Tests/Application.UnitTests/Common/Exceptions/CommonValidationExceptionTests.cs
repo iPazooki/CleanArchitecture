@@ -1,6 +1,3 @@
-using CleanArchitecture.Application.Common.Exceptions;
-using FluentValidation.Results;
-
 namespace Application.UnitTests.Common.Exceptions;
 
 public class CommonValidationExceptionTests
@@ -31,7 +28,7 @@ public class CommonValidationExceptionTests
     public void CommonValidationException_WithNoFailures_SetsEmptyErrorsProperty()
     {
         // Arrange
-        List<ValidationFailure> failures = new();
+        List<ValidationFailure> failures = [];
         
         // Act
         CommonValidationException exception = new(failures);

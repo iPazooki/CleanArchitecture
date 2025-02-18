@@ -71,7 +71,7 @@ dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence
 
 ## Support
 
-If you are having problems, please let me know by [raising a new issue](https://github.com/iPazooki/CleanArchitecture/issues/new?template=Blank+issue).
+If you are having problems, please let me know by [raising a new issue](https://github.com/iPazooki/CleanArchitecture/issues).
 
 ## License
 

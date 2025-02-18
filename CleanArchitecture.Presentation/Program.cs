@@ -20,6 +20,8 @@ app.UseHealthChecks("/health");
 
 // API Endpoints
 app.MapBookEndpoints();
+app.MapOrderEndpoints();
+app.MapPersonEndpoints();
 
 app.UseExceptionHandler();
 

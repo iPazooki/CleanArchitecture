@@ -1,9 +1,9 @@
-﻿namespace CleanArchitecture.Domain.Entities;
+﻿namespace CleanArchitecture.Domain.Entities.Book;
 
 /// <summary>
-/// Represents a book entity, inheriting from <see cref="BaseAuditableEntity"/>.
+/// Represents a book entity, inheriting from <see cref="EntityAuditable"/>.
 /// </summary>
-public sealed class Book : BaseAuditableEntity
+public sealed partial class Book : AggregateRootAuditable
 {
     /// <summary>
     /// Gets or sets the title of the book.

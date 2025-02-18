@@ -1,11 +1,12 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
+﻿using CleanArchitecture.Domain.Entities.Book;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
 /// <summary>
 /// Handles the creation of a new book.
 /// </summary>
 /// <param name="applicationUnitOfWork">The unit of work to interact with the application's data.</param>
-public class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
-    : IRequestHandler<CreateBookCommand, Result<int>>
+public class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<CreateBookCommand, Result<int>>
 {
     /// <summary>
     /// Handles the create book command.
@@ -16,19 +17,21 @@ public class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWo
     public async Task<Result<int>> Handle(CreateBookCommand request, CancellationToken cancellationToken)
     {
         // Creates a new Book entity with the provided title and genre.
-        Book book = new()
+        Result<Book> book = Book.Create(request.Title,Genre.FromCode(request.Genre));
+        
+        // If the book creation failed, returns the errors.
+        if (!book.IsSuccess)
         {
-            Title = request.Title,
-            Genre = Genre.FromCode(request.Genre)
-        };
+            return Result<int>.Failure(book.Errors.ToArray());
+        }
 
         // Adds the new book to the unit of work.
-        applicationUnitOfWork.Books.Add(book);
+        applicationUnitOfWork.Books.Add(book!);
 
         // Saves the changes asynchronously and gets the result.
         Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken);
         
         // Returns the result, including the ID of the created book if successful.
-        return result.IsSuccess ? Result<int>.Success(book.Id) : Result<int>.Failure("An error occurred while creating the book.");
+        return result.IsSuccess ? Result<int>.Success(book.Value!.Id) : Result<int>.Failure(string.Format(GeneralErrors.GeneralCreateErrorMessage, nameof(Book)));
     }
 }

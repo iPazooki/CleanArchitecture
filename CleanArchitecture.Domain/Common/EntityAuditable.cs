@@ -1,9 +1,9 @@
 ﻿namespace CleanArchitecture.Domain.Common;
 
 /// <summary>
-/// Represents a base class for auditable entities, inheriting from <see cref="BaseEntity"/>.
+/// Represents a base class for auditable entities, inheriting from <see cref="Entity"/>.
 /// </summary>
-public class BaseAuditableEntity : BaseEntity
+public class EntityAuditable : Entity
 {
     /// <summary>
     /// Gets or sets the date and time when the entity was created.

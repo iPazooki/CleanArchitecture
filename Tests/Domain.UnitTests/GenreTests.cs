@@ -5,84 +5,51 @@ namespace Domain.UnitTests;
 
 public class GenreTests
 {
-    [Fact]
-    public void FromCode_ValidCode_ReturnsGenre()
+    [Theory]
+    [InlineData("F")]
+    [InlineData("NF")]
+    [InlineData("M")]
+    public void FromCode_Valid_ReturnsExpectedGenre(string code)
     {
-        string code = "F";
         Genre genre = Genre.FromCode(code);
+        Assert.NotNull(genre);
         Assert.Equal(code, genre.Code);
     }
 
     [Fact]
-    public void FromCode_ValidCodeWithCode_ReturnsGenre()
+    public void FromCode_Invalid_ThrowsUnsupportedGenreException()
     {
-        Genre genre = Genre.FromCode("F");
-        Assert.Equal(Genre.Fiction.Code, genre.Code);
+        Assert.Throws<UnsupportedGenreException>(() => Genre.FromCode("XYZ"));
+    }
+
+    [Theory]
+    [InlineData("f")]
+    [InlineData("nf")]
+    [InlineData("m")]
+    public void FromCode_CaseSensitive_ThrowsUnsupportedGenreException(string code)
+    {
+        Assert.Throws<UnsupportedGenreException>(() => Genre.FromCode(code));
     }
 
     [Fact]
-    public void ToString_ValidCode_ReturnsGenre()
+    public void Equals_SameCode_ReturnsTrue()
     {
-        Genre genre = Genre.Fiction;
-
-        Assert.Equal(genre.Code, genre.ToString());
+        Genre first = Genre.FromCode("F");
+        Genre second = Genre.FromCode("F");
+        Assert.Equal(first, second);
     }
 
     [Fact]
-    public void ImplicitConversion_ValidCode_ReturnsGenre()
+    public void Equals_DifferentCode_ReturnsFalse()
     {
-        string genre = Genre.Fiction;
-
-        Assert.Equal("F", genre);
+        Genre first = Genre.FromCode("F");
+        Genre second = Genre.FromCode("NF");
+        Assert.NotEqual(first, second);
     }
 
     [Fact]
-    public void ExplicitConversion_ValidCode_ReturnsGenre()
+    public void ToString_ReturnsCode()
     {
-        Genre genre = (Genre)"F";
-
-        Assert.Equal(Genre.Fiction, genre);
-    }
-
-    [Fact]
-    public void FromCode_InvalidCode_ThrowsUnsupportedGenreException()
-    {
-        Assert.Throws<UnsupportedGenreException>(() => Genre.FromCode("InvalidCode"));
-    }
-
-    [Fact]
-    public void Fiction_ReturnsGenreWithCodeF()
-    {
-        Genre genre = Genre.Fiction;
-        Assert.Equal("F", genre.Code);
-    }
-
-    [Fact]
-    public void NonFiction_ReturnsGenreWithCodeNF()
-    {
-        Genre genre = Genre.NonFiction;
-        Assert.Equal("NF", genre.Code);
-    }
-
-    [Fact]
-    public void Mystery_ReturnsGenreWithCodeM()
-    {
-        Genre genre = Genre.Mystery;
-        Assert.Equal("M", genre.Code);
-    }
-
-    [Fact]
-    public void SupportedGenres_ContainsAllDefinedGenres()
-    {
-        IEnumerable<Genre> supportedGenres = new List<Genre>
-        {
-            Genre.Fiction,
-            Genre.NonFiction,
-            Genre.Mystery
-        };
-
-        Assert.Contains(Genre.Fiction, supportedGenres);
-        Assert.Contains(Genre.NonFiction, supportedGenres);
-        Assert.Contains(Genre.Mystery, supportedGenres);
+        Assert.Equal("F", Genre.Fiction.ToString());
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Delete;
+﻿using CleanArchitecture.Domain.Entities.Book;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Delete;
 
 /// <summary>
 /// Handles the deletion of a book.
