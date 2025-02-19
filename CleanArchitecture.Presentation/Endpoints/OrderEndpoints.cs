@@ -3,6 +3,7 @@ using CleanArchitecture.Application.Entities.OrderItem.Commands.Delete;
 using CleanArchitecture.Application.Entities.Orders.Commands.Create;
 using CleanArchitecture.Application.Entities.Orders.Commands.Update;
 using CleanArchitecture.Application.Entities.Orders.Queries.Get;
+using CleanArchitecture.Presentation.Configuration;
 
 namespace CleanArchitecture.Presentation.Endpoints;
 
@@ -63,7 +64,7 @@ public static class OrderEndpoints
 
     private static async Task<IResult> UpdateOrder(ISender sender, UpdateOrderCommand command)
     {
-        Result result = await sender.Send(command);
+        Result result = await sender.SendWithRetryAsync(command);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -81,7 +82,7 @@ public static class OrderEndpoints
     
     private static async Task<IResult> AddOrderItem(ISender sender, CreateOrderItemCommand command)
     {
-        Result result = await sender.Send(command);
+        Result result = await sender.SendWithRetryAsync(command);
 
         return result.IsSuccess
             ? Results.Ok()
@@ -90,7 +91,7 @@ public static class OrderEndpoints
 
     private static async Task<IResult> RemoveOrderItem(ISender sender, [FromBody] DeleteOrderItemCommand command)
     {
-        Result result = await sender.Send(command);
+        Result result = await sender.SendWithRetryAsync(command);
 
         return result.IsSuccess
             ? Results.NoContent()

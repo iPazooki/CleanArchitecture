@@ -1,6 +1,3 @@
-using CleanArchitecture.Domain.Exceptions;
-using CleanArchitecture.Domain.ValueObjects;
-
 namespace Domain.UnitTests;
 
 public class GenreTests

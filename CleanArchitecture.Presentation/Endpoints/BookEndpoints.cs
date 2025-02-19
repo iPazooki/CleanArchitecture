@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Presentation.Endpoints;
+﻿using CleanArchitecture.Presentation.Configuration;
+
+namespace CleanArchitecture.Presentation.Endpoints;
 
 public static class BookEndpoints
 {
@@ -48,7 +50,7 @@ public static class BookEndpoints
 
     private static async Task<IResult> DeleteBook(ISender sender, [FromBody] DeleteBookCommand command)
     {
-        Result result = await sender.Send(command);
+        Result result = await sender.SendWithRetryAsync(command);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -57,7 +59,7 @@ public static class BookEndpoints
 
     private static async Task<IResult> UpdateBook(ISender sender, UpdateBookCommand command)
     {
-        Result result = await sender.Send(command);
+        Result result = await sender.SendWithRetryAsync(command);
 
         return result.IsSuccess
             ? Results.NoContent()

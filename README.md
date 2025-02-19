@@ -2,65 +2,59 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/ipazooki/CleanArchitecture)
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ipazooki/CleanArchitecture/dotnet.yml)
 
-## Clean Architecture 🏗️
+## Clean Architecture
 
-Welcome to the Clean Architecture template with Minimal API! This project serves as a starting point for building robust and maintainable applications using Clean Architecture principles.
+A lightweight **.NET 8** based **Clean Architecture** template leveraging **Minimal API**. This repository helps you quickly set up a maintainable project structure that separates core business rules from infrastructure and presentation concerns.
 
-### Overview
-This template targets .NET 8 and is organized into distinct layers, each with a specific responsibility. It's designed to help developers quickly set up a new project that adheres to best practices in software architecture.
+## Why This Template?
 
-**If you find this project useful, please give it a star. Thanks! ⭐**
+- **Faster Development**: Pre-configured with essential design patterns like **CQRS** (Commands/Queries), value objects, and layered architecture.
+- **Domain-Driven Design**: Organize your core business logic with Entities, Value Objects, Specifications, and Domain Services.
+- **Flexible Data Access**: Uses **SQLite** by default but supports **SQL Server** and other databases with minimal changes.
+- **Simple API**: Minimal API endpoints keep things lightweight and easy to extend.
+- **Extensible**: Easily add new modules, microservices, or features without breaking existing code.
+- **Scalable**: Clear separation of concerns keeps your code well-organized as your app grows.
+- **Robust Testing**: Includes example unit tests (using xUnit and Moq) to encourage a TDD mindset.
+- **Polly Integration**: Resilient API calls with built-in retries, circuit breaker patterns, and fallbacks.
 
-### Getting Started
+
+## Project Structure
+
+1. **Domain Layer**  
+   - Entities, value objects, and domain services.
+2. **Application Layer**  
+   - Interfaces, DTOs, commands, queries, and validators.
+3. **Infrastructure Layer**  
+   - Persistence, database repositories, and external service integrations.
+4. **Presentation Layer**  
+   - Minimal API endpoints, middleware, and request/response handling.
+
+
+## Getting Started
 
 The following prerequisites are required to build and run the solution:
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (latest version)
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (LTS)
 
-### Layers Explained
-
-#### Domain Layer 🌟
-- **Entities**: Core business objects representing data and behavior.
-- **Value Objects**: Immutable types that represent a concept through multiple attributes.
-- **Specifications**: Encapsulate business rules that are combinable.
-- **Domain Services**: Handle complex business logic that doesn't fit within entities.
-
-#### Application Layer 🚀
-- **Interfaces**: Abstractions for services used by the application layer.
-- **DTOs**: Data Transfer Objects for communication between layers.
-- **Commands and Queries**: Implement the CQRS pattern for read and write operations.
-- **Validators**: Ensure data meets required rules and constraints.
-
-#### Infrastructure Layer 🛠️
-- **Persistence**: Implementation of data access using Entity Framework Core.
-- **Repositories**: Classes responsible for data retrieval and storage.
-- **Services**: External services like file storage, email senders, etc.
-
-#### Presentation Layer 🎨
-- **Minimal API**: Simplified approach to building HTTP APIs with ASP.NET Core.
-- **Endpoints**: Define HTTP endpoints for client interactions.
-- **Middleware**: Components that handle requests and responses.
-
-### Getting Started 📖
 1. Clone the repository to your local machine.
+    - ```git clone https://github.com/iPazooki/CleanArchitecture.git```
+    - ```git clone git@github.com:iPazooki/CleanArchitecture.git```
 2. Navigate to the project directory.
 3. Restore dependencies using:
-    
-```bash
-dotnet restore
-```
- 4.	Run the application using:
-```bash
-   dotnet build
-```
+    - ```dotnet restore```
+4. Build and run the application:
+    - ```dotnet build```
+    - ```dotnet run --project CleanArchitecture.Presentation```
+5. Visit the automatically generated Swagger UI (by default at `https://localhost:7281/swagger/index.html`) for interactive documentation.
 
-### Database
-The template is set to use SQLite by default. If you would like to use SQL Server instead, please open the `CleanArchitecture.Infrastructure.Persistence.csproj` file and remove the `UseSQLite` constant from the `DefineConstants` property. Then, update the connection string in the `appsettings.json` file.
+## Database Configuration
+
+To switch from the default **SQLite** to **SQL Server**, remove the `UseSQLite` constant from the `DefineConstants` property in `CleanArchitecture.Infrastructure.Persistence.csproj` and adjust the connection string in your `appsettings.json`.
 
 ```xml
 <DefineConstants>UseSQLite</DefineConstants>
 ```
 
-### Database Migrations 📂
+## Database Migrations
 To add migrations and update the database, run the following commands:
 
 ```bash
@@ -69,13 +63,8 @@ dotnet ef migrations add InitialCreate --project CleanArchitecture.Infrastructur
 dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
 ```
 
-## Support
-
-If you are having problems, please let me know by [raising a new issue](https://github.com/iPazooki/CleanArchitecture/issues).
+## Contributing
+Pull requests are welcome! For major changes, please open an [issue](https://github.com/iPazooki/CleanArchitecture/issues) first to discuss proposed modifications. We appreciate your support and feedback. Don’t forget to **star** the project if you find it helpful.
 
 ## License
-
-This project is licensed with the [MIT license](LICENSE).
-
-### Contributing 🤝
-Contributions are welcome! If you have ideas for improvements or encounter any bugs, feel free to open an issue or submit a pull request. Let's collaborate to make this project better. 😊
+This project is licensed under the [MIT](LICENSE) license. Feel free to use it as a foundation for your own projects!
