@@ -6,8 +6,7 @@ namespace CleanArchitecture.Application.Entities.Books.Commands.Delete;
 /// Handles the deletion of a book.
 /// </summary>
 /// <param name="applicationUnitOfWork">The unit of work to interact with the application's data.</param>
-public class DeleteBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
-    : IRequestHandler<DeleteBookCommand, Result>
+public class DeleteBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<DeleteBookCommand, Result>
 {
     /// <summary>
     /// Handles the delete book command.

@@ -9,14 +9,14 @@ public partial class Order
     private readonly List<OrderItem> _orderItems = [];
     private OrderStatus _orderStatus;
 
-    public static Result<Order> Create(Person.Person person, OrderStatus orderStatus)
+    public static Result<Order> Create(User.User user, OrderStatus orderStatus)
     {
         if (orderStatus!= OrderStatus.Pending)
         {
             return Result<Order>.Failure(OrderErrors.OrderStatusInvalid);
         }
 
-        Order order = new() { Customer = person, OrderStatus = orderStatus };
+        Order order = new() { Customer = user, OrderStatus = orderStatus };
         
         order.AddDomainEvent(new OrderAddedEvent(order));
 

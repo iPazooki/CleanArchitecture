@@ -10,7 +10,7 @@ public abstract class Entity : IEquatable<Entity>
     /// <summary>
     /// Gets or sets the unique identifier for the entity.
     /// </summary>
-    public int Id { get; init; }
+    public Guid Id { get; init; } = Guid.NewGuid();
     
     private readonly List<INotification> _domainEvents = [];
 

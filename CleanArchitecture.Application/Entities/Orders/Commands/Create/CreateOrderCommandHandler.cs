@@ -1,24 +1,24 @@
 ﻿using CleanArchitecture.Domain.Entities.Order;
-using CleanArchitecture.Domain.Entities.Person;
+using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Entities.Orders.Commands.Create;
 
-public class CreateOrderCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<CreateOrderCommand, Result<int>>
+public class CreateOrderCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<CreateOrderCommand, Result<Guid>>
 {
-    public async Task<Result<int>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        Person? customer = await applicationUnitOfWork.Persons.FindAsync(keyValues: [request.CustomerId], cancellationToken);
+        User? customer = await applicationUnitOfWork.Users.FindAsync(keyValues: [request.CustomerId], cancellationToken);
 
         if (customer is null)
         {
-            return Result<int>.Failure("Customer Not Found.");
+            return Result<Guid>.Failure("Customer Not Found.");
         }
 
         Result<Order> order = Order.Create(customer, OrderStatus.Pending);
         
         if (!order.IsSuccess)
         {
-            return Result<int>.Failure(order.Errors.ToArray());
+            return Result<Guid>.Failure(order.Errors.ToArray());
         }
 
         applicationUnitOfWork.Orders.Add(order!);
@@ -26,7 +26,7 @@ public class CreateOrderCommandHandler(IApplicationUnitOfWork applicationUnitOfW
         Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken);
         
         return result.IsSuccess
-            ? Result<int>.Success(order.Value!.Id)
-            : Result<int>.Failure(string.Format(GeneralErrors.GeneralCreateErrorMessage, nameof(Order)));
+            ? Result<Guid>.Success(order.Value!.Id)
+            : Result<Guid>.Failure(string.Format(GeneralErrors.GeneralCreateErrorMessage, nameof(Order)));
     }
 }

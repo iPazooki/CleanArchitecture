@@ -2,7 +2,7 @@
 
 namespace CleanArchitecture.Presentation.Endpoints;
 
-public static class BookEndpoints
+internal static class BookEndpoints
 {
     public static void MapBookEndpoints(this WebApplication app)
     {
@@ -30,7 +30,7 @@ public static class BookEndpoints
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
 
-        app.MapGet("/get-book/{id:int}", GetBook)
+        app.MapGet("/get-book/{id:Guid}", GetBook)
             .WithOpenApi()
             .WithSummary("Gets a book by ID")
             .WithDescription("Gets a book with the specified ID.")
@@ -39,7 +39,7 @@ public static class BookEndpoints
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
     }
 
-    private static async Task<IResult> GetBook(ISender sender, int id)
+    private static async Task<IResult> GetBook(ISender sender, Guid id)
     {
         Result<BookResponse> result = await sender.Send(new GetBookQuery(id));
 
@@ -68,7 +68,7 @@ public static class BookEndpoints
 
     private static async Task<IResult> CreateBook(ISender sender, CreateBookCommand command)
     {
-        Result<int> result = await sender.Send(command);
+        Result<Guid> result = await sender.Send(command);
         
         return !result.IsSuccess 
             ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message))) 

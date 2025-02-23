@@ -11,12 +11,12 @@ public sealed partial class Order : AggregateRoot
     /// <summary>
     /// Gets the customer associated with the order.
     /// </summary>
-    public required Person.Person Customer { get; init; }
+    public required User.User Customer { get; init; }
 
     /// <summary>
     /// Gets the ID of the customer associated with the order.
     /// </summary>
-    public int CustomerId { get; init; }
+    public Guid CustomerId { get; init; }
     
     /// <summary>
     /// Gets or sets the status of the order.

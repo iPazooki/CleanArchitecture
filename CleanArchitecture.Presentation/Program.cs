@@ -1,7 +1,12 @@
 using CleanArchitecture.Presentation.Configuration;
 using CleanArchitecture.Presentation.Endpoints;
+using CleanArchitecture.Presentation.OptionsSetup;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureOptions<JwtOptionsSetup>();
+builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
 
 // Add services to the container.
 builder.Services
@@ -9,6 +14,9 @@ builder.Services
     .AddInfrastructureServices()
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+builder.Services.AddAuthorization();
 
 WebApplication app = builder.Build();
 
@@ -21,8 +29,12 @@ app.UseHealthChecks("/health");
 // API Endpoints
 app.MapBookEndpoints();
 app.MapOrderEndpoints();
-app.MapPersonEndpoints();
+app.MapUserEndpoints();
+app.MapMemberEndpoints();
 
 app.UseExceptionHandler();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

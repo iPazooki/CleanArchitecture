@@ -5,8 +5,7 @@
 /// </summary>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
-    : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+internal sealed class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     /// <summary>
     /// Handles the request by validating it and then passing it to the next handler if validation succeeds.
@@ -15,7 +14,7 @@ public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRe
     /// <param name="next">The delegate representing the next handler in the pipeline.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the response from the next handler.</returns>
-    /// <exception cref="CommonValidationException">Thrown when validation fails.</exception>
+    /// <exception cref="ApplicationValidationException">Thrown when validation fails.</exception>
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if (!validators.Any())
@@ -36,7 +35,7 @@ public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRe
 
         if (failures.Count != 0)
         {
-            throw new CommonValidationException(failures);
+            throw new ApplicationValidationException(failures);
         }
 
         return await next();

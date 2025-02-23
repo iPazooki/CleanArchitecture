@@ -1,6 +1,6 @@
 ﻿using CleanArchitecture.Domain.Entities.Book;
 using CleanArchitecture.Domain.Entities.Order;
-using CleanArchitecture.Domain.Entities.Person;
+using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Common;
 
@@ -23,9 +23,9 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 public interface IApplicationUnitOfWork : IUnitOfWork
 {
     /// <summary>
-    /// Gets the DbSet for <see cref="Person"/> entities.
+    /// Gets the DbSet for <see cref="User"/> entities.
     /// </summary>
-    public DbSet<Person> Persons { get; }
+    public DbSet<User> Users { get; }
 
     /// <summary>
     /// Gets the DbSet for <see cref="Book"/> entities.

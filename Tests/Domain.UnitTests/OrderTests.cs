@@ -1,7 +1,7 @@
 ﻿using CleanArchitecture.Domain.Events.Order;
 using CleanArchitecture.Domain.Entities.Book;
 using CleanArchitecture.Domain.Entities.Order;
-using CleanArchitecture.Domain.Entities.Person;
+using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace Domain.UnitTests;
 
@@ -11,7 +11,7 @@ public class OrderTests
     public void Order_Create_ShouldReturnSuccessResult_WhenStatusIsPending()
     {
         // Arrange & Act
-        Result<Order> result = Order.Create(Person.Create("First Name", "Last Name")!, OrderStatus.Pending);
+        Result<Order> result = Order.Create(User.Create("First Name", "Last Name")!, OrderStatus.Pending);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -25,7 +25,7 @@ public class OrderTests
     public void Order_Create_ShouldReturnFailure_WhenStatusIsNotPending()
     {
         // Arrange & Act
-        Result<Order> result = Order.Create(Person.Create("First Name", "Last Name")!, OrderStatus.Delivered);
+        Result<Order> result = Order.Create(User.Create("First Name", "Last Name")!, OrderStatus.Delivered);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -36,7 +36,7 @@ public class OrderTests
     public void Order_AddOrderItem_ShouldSucceed_WhenValidData()
     {
         // Arrange
-        Order order = Order.Create(Person.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
+        Order order = Order.Create(User.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
 
         // Act
         Result addResult = order.AddOrderItem(Book.Create("Some Book", Genre.Fiction)!, 2, 10m);
@@ -52,7 +52,7 @@ public class OrderTests
     public void Order_AddOrderItem_ShouldFail_WhenQuantityIsInvalid()
     {
         // Arrange
-        Order order = Order.Create(Person.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
+        Order order = Order.Create(User.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
 
         // Act
         Result addResult = order.AddOrderItem(Book.Create("Invalid Qty", Genre.Fiction)!, 0, 10m);
@@ -66,7 +66,7 @@ public class OrderTests
     public void Order_RemoveOrderItem_ShouldRemoveCorrectly()
     {
         // Arrange
-        Order order = Order.Create(Person.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
+        Order order = Order.Create(User.Create("First Name", "Last Name")!, OrderStatus.Pending).Value!;
         order.AddOrderItem(Book.Create("Test Book", Genre.Fiction)!, 1, 15m);
         OrderItem toRemove = order.OrderItems.First();
 

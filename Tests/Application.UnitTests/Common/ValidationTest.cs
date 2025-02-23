@@ -71,7 +71,7 @@ public class ValidationTest
         Mock<RequestHandlerDelegate<SampleResponse>> nextHandler = new();
 
         // Act & Assert
-        await Assert.ThrowsAsync<CommonValidationException>(() =>
+        await Assert.ThrowsAsync<ApplicationValidationException>(() =>
             behavior.Handle(request, nextHandler.Object, CancellationToken.None));
     }
 }

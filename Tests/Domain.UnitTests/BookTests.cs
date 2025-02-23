@@ -84,16 +84,16 @@ public class BookTests
     {
         // Arrange
         Result<Book> result1 = Book.Create("Test Title", Genre.Fiction);
-        Book? book1 = result1.Value;
+        Book book1 = result1.Value!;
 
         Result<Book> result2 = Book.Create("Another Title", Genre.NonFiction);
-        Book? book2 = result2.Value;
+        Book book2 = result2.Value!;
 
         // Act
-        bool isEqual = book1!.Equals(book2);
+        bool isEqual = book1.Equals(book2);
 
         // Assert
-        Assert.True(isEqual);
+        Assert.False(isEqual);
     }
 
     [Fact]
@@ -107,6 +107,6 @@ public class BookTests
         Book? book2 = result2.Value;
 
         // Act & Assert
-        Assert.True(book1 == book2);
+        Assert.True(book1 != book2);
     }
 }

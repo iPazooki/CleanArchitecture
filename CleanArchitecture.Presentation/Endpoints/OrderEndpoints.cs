@@ -1,13 +1,13 @@
-﻿using CleanArchitecture.Application.Entities.OrderItem.Commands.Create;
-using CleanArchitecture.Application.Entities.OrderItem.Commands.Delete;
+﻿using CleanArchitecture.Presentation.Configuration;
+using CleanArchitecture.Application.Entities.Orders.Queries.Get;
 using CleanArchitecture.Application.Entities.Orders.Commands.Create;
 using CleanArchitecture.Application.Entities.Orders.Commands.Update;
-using CleanArchitecture.Application.Entities.Orders.Queries.Get;
-using CleanArchitecture.Presentation.Configuration;
+using CleanArchitecture.Application.Entities.OrderItem.Commands.Create;
+using CleanArchitecture.Application.Entities.OrderItem.Commands.Delete;
 
 namespace CleanArchitecture.Presentation.Endpoints;
 
-public static class OrderEndpoints
+internal static class OrderEndpoints
 {
     public static void MapOrderEndpoints(this WebApplication app)
     {
@@ -27,7 +27,7 @@ public static class OrderEndpoints
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
 
-        app.MapGet("/get-order/{id:int}", GetOrder)
+        app.MapGet("/get-order/{id:Guid}", GetOrder)
             .WithOpenApi()
             .WithSummary("Gets an order by ID")
             .WithDescription("Gets an order with the specified ID.")
@@ -53,7 +53,7 @@ public static class OrderEndpoints
 
     }
 
-    private static async Task<IResult> GetOrder(ISender sender, int id)
+    private static async Task<IResult> GetOrder(ISender sender, Guid id)
     {
         Result<OrderResponse> result = await sender.Send(new GetOrderQuery(id));
 
@@ -73,7 +73,7 @@ public static class OrderEndpoints
 
     private static async Task<IResult> CreateOrder(ISender sender, CreateOrderCommand command)
     {
-        Result<int> result = await sender.Send(command);
+        Result<Guid> result = await sender.Send(command);
         
         return !result.IsSuccess 
             ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message))) 

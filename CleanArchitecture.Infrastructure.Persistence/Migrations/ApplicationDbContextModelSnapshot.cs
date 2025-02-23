@@ -19,9 +19,9 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("TEXT");
@@ -43,12 +43,12 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
@@ -71,15 +71,15 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.OrderItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("BookId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
@@ -101,11 +101,15 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.ToTable("OrderItem");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person.Person", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -113,6 +117,10 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Gender")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HashedPassword")
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
@@ -124,15 +132,15 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("LastName");
 
-                    b.ToTable("Person");
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Genre", "Genre", b1 =>
                         {
-                            b1.Property<int>("BookId")
-                                .HasColumnType("INTEGER");
+                            b1.Property<Guid>("BookId")
+                                .HasColumnType("TEXT");
 
                             b1.Property<string>("Code")
                                 .IsRequired()
@@ -152,7 +160,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
                 {
-                    b.HasOne("CleanArchitecture.Domain.Entities.Person.Person", "Customer")
+                    b.HasOne("CleanArchitecture.Domain.Entities.User.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -178,12 +186,12 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Person.Person", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User.User", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Address", "Address", b1 =>
                         {
-                            b1.Property<int>("PersonId")
-                                .HasColumnType("INTEGER");
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("TEXT");
 
                             b1.Property<string>("City")
                                 .IsRequired()
@@ -200,12 +208,12 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                                 .HasMaxLength(100)
                                 .HasColumnType("TEXT");
 
-                            b1.HasKey("PersonId");
+                            b1.HasKey("UserId");
 
-                            b1.ToTable("Person");
+                            b1.ToTable("User");
 
                             b1.WithOwner()
-                                .HasForeignKey("PersonId");
+                                .HasForeignKey("UserId");
                         });
 
                     b.Navigation("Address");

@@ -21,7 +21,7 @@ public sealed class OrderItemConfiguration : BaseEntityConfiguration<OrderItem>
             .HasForeignKey(oi => oi.BookId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(oi => oi.BookId);
+        builder.HasIndex(oi => oi.OrderId);
 
         builder.Property(oi => oi.RowVersion)
             .IsRowVersion();

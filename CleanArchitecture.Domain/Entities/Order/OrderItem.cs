@@ -2,9 +2,9 @@
 
 public sealed class OrderItem : Entity
 {
-    public int OrderId { get; set; }
+    public Guid OrderId { get; set; }
 
-    public int BookId { get; init; } 
+    public Guid BookId { get; init; } 
     
     public required Book.Book Book { get; set; }
     

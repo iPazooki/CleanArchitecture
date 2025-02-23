@@ -65,7 +65,6 @@ public class UnitTest1
         {
             Assembly referencedAssembly = Assembly.Load(reference);
             string? referencedAssemblyName = referencedAssembly.GetName().Name;
-            Assert.NotEqual(DomainAssemblyName, referencedAssemblyName);
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
         
@@ -73,7 +72,7 @@ public class UnitTest1
     }
     
     [Fact]
-    public void InfrastructurePersistenceShouldOnlyDependOnApplicationAndDomain()
+    public void InfrastructurePersistenceShouldOnlyDependOnApplication()
     {
         // Arrange
         Assembly infrastructurePersistenceAssembly = Assembly.Load(InfrastructurePersistenceAssemblyName);

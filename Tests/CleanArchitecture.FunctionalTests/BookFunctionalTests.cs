@@ -56,17 +56,19 @@ public class BookFunctionalTests
     [Fact]
     public async Task UpdateBookCommand_WithValidRequest_UpdatesBook()
     {
+        Book book = Book.Create("Original", Genre.Fiction).Value!;
+        
         _mockApplicationUnitOfWork
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Book.Create("Original", Genre.Fiction).Value);
+            .ReturnsAsync(book);
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.Update(It.IsAny<Book>()));
 
         HttpClient httpClient = CreateHttpClient();
-        UpdateBookCommand command = new(1, "Updated Title", "F");
+        UpdateBookCommand command = new(book.Id, "Updated Title", "F");
 
         HttpResponseMessage response = await httpClient.PutAsJsonAsync("/update-book/", command);
 
@@ -81,7 +83,7 @@ public class BookFunctionalTests
             .ReturnsAsync((Book?)null);
 
         HttpClient httpClient = CreateHttpClient();
-        UpdateBookCommand command = new(999, "Does Not Exist", "F");
+        UpdateBookCommand command = new(Guid.NewGuid(), "Does Not Exist", "F");
 
         HttpResponseMessage response = await httpClient.PutAsJsonAsync("/update-book/", command);
 
@@ -91,17 +93,19 @@ public class BookFunctionalTests
     [Fact]
     public async Task DeleteBookCommand_WithValidRequest_DeletesBook()
     {
+        Book book = Book.Create("Delete Me", Genre.Fiction).Value!;
+        
         _mockApplicationUnitOfWork
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Book.Create("Delete Me", Genre.Fiction).Value);
+            .ReturnsAsync(book);
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.Remove(It.IsAny<Book>()));
 
         HttpClient httpClient = CreateHttpClient();
-        DeleteBookCommand command = new(1);
+        DeleteBookCommand command = new(book.Id);
 
         HttpRequestMessage request = new(HttpMethod.Delete, "/delete-book")
         {
@@ -120,7 +124,7 @@ public class BookFunctionalTests
             .ReturnsAsync((Book?)null);
 
         HttpClient httpClient = CreateHttpClient();
-        DeleteBookCommand command = new(999);
+        DeleteBookCommand command = new(Guid.NewGuid());
 
         HttpRequestMessage request = new(HttpMethod.Delete, "/delete-book")
         {
@@ -135,13 +139,14 @@ public class BookFunctionalTests
     public async Task GetBookQuery_WithValidId_ReturnsBook()
     {
         Book book = Book.Create("Test Book", Genre.Fiction).Value!;
+        
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(book);
 
         HttpClient httpClient = CreateHttpClient();
 
-        HttpResponseMessage response = await httpClient.GetAsync("/get-book/1");
+        HttpResponseMessage response = await httpClient.GetAsync($"/get-book/{book.Id}");;
 
         Assert.True(response.IsSuccessStatusCode);
         Result<BookResponse>? returnedBook = await response.Content.ReadFromJsonAsync<Result<BookResponse>>();
@@ -158,7 +163,7 @@ public class BookFunctionalTests
 
         HttpClient httpClient = CreateHttpClient();
 
-        HttpResponseMessage response = await httpClient.GetAsync("/get-book/999");
+        HttpResponseMessage response = await httpClient.GetAsync($"/get-book/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

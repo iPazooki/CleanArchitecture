@@ -2,4 +2,4 @@
 
 namespace CleanArchitecture.Application.Entities.Orders.Queries.Get;
 
-public record OrderResponse(int Id, string CustomerName, string OrderStatus, IEnumerable<OrderItemResponse> OrderItems);
+public record OrderResponse(Guid Id, string CustomerName, string OrderStatus, IEnumerable<OrderItemResponse> OrderItems);

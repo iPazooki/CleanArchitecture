@@ -10,4 +10,4 @@ namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 /// <returns>The ID of the created book.</returns>
 public record CreateBookCommand(
     [property: Required, MaxLength(100)] string Title,
-    [property: Required, MaxLength(2), MinLength(1)] string Genre) : IRequest<Result<int>>;
+    [property: Required, MaxLength(2), MinLength(1)] string Genre) : IRequest<Result<Guid>>;

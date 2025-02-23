@@ -1,7 +1,7 @@
 ﻿namespace CleanArchitecture.Domain.Enums;
 
 /// <summary>
-/// Represents the gender of a person.
+/// Represents the gender of a user.
 /// </summary>
 public enum Gender
 {
