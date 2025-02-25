@@ -14,7 +14,6 @@ public abstract class Entity : IEquatable<Entity>
     
     private readonly List<INotification> _domainEvents = [];
 
-    [NotMapped] 
     public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
 
     public void AddDomainEvent(INotification domainEvent) => _domainEvents.Add(domainEvent);
@@ -62,7 +61,7 @@ public abstract class Entity : IEquatable<Entity>
     /// Serves as the default hash function.
     /// </summary>
     /// <returns>A hash code for the current object.</returns>
-    public override int GetHashCode() => Id.GetHashCode();
+    public override int GetHashCode() => Id.GetHashCode() * 41;
 
     /// <summary>
     /// Determines whether two specified entities have the same value.

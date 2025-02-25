@@ -1,5 +1,6 @@
 ﻿using CleanArchitecture.Domain.Entities.Book;
 using CleanArchitecture.Domain.Entities.Order;
+using CleanArchitecture.Domain.Entities.Security;
 using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Common;
@@ -32,5 +33,18 @@ public interface IApplicationUnitOfWork : IUnitOfWork
     /// </summary>
     public DbSet<Book> Books { get; }
 
+    /// <summary>
+    /// Gets the DbSet for <see cref="Order"/> entities.
+    /// </summary>
     public DbSet<Order> Orders { get; }
+    
+    /// <summary>
+    /// Gets the DbSet for <see cref="Role"/> entities.
+    /// </summary>
+    public DbSet<Role> Roles { get; }
+    
+    /// <summary>
+    /// Gets the DbSet for <see cref="Permission"/> entities.
+    /// </summary>
+    public DbSet<Permission> Permissions { get; }
 }

@@ -7,8 +7,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 /// Represents the unit of work for the application.
 /// </summary>
 /// <param name="context">The application database context.</param>
-public partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger)
-    : IApplicationUnitOfWork
+public partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
 {
     /// <summary>
     /// Saves the changes asynchronously.

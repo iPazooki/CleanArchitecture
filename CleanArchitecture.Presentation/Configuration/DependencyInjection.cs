@@ -1,4 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using CleanArchitecture.Infrastructure.Security;
+using Microsoft.OpenApi.Models;
+using CleanArchitecture.Presentation.OptionsSetup;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CleanArchitecture.Presentation.Configuration;
 
@@ -6,6 +10,9 @@ internal static class DependencyInjection
 {
     public static void AddPresentationServices(this IServiceCollection services)
     {
+        services.ConfigureOptions<JwtOptionsSetup>();
+        services.ConfigureOptions<JwtBearerOptionsSetup>();
+        
         services.AddEndpointsApiExplorer();
         
         services.AddSwaggerGen(s =>
@@ -37,5 +44,10 @@ internal static class DependencyInjection
         services.AddProblemDetails();
 
         services.AddHealthChecks();
+        
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddAuthorization();
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
     }
 }

@@ -5,7 +5,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 /// <summary>
 /// Configures the Book entity.
 /// </summary>
-public class BookConfiguration : BaseAggregateRootAuditableConfiguration<Book>
+public sealed class BookConfiguration : BaseAggregateRootAuditableConfiguration<Book>
 {
     /// <summary>
     /// Configures the properties and relationships of the Book entity.

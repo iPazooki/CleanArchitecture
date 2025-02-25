@@ -1,4 +1,5 @@
-﻿using User = CleanArchitecture.Domain.Entities.User.User;
+﻿using CleanArchitecture.Domain.Entities.Security;
+using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Entities.Users.Commands.Create;
 
@@ -25,6 +26,15 @@ public class CreateUserCommandHandler(IApplicationUnitOfWork applicationUnitOfWo
         {
             return Result<Guid>.Failure(userResult.Errors.ToArray());
         }
+
+        Role? role = await applicationUnitOfWork.Roles.SingleOrDefaultAsync(x => x.Id == (int)Roles.Member, cancellationToken);
+
+        if (role is null)
+        {
+            return Result<Guid>.Failure(string.Format(GeneralErrors.NotFoundErrorMessage, nameof(Role)));
+        }
+        
+        userResult.Value!.AddRole(role);
 
         await applicationUnitOfWork.Users.AddAsync(userResult.Value!, cancellationToken);
 

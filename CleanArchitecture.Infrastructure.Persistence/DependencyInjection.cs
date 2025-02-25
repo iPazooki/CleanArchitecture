@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Infrastructure.Persistence.Data;
+using CleanArchitecture.Infrastructure.Persistence.Data.Security;
 using CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 using CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 
@@ -54,6 +56,8 @@ public static class DependencyInjection
 
         // Adds the system time provider as a singleton service.
         services.AddSingleton(TimeProvider.System);
+
+        services.AddScoped<IPermissionService, PermissionService>();
 
         return services;
     }

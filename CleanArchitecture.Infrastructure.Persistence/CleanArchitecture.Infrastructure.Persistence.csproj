@@ -25,4 +25,8 @@
       <Folder Include="Migrations\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Migrations\20250224173544_AddRolePermission.cs" />
+    </ItemGroup>
+
 </Project>

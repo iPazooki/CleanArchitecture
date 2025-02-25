@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Domain.Entities.User;
+﻿using CleanArchitecture.Domain.Entities.Security;
+
+namespace CleanArchitecture.Domain.Entities.User;
 
 public partial class User
 {
@@ -65,4 +67,6 @@ public partial class User
 
         return Result<User>.Success(user);
     }
+
+    public void AddRole(Role role) => Roles.Add(role);
 }

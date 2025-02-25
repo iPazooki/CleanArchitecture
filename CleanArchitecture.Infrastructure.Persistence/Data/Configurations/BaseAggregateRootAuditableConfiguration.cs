@@ -13,5 +13,7 @@ public abstract class BaseAggregateRootAuditableConfiguration<T> : IEntityTypeCo
 
         builder.Property(x => x.UpdatedDate)
             .IsRequired();
+        
+        builder.Ignore(o => o.DomainEvents);
     }
 }

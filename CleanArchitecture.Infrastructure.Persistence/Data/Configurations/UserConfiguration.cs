@@ -1,11 +1,12 @@
-﻿using User = CleanArchitecture.Domain.Entities.User.User;
+﻿using CleanArchitecture.Domain.Entities.Security;
+using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
 /// <summary>
 /// Configures the User entity.
 /// </summary>
-public class UserConfiguration : BaseAggregateRootConfiguration<User>
+public sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
 {
     /// <summary>
     /// Configures the properties and relationships of the User entity.
@@ -22,7 +23,7 @@ public class UserConfiguration : BaseAggregateRootConfiguration<User>
         builder.Property(p => p.LastName)
             .HasMaxLength(50)
             .IsRequired();
-        
+
         builder.OwnsOne(p => p.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(100).IsRequired();
@@ -33,15 +34,22 @@ public class UserConfiguration : BaseAggregateRootConfiguration<User>
         builder.Property(p => p.Gender)
             .HasConversion<string>()
             .IsRequired(false);
-        
-        builder.Property(p=> p.Email)
+
+        builder.Property(p => p.Email)
             .HasMaxLength(100)
             .IsRequired(false);
-        
+
         builder.Property(p => p.HashedPassword)
             .HasMaxLength(50)
             .IsRequired(false);
 
-        builder.HasIndex(p => p.LastName);
+        builder.HasMany(p => p.Roles)
+            .WithMany()
+            .UsingEntity<RoleUser>(r => 
+                    r.HasOne<Role>().WithMany().HasForeignKey(ru => ru.RoleId),
+                u => 
+                    u.HasOne<User>().WithMany().HasForeignKey(ru => ru.UserId));
+
+        builder.HasIndex(p => p.Email).IsUnique();
     }
 }

@@ -1,12 +1,7 @@
-using CleanArchitecture.Presentation.Configuration;
 using CleanArchitecture.Presentation.Endpoints;
-using CleanArchitecture.Presentation.OptionsSetup;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using CleanArchitecture.Presentation.Configuration;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-builder.Services.ConfigureOptions<JwtOptionsSetup>();
-builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
 
 // Add services to the container.
 builder.Services
@@ -14,9 +9,6 @@ builder.Services
     .AddInfrastructureServices()
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-builder.Services.AddAuthorization();
 
 WebApplication app = builder.Build();
 

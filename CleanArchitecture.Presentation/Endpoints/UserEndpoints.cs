@@ -1,5 +1,6 @@
 ﻿using CleanArchitecture.Application.Entities.Users.Queries.Get;
 using CleanArchitecture.Application.Entities.Users.Commands.Create;
+using CleanArchitecture.Domain.Enums;
 
 namespace CleanArchitecture.Presentation.Endpoints;
 
@@ -23,7 +24,7 @@ internal static class UserEndpoints
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The user was not found"))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.Unauthorized, "The request requires user authentication", typeof(ProblemDetails)))
-            .RequireAuthorization();
+            .RequireAuthorization(Permissions.CanRead.ToString());
     }
 
     private static async Task<IResult> GetUser(ISender sender, Guid id)

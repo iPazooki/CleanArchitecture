@@ -13,6 +13,6 @@ public class LoginCommandHandler(IApplicationUnitOfWork applicationUnitOfWork, I
             return Result<string>.Failure(SecurityErrors.EmailOrPasswordIncorrect);
         }
 
-        return jwtProvider.GenerateJwtToken(user);
+        return await jwtProvider.GenerateJwtTokenAsync(user);
     }
 }
