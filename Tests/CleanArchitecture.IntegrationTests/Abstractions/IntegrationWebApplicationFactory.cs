@@ -19,6 +19,16 @@ internal class IntegrationWebApplicationFactory : WebApplicationFactory<Program>
             {
                 options.UseInMemoryDatabase("InMemoryDbForTesting");
             });
+            
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+
+            using IServiceScope scope = serviceProvider.CreateScope();
+            
+            IServiceProvider scopedServices = scope.ServiceProvider;
+            
+            ApplicationDbContext db = scopedServices.GetRequiredService<ApplicationDbContext>();
+
+            db.Database.EnsureCreated();
         });
     }
 }
