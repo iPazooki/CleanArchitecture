@@ -20,7 +20,7 @@ public sealed class PasswordHasher : IPasswordHasher
 
     public bool VerifyPassword(string password, string? hashedPassword)
     {
-        if (password == null || hashedPassword == null)
+        if (hashedPassword is null)
         {
             return false;
         }

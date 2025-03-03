@@ -1,8 +1,8 @@
-﻿using CleanArchitecture.Infrastructure.Security;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authorization;
+using CleanArchitecture.Infrastructure.Security;
 using CleanArchitecture.Presentation.OptionsSetup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CleanArchitecture.Presentation.Configuration;
 

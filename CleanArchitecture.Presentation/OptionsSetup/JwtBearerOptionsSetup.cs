@@ -22,7 +22,8 @@ internal class JwtBearerOptionsSetup(IOptions<JwtOptions> jwtOptions): IPostConf
             ValidAudience = _jwtOptions.Audience,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)),
-            ValidateLifetime = true
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
     }
 }
