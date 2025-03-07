@@ -21,8 +21,6 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "An error occurred while processing the request.");
-
         Type exceptionType = exception.GetType();
 
         if (_exceptionHandlers.TryGetValue(exceptionType, out Func<HttpContext, Exception, CancellationToken, Task>? exceptionHandler))
@@ -30,6 +28,8 @@ public class GlobalExceptionHandler : IExceptionHandler
             await exceptionHandler.Invoke(httpContext, exception, cancellationToken);
             return true;
         }
+
+        _logger.LogError(exception, "An error occurred while processing the request {@DateTime} {@Path}", DateTime.UtcNow ,httpContext.Request.Path);
 
         ProblemDetails problemDetails = new()
         {
@@ -47,8 +47,8 @@ public class GlobalExceptionHandler : IExceptionHandler
     private async Task HandleApplicationException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
     {
         ApplicationValidationException exception = (ApplicationValidationException)ex;
-
-        //httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        
+        _logger.LogWarning("Invalid user data {@DateTime} {@Path} {@Message}", DateTime.UtcNow ,httpContext.Request.Path, exception.Errors);
         
         ValidationProblemDetails problemDetails = new()
         {

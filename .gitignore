@@ -400,3 +400,5 @@ FodyWeavers.xsd
 *.sln.iml
 /.idea
 CleanArchitecture.Presentation/app.db
+CleanArchitecture.Presentation/app.db-shm
+CleanArchitecture.Presentation/app.db-wal

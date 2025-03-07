@@ -1,3 +1,4 @@
+using Serilog;
 using CleanArchitecture.Presentation.Endpoints;
 using CleanArchitecture.Presentation.Configuration;
 
@@ -10,7 +11,12 @@ builder.Services
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices();
 
+builder.Logging.ClearProviders();
+builder.Host.UseSerilog(((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration)));
+
 WebApplication app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
