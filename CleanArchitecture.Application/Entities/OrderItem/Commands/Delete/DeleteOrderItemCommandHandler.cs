@@ -2,9 +2,10 @@
 
 namespace CleanArchitecture.Application.Entities.OrderItem.Commands.Delete;
 
-public class DeleteOrderItemCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<DeleteOrderItemCommand, Result>
+internal class DeleteOrderItemRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<DeleteOrderItemCommand>> validators) 
+    : BaseRequestHandler<DeleteOrderItemCommand>(validators)
 {
-    public async Task<Result> Handle(DeleteOrderItemCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleRequest(DeleteOrderItemCommand request, CancellationToken cancellationToken)
     {
         Order? order = await applicationUnitOfWork.Orders.FindAsync(keyValues: [request.OrderId], cancellationToken);
 

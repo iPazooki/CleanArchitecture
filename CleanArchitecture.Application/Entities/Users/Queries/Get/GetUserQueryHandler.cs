@@ -2,9 +2,10 @@
 
 namespace CleanArchitecture.Application.Entities.Users.Queries.Get;
 
-public class GetUserQueryHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<GetUserQuery, Result<UserResponse>>
+internal class GetUserQueryHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<GetUserQuery>> validators) 
+    : BaseRequestHandler<GetUserQuery, UserResponse>(validators)
 {
-    public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<UserResponse>> HandleRequest(GetUserQuery request, CancellationToken cancellationToken)
     {
         User? user = await applicationUnitOfWork.Users.FindAsync(keyValues: [request.Id], cancellationToken);
 

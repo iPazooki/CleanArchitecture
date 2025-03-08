@@ -9,5 +9,4 @@ global using CleanArchitecture.Application.Errors;
 global using CleanArchitecture.Application.Common;
 global using CleanArchitecture.Domain.ValueObjects;
 global using CleanArchitecture.Domain.Events.Order;
-global using CleanArchitecture.Application.Common.Exceptions;
 global using CleanArchitecture.Application.Common.Interfaces;

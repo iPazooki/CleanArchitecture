@@ -1,6 +1,6 @@
 namespace Application.UnitTests.Common.Exceptions;
 
-public class ApplicationValidationExceptionTests
+public class ApplicationValidationErrorTests
 {
     [Fact]
     public void CommonValidationException_WithFailures_SetsErrorsProperty()
@@ -14,14 +14,14 @@ public class ApplicationValidationExceptionTests
         ];
 
         // Act
-        ApplicationValidationException exception = new(failures);
+        ApplicationValidationError error = new(failures);
 
         // Assert
-        Assert.Equal(2, exception.Errors.Count);
-        Assert.Contains("Property1", exception.Errors.Keys);
-        Assert.Contains("Property2", exception.Errors.Keys);
-        Assert.Equal(["Error1", "Error2"], exception.Errors["Property1"]);
-        Assert.Equal(["Error3"], exception.Errors["Property2"]);
+        Assert.Equal(2, error.Errors.Count);
+        Assert.Contains("Property1", error.Errors.Keys);
+        Assert.Contains("Property2", error.Errors.Keys);
+        Assert.Equal(["Error1", "Error2"], error.Errors["Property1"]);
+        Assert.Equal(["Error3"], error.Errors["Property2"]);
     }
 
     [Fact]
@@ -31,9 +31,9 @@ public class ApplicationValidationExceptionTests
         List<ValidationFailure> failures = [];
         
         // Act
-        ApplicationValidationException exception = new(failures);
+        ApplicationValidationError error = new(failures);
 
         // Assert
-        Assert.Empty(exception.Errors);
+        Assert.Empty(error.Errors);
     }
 }

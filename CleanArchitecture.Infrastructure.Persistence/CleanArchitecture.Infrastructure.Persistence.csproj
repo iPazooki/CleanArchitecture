@@ -1,32 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <DefineConstants>UseSQLite</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>UseSQLite</DefineConstants>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\CleanArchitecture.Application\CleanArchitecture.Application.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CleanArchitecture.Application\CleanArchitecture.Application.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Migrations\" />
-    </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Migrations\"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Migrations\20250224173544_AddRolePermission.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Migrations\20250224173544_AddRolePermission.cs"/>
+  </ItemGroup>
 
 </Project>

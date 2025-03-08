@@ -2,5 +2,4 @@
 global using MediatR;
 global using FluentValidation;
 global using FluentValidation.Results;
-global using CleanArchitecture.Application.Common.Behaviours;
-global using CleanArchitecture.Application.Common.Exceptions;
+global using CleanArchitecture.Application.Common.Errors;

@@ -1,15 +1,15 @@
-﻿namespace CleanArchitecture.Application.Common.Exceptions;
+﻿namespace CleanArchitecture.Application.Common.Errors;
 
 /// <summary>
 /// Represents an exception that occurs when one or more validation failures have occurred.
 /// </summary>
-public sealed class ApplicationValidationException() : Exception("One or more validation failures have occurred.")
+public sealed class ApplicationValidationError
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ApplicationValidationException"/> class with the specified validation failures.
+    /// Initializes a new instance of the <see cref="ApplicationValidationError"/> class with the specified validation failures.
     /// </summary>
     /// <param name="failures">The collection of validation failures.</param>
-    public ApplicationValidationException(IEnumerable<ValidationFailure> failures) : this()
+    public ApplicationValidationError(IEnumerable<ValidationFailure> failures)
     {
         Errors = failures
             .GroupBy(e => e.PropertyName, e => e.ErrorMessage)

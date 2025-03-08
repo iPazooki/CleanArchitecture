@@ -2,10 +2,10 @@
 
 namespace CleanArchitecture.Application.Entities.Orders.Commands.Update;
 
-public class UpdateOrderCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
-    : IRequestHandler<UpdateOrderCommand, Result>
+internal class UpdateOrderRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<UpdateOrderCommand>> validators)
+    : BaseRequestHandler<UpdateOrderCommand>(validators)
 {
-    public async Task<Result> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleRequest(UpdateOrderCommand request, CancellationToken cancellationToken)
     {
         Order? order = await applicationUnitOfWork.Orders.FindAsync(keyValues: [request.OrderId], cancellationToken);
 

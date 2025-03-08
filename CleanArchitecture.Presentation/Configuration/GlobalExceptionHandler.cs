@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using CleanArchitecture.Application.Common.Exceptions;
 
 namespace CleanArchitecture.Presentation.Configuration;
 
@@ -13,7 +12,6 @@ public class GlobalExceptionHandler : IExceptionHandler
         _logger = logger;
         _exceptionHandlers = new Dictionary<Type, Func<HttpContext, Exception, CancellationToken, Task>>
         {
-            { typeof(ApplicationValidationException), HandleApplicationException },
             { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException }
         };
     }
@@ -43,30 +41,16 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         return true;
     }
-
-    private async Task HandleApplicationException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
-    {
-        ApplicationValidationException exception = (ApplicationValidationException)ex;
-        
-        _logger.LogWarning("Invalid user data {@DateTime} {@Path} {@Message}", DateTime.UtcNow ,httpContext.Request.Path, exception.Errors);
-        
-        ValidationProblemDetails problemDetails = new()
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
-            Title = "An error occurred while processing your request.",
-            Detail = exception.Message,
-            Errors = exception.Errors
-        };
-
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken);
-    }
     
-    private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken) =>
+    private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
+    {
+        _logger.LogWarning(ex, "An error occurred while processing the request {@DateTime} {@Path}", DateTime.UtcNow ,httpContext.Request.Path);
+        
         await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
         {
             Status = StatusCodes.Status401Unauthorized,
-            Title = "Unauthorized",
-            Type = "https://tools.ietf.org/html/rfc7235#section-3.1"
+            Title = "Unauthorized Access",
+            Type = "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1"
         }, cancellationToken: cancellationToken);
+    }
 }

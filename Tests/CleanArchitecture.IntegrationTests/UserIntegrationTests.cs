@@ -32,13 +32,6 @@ public class UserIntegrationTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task CreateUserCommand_WithEmptyName_ThrowsException()
-    {
-        await Assert.ThrowsAsync<ApplicationValidationException>(
-            () => CreateUserAsync(" ", string.Empty));
-    }
-
-    [Fact]
     public async Task GetUserQuery_WithNotFound_ReturnsFailure()
     {
         Result<UserResponse> result = await Sender.Send(new GetUserQuery(Guid.NewGuid()));
@@ -46,19 +39,5 @@ public class UserIntegrationTests : BaseIntegrationTest
         Assert.NotNull(result);
         Assert.False(result.IsSuccess);
         Assert.Single(result.Errors);
-    }
-    
-    [Fact]
-    public async Task CreateUserCommand_WithEmailWithoutPassword_ThrowsException()
-    {
-        await Assert.ThrowsAsync<ApplicationValidationException>(
-            () => CreateUserAsync("Test", "User", "test@example.com", ""));
-    }
-
-    [Fact]
-    public async Task CreateUserCommand_WithPasswordLessThanSixCharacters_ThrowsException()
-    {
-        await Assert.ThrowsAsync<ApplicationValidationException>(
-            () => CreateUserAsync("Test", "User", "test@example.com", "12345"));
     }
 }

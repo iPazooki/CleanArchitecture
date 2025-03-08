@@ -3,9 +3,10 @@ using CleanArchitecture.Domain.Entities.Order;
 
 namespace CleanArchitecture.Application.Entities.OrderItem.Commands.Create;
 
-public class CreateOrderItemCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<CreateOrderItemCommand, Result>
+internal class CreateOrderItemRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<CreateOrderItemCommand>> validators) 
+    : BaseRequestHandler<CreateOrderItemCommand>(validators)
 {
-    public async Task<Result> Handle(CreateOrderItemCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleRequest(CreateOrderItemCommand request, CancellationToken cancellationToken)
     {
         Order? order = await applicationUnitOfWork.Orders.FindAsync(keyValues: [request.OrderId], cancellationToken);
 

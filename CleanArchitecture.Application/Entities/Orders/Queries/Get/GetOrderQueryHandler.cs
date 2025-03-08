@@ -2,9 +2,10 @@
 
 namespace CleanArchitecture.Application.Entities.Orders.Queries.Get;
 
-public class GetOrderQueryHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<GetOrderQuery, Result<OrderResponse>>
+internal class GetOrderQueryHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<GetOrderQuery>> validators) 
+    : BaseRequestHandler<GetOrderQuery, OrderResponse>(validators)
 {
-    public async Task<Result<OrderResponse>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<OrderResponse>> HandleRequest(GetOrderQuery request, CancellationToken cancellationToken)
     {
         Order? order = await applicationUnitOfWork.Orders
             .Include(o => o.Customer)

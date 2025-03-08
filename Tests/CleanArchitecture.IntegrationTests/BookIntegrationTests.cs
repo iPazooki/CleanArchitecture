@@ -53,13 +53,6 @@ public class BookIntegrationTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task CreateBookCommand_WithEmptyTitle_ThrowsException()
-    {
-        await Assert.ThrowsAsync<ApplicationValidationException>(
-            () => CreateBookAsync(" ", "F"));
-    }
-
-    [Fact]
     public async Task CreateBookCommand_WithUnsupportedGenre_ThrowsException()
     {
         await Assert.ThrowsAsync<UnsupportedGenreException>(

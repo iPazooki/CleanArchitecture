@@ -3,9 +3,10 @@ using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Entities.Orders.Commands.Create;
 
-public class CreateOrderCommandHandler(IApplicationUnitOfWork applicationUnitOfWork) : IRequestHandler<CreateOrderCommand, Result<Guid>>
+internal class CreateOrderRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<CreateOrderCommand>> validators ) 
+    : BaseRequestHandler<CreateOrderCommand, Guid>(validators)
 {
-    public async Task<Result<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Guid>> HandleRequest(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         User? customer = await applicationUnitOfWork.Users.FindAsync(keyValues: [request.CustomerId], cancellationToken);
 

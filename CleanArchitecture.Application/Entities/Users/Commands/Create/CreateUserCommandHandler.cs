@@ -3,9 +3,10 @@ using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Application.Entities.Users.Commands.Create;
 
-public class CreateUserCommandHandler(IApplicationUnitOfWork applicationUnitOfWork, IPasswordHasher passwordHasher) : IRequestHandler<CreateUserCommand, Result<Guid>>
+internal class CreateUserCommandHandler(IApplicationUnitOfWork applicationUnitOfWork, IPasswordHasher passwordHasher, IEnumerable<IValidator<CreateUserCommand>> validators) 
+    : BaseRequestHandler<CreateUserCommand, Guid>(validators)
 {
-    public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Guid>> HandleRequest(CreateUserCommand request, CancellationToken cancellationToken)
     {
         Address? address = null;
         string? passwordHash = null;
