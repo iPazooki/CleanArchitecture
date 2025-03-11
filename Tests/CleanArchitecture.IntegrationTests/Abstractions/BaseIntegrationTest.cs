@@ -31,5 +31,9 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationWebApplicat
     /// <summary>
     /// Disposes the service scope.
     /// </summary>
-    public void Dispose() => _scope.Dispose();
+    public void Dispose()
+    {
+        _scope.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

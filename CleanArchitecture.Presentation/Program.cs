@@ -35,4 +35,4 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.Run();
+await app.RunAsync().ConfigureAwait(false);

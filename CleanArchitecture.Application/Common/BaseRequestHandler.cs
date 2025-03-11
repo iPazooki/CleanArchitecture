@@ -1,12 +1,12 @@
 ﻿namespace CleanArchitecture.Application.Common;
 
-public abstract class BaseRequestHandler<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) 
+public abstract class BaseRequestHandler<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IRequestHandler<TRequest, Result<TResponse>> where TRequest : IRequest<Result<TResponse>>
 {
     public async Task<Result<TResponse>> Handle(TRequest request, CancellationToken cancellationToken)
     {
         ValidationResult[] validationResults = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(request, cancellationToken)));
+            validators.Select(v => v.ValidateAsync(request, cancellationToken))).ConfigureAwait(false);
 
         List<ValidationFailure> failures = validationResults
             .Where(r => r.Errors.Count != 0)
@@ -15,11 +15,11 @@ public abstract class BaseRequestHandler<TRequest, TResponse>(IEnumerable<IValid
 
         if (failures.Count == 0)
         {
-            return await HandleRequest(request, cancellationToken);
+            return await HandleRequest(request, cancellationToken).ConfigureAwait(false);
         }
 
         Error[] errors = failures.Select(f => new Error(f.ErrorMessage)).ToArray();
-        
+
         return Result<TResponse>.Failure(errors);
 
     }
@@ -33,7 +33,7 @@ public abstract class BaseRequestHandler<TRequest>(IEnumerable<IValidator<TReque
     public async Task<Result> Handle(TRequest request, CancellationToken cancellationToken)
     {
         ValidationResult[] validationResults = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(request, cancellationToken)));
+            validators.Select(v => v.ValidateAsync(request, cancellationToken))).ConfigureAwait(false);
 
         List<ValidationFailure> failures = validationResults
             .Where(r => r.Errors.Count != 0)
@@ -42,11 +42,11 @@ public abstract class BaseRequestHandler<TRequest>(IEnumerable<IValidator<TReque
 
         if (failures.Count == 0)
         {
-            return await HandleRequest(request, cancellationToken);
+            return await HandleRequest(request, cancellationToken).ConfigureAwait(false);
         }
 
         Error[] errors = failures.Select(f => new Error(f.ErrorMessage)).ToArray();
-        
+
         return Result.Failure(errors);
     }
 

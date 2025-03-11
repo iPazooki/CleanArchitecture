@@ -15,9 +15,9 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -41,7 +41,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.ToTable("Book");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -69,7 +69,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.ToTable("Order");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.OrderItem", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -257,7 +257,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.ToTable("RoleUser");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User.User", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -292,7 +292,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book.Book", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Book", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Genre", "Genre", b1 =>
                         {
@@ -315,9 +315,9 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("CleanArchitecture.Domain.Entities.User.User", "Customer")
+                    b.HasOne("CleanArchitecture.Domain.Entities.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -326,15 +326,15 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.OrderItem", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.OrderItem", b =>
                 {
-                    b.HasOne("CleanArchitecture.Domain.Entities.Book.Book", "Book")
+                    b.HasOne("CleanArchitecture.Domain.Entities.Book", "Book")
                         .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CleanArchitecture.Domain.Entities.Order.Order", null)
+                    b.HasOne("CleanArchitecture.Domain.Entities.Order", null)
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -366,14 +366,14 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CleanArchitecture.Domain.Entities.User.User", null)
+                    b.HasOne("CleanArchitecture.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User.User", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.User", b =>
                 {
                     b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Address", "Address", b1 =>
                         {
@@ -406,7 +406,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.Navigation("Address");
                 });
 
-            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order.Order", b =>
+            modelBuilder.Entity("CleanArchitecture.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });

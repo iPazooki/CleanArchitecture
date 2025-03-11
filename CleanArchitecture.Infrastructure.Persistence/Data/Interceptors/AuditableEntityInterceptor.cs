@@ -18,6 +18,8 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
     /// <returns>The result of the save operation.</returns>
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
+
         UpdateEntities(eventData.Context);
 
         return base.SavedChanges(eventData, result);
@@ -32,6 +34,8 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
     /// <returns>A task that represents the asynchronous operation.</returns>
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = new())
     {
+        ArgumentNullException.ThrowIfNull(eventData);
+
         UpdateEntities(eventData.Context);
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);
@@ -50,7 +54,7 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
 
         foreach (EntityEntry<EntityAuditable> entry in context.ChangeTracker.Entries<EntityAuditable>())
         {
-            if (entry.State is not (EntityState.Added or EntityState.Modified) && !entry.HasChangedOwnedEntities())
+            if (entry.State is not (EntityState.Added or EntityState.Modified) && !HasChangedOwnedEntities(entry))
             {
                 continue;
             }
@@ -65,21 +69,12 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
             entry.Entity.UpdatedDate = utcNow;
         }
     }
-}
 
-/// <summary>
-/// Provides extension methods for EntityEntry.
-/// </summary>
-public static class Extensions
-{
-    /// <summary>
-    /// Determines whether the entry has changed owned entities.
-    /// </summary>
-    /// <param name="entry">The entity entry.</param>
-    /// <returns><c>true</c> if the entry has changed owned entities; otherwise, <c>false</c>.</returns>
-    public static bool HasChangedOwnedEntities(this EntityEntry entry) =>
-        entry.References.Any(r =>
+    private static bool HasChangedOwnedEntities(EntityEntry entry)
+    {
+        return entry.References.Any(r =>
             r.TargetEntry != null &&
             r.TargetEntry.Metadata.IsOwned() &&
-            (r.TargetEntry.State == EntityState.Added || r.TargetEntry.State == EntityState.Modified));
+            r.TargetEntry.State is EntityState.Added or EntityState.Modified);
+    }
 }

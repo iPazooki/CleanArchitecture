@@ -1,4 +1,4 @@
-﻿namespace CleanArchitecture.Domain.Entities.Book;
+﻿namespace CleanArchitecture.Domain.Entities;
 
 public partial class Book
 {

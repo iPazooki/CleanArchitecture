@@ -3,16 +3,18 @@ using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using CleanArchitecture.Domain.Entities.User;
+using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Infrastructure.Security;
 
-public sealed class JwtProvider(IOptions<JwtOptions> jwtOptions, IPermissionService permissionService) : IJwtProvider
+internal sealed class JwtProvider(IOptions<JwtOptions> jwtOptions, IPermissionService permissionService) : IJwtProvider
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
     public async Task<string> GenerateJwtTokenAsync(User user)
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         List<Claim> claims =
         [
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -20,7 +22,7 @@ public sealed class JwtProvider(IOptions<JwtOptions> jwtOptions, IPermissionServ
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
 
-        HashSet<string> permissions = await permissionService.GetPermissionsAsync(user.Id);
+        HashSet<string> permissions = await permissionService.GetPermissionsAsync(user.Id).ConfigureAwait(false);
 
         claims.AddRange(permissions.Select(permission => new Claim(Constants.Claims.Permissions, permission)));
 

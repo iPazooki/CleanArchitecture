@@ -18,7 +18,7 @@ internal static class MemberEndpoints
 
     private static async Task<IResult> LoginMember(ISender sender, LoginCommand command)
     {
-        Result<string> result = await sender.Send(command);
+        Result<string> result = await sender.Send(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok(result)

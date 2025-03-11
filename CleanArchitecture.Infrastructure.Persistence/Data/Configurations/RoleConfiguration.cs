@@ -1,10 +1,9 @@
 ﻿using CleanArchitecture.Domain.Enums;
 using CleanArchitecture.Domain.Entities.Security;
-using CleanArchitecture.Domain.Entities.User;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
+internal sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
     public void Configure(EntityTypeBuilder<Role> builder)
     {
@@ -16,9 +15,9 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         builder.HasMany(x => x.Users)
             .WithMany()
-            .UsingEntity<RoleUser>(u => 
+            .UsingEntity<RoleUser>(u =>
                     u.HasOne<User>().WithMany().HasForeignKey(ru => ru.UserId),
-                r => 
+                r =>
                     r.HasOne<Role>().WithMany().HasForeignKey(ru => ru.RoleId));
 
         IEnumerable<Role> roles = Enum.GetValues<Roles>().Select(x => new Role { Id = (int)x, Name = x.ToString() });

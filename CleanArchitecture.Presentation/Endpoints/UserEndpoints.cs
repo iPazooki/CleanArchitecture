@@ -29,7 +29,7 @@ internal static class UserEndpoints
 
     private static async Task<IResult> GetUser(ISender sender, Guid id)
     {
-        Result<UserResponse> result = await sender.Send(new GetUserQuery(id));
+        Result<UserResponse> result = await sender.Send(new GetUserQuery(id)).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok(result)
@@ -38,7 +38,7 @@ internal static class UserEndpoints
 
     private static async Task<IResult> CreateUser(ISender sender, CreateUserCommand command)
     {
-        Result<Guid> result = await sender.Send(command);
+        Result<Guid> result = await sender.Send(command).ConfigureAwait(false);
 
         return !result.IsSuccess
             ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message)))

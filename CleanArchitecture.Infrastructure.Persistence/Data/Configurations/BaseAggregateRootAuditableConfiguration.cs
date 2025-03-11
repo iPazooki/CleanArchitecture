@@ -2,7 +2,7 @@
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-public abstract class BaseAggregateRootAuditableConfiguration<T> : IEntityTypeConfiguration<T> where T : AggregateRootAuditable
+internal abstract class BaseAggregateRootAuditableConfiguration<T> : IEntityTypeConfiguration<T> where T : AggregateRootAuditable
 {
     public virtual void Configure(EntityTypeBuilder<T> builder)
     {
@@ -13,7 +13,7 @@ public abstract class BaseAggregateRootAuditableConfiguration<T> : IEntityTypeCo
 
         builder.Property(x => x.UpdatedDate)
             .IsRequired();
-        
+
         builder.Ignore(o => o.DomainEvents);
     }
 }

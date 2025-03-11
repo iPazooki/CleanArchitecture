@@ -10,7 +10,7 @@ namespace CleanArchitecture.FunctionalTests.Abstractions;
 /// A custom WebApplicationFactory for functional tests.
 /// </summary>
 /// <param name="serviceCollection">An action to configure the service collection.</param>
-internal class FunctionalWebApplicationFactory(Action<IServiceCollection> serviceCollection)
+internal sealed class FunctionalWebApplicationFactory(Action<IServiceCollection> serviceCollection)
     : WebApplicationFactory<Program>
 {
     /// <summary>

@@ -14,11 +14,11 @@ public sealed class ApplicationValidationError
         Errors = failures
             .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
             .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
-        
+
     }
 
     /// <summary>
     /// Gets the dictionary of validation errors, where the key is the property name and the value is an array of error messages.
     /// </summary>
-    public IDictionary<string, string[]> Errors { get; } = new Dictionary<string, string[]>();
+    public IDictionary<string, string[]> Errors { get; }
 }

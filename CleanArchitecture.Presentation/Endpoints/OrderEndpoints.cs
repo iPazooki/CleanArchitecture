@@ -34,7 +34,7 @@ internal static class OrderEndpoints
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The order was found", typeof(OrderResponse)))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The order was not found"))
             .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
-       
+
         app.MapPost("/add-order-item", AddOrderItem)
             .WithOpenApi()
             .WithSummary("Adds an item to an order")
@@ -55,7 +55,7 @@ internal static class OrderEndpoints
 
     private static async Task<IResult> GetOrder(ISender sender, Guid id)
     {
-        Result<OrderResponse> result = await sender.Send(new GetOrderQuery(id));
+        Result<OrderResponse> result = await sender.Send(new GetOrderQuery(id)).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok(result)
@@ -64,7 +64,7 @@ internal static class OrderEndpoints
 
     private static async Task<IResult> UpdateOrder(ISender sender, UpdateOrderCommand command)
     {
-        Result result = await sender.SendWithRetryAsync(command);
+        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -73,16 +73,16 @@ internal static class OrderEndpoints
 
     private static async Task<IResult> CreateOrder(ISender sender, CreateOrderCommand command)
     {
-        Result<Guid> result = await sender.Send(command);
-        
-        return !result.IsSuccess 
-            ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message))) 
+        Result<Guid> result = await sender.Send(command).ConfigureAwait(false);
+
+        return !result.IsSuccess
+            ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message)))
             : Results.Created($"/create-order/{result.Value}", result);
     }
-    
+
     private static async Task<IResult> AddOrderItem(ISender sender, CreateOrderItemCommand command)
     {
-        Result result = await sender.SendWithRetryAsync(command);
+        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok()
@@ -91,7 +91,7 @@ internal static class OrderEndpoints
 
     private static async Task<IResult> RemoveOrderItem(ISender sender, [FromBody] DeleteOrderItemCommand command)
     {
-        Result result = await sender.SendWithRetryAsync(command);
+        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.NoContent()

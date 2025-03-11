@@ -1,4 +1,4 @@
-using CleanArchitecture.Domain.Entities.Book;
+using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Application.Entities.Books.Queries.Get;
 using CleanArchitecture.Application.Entities.Books.Commands.Create;
 using CleanArchitecture.Application.Entities.Books.Commands.Delete;
@@ -57,7 +57,7 @@ public class BookFunctionalTests
     public async Task UpdateBookCommand_WithValidRequest_UpdatesBook()
     {
         Book book = Book.Create("Original", Genre.Fiction).Value!;
-        
+
         _mockApplicationUnitOfWork
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
@@ -94,7 +94,7 @@ public class BookFunctionalTests
     public async Task DeleteBookCommand_WithValidRequest_DeletesBook()
     {
         Book book = Book.Create("Delete Me", Genre.Fiction).Value!;
-        
+
         _mockApplicationUnitOfWork
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
@@ -139,14 +139,14 @@ public class BookFunctionalTests
     public async Task GetBookQuery_WithValidId_ReturnsBook()
     {
         Book book = Book.Create("Test Book", Genre.Fiction).Value!;
-        
+
         _mockApplicationUnitOfWork
             .Setup(x => x.Books.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(book);
 
         HttpClient httpClient = CreateHttpClient();
 
-        HttpResponseMessage response = await httpClient.GetAsync($"/get-book/{book.Id}");;
+        HttpResponseMessage response = await httpClient.GetAsync($"/get-book/{book.Id}");
 
         Assert.True(response.IsSuccessStatusCode);
         Result<BookResponse>? returnedBook = await response.Content.ReadFromJsonAsync<Result<BookResponse>>();

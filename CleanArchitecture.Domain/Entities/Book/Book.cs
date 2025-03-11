@@ -1,4 +1,4 @@
-﻿namespace CleanArchitecture.Domain.Entities.Book;
+﻿namespace CleanArchitecture.Domain.Entities;
 
 /// <summary>
 /// Represents a book entity, inheriting from <see cref="EntityAuditable"/>.

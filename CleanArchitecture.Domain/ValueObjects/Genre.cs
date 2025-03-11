@@ -56,7 +56,12 @@ public sealed record Genre(string Code)
     /// Implicitly converts a Genre to a string.
     /// </summary>
     /// <param name="genre">The Genre to convert.</param>
-    public static implicit operator string(Genre genre) => genre.ToString();
+    public static implicit operator string(Genre genre)
+    {
+        ArgumentNullException.ThrowIfNull(genre);
+
+        return genre.ToString();
+    }
 
     /// <summary>
     /// Explicitly converts a string to a Genre.

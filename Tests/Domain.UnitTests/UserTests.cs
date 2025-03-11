@@ -1,4 +1,4 @@
-﻿using User = CleanArchitecture.Domain.Entities.User.User;
+﻿using CleanArchitecture.Domain.Entities;
 
 namespace Domain.UnitTests;
 
@@ -16,12 +16,12 @@ public class UserTests
         Assert.Equal("John", result.Value.FirstName);
         Assert.Equal("Doe", result.Value.LastName);
     }
-    
+
     [Fact]
     public void User_Create_ShouldReturnSuccess_WhenValidDataAddressGender()
     {
         // Arrange & Act
-        Result<User> result = User.Create("John", "Doe", new Address("City", "Street", "Postal"), Gender.Male);
+        Result<User> result = User.Create("John", "Doe", address: new Address("City", "Street", "Postal"), gender: Gender.Male);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -44,7 +44,7 @@ public class UserTests
         Assert.False(result.IsSuccess);
         Assert.Contains(UserErrors.FirstNameIsRequired, result.Errors);
     }
-    
+
     [Fact]
     public void User_Create_ShouldReturnSuccess_WhenValidDataWithEmailPassword()
     {

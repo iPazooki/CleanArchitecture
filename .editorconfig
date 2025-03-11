@@ -266,3 +266,48 @@ dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:sil
 dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
 dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
+
+# SonarAnalyzers.CSharp
+
+# S2094: Classes should not be empty
+dotnet_diagnostic.s2094.severity = suggestion
+# CA1711: Identifiers should not have incorrect suffix
+dotnet_diagnostic.ca1711.severity = suggestion
+# CA2225: Operator overloads have named alternates
+dotnet_diagnostic.ca2225.severity = suggestion
+# CA1032: Implement standard exception constructors
+dotnet_diagnostic.ca1032.severity = suggestion
+# CA1724: Type names should not match namespaces
+dotnet_diagnostic.ca1724.severity = suggestion
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.ca1707.severity = suggestion
+# CA1716: Identifiers should not match keywords
+dotnet_diagnostic.ca1716.severity = suggestion
+# CA1848: Use the LoggerMessage delegates
+dotnet_diagnostic.ca1848.severity = suggestion
+# CA1802: Use Literals Where Appropriate
+dotnet_diagnostic.ca1802.severity = suggestion
+# CA1812: Use Literals Where Appropriate
+dotnet_diagnostic.ca1812.severity = suggestion
+
+[CleanArchitecture.Infrastructure.Persistence/Migrations/**.cs]
+dotnet_diagnostic.ca1062.severity = none
+dotnet_diagnostic.ca2007.severity = none
+dotnet_diagnostic.ca1062.severity = none
+dotnet_diagnostic.ca1860.severity = none
+dotnet_diagnostic.ca1861.severity = none
+dotnet_analyzer_diagnostic.severity = none
+
+[Tests/CleanArchitecture.{IntegrationTests,FunctionalTests}/**.cs]
+# CA1515: Consider making public types internal
+dotnet_diagnostic.ca1515.severity = none
+# CA1063: Implement IDisposable correctly
+dotnet_diagnostic.ca1063.severity = none
+# CA2007: Do not directly await a Task
+dotnet_diagnostic.ca2007.severity = none
+# S3881: "IDisposable" should be implemented correctly
+dotnet_diagnostic.s3881.severity = suggestion
+# CA2000: Dispose objects before losing scope
+dotnet_diagnostic.CA2000.severity = none
+# CA2234: Pass System.Uri objects instead of strings
+dotnet_diagnostic.CA2234.severity = none

@@ -4,6 +4,8 @@ public sealed class OrderAddedEventHandler(ILogger<OrderAddedEventHandler> logge
 {
     public Task Handle(OrderAddedEvent notification, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(notification);
+
         logger.LogInformation("CleanArchitecture Domain Event: {DomainEvent}", notification.GetType().Name);
 
         return Task.CompletedTask;

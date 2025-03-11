@@ -12,7 +12,7 @@ internal sealed class PermissionService(IApplicationUnitOfWork applicationUnitOf
             .ThenInclude(x => x.Permissions)
             .Where(x => x.Id == memberId)
             .SelectMany(x => x.Roles!)
-            .ToListAsync();
+            .ToListAsync().ConfigureAwait(false);
 
         return roles
             .SelectMany(x => x.Permissions)

@@ -1,6 +1,6 @@
 ﻿using CleanArchitecture.Domain.Events.Order;
 
-namespace CleanArchitecture.Domain.Entities.Order;
+namespace CleanArchitecture.Domain.Entities;
 
 /// <summary>
 /// Represents an order in the domain.
@@ -11,13 +11,13 @@ public sealed partial class Order : AggregateRoot
     /// <summary>
     /// Gets the customer associated with the order.
     /// </summary>
-    public required User.User Customer { get; init; }
+    public required User Customer { get; init; }
 
     /// <summary>
     /// Gets the ID of the customer associated with the order.
     /// </summary>
     public Guid CustomerId { get; init; }
-    
+
     /// <summary>
     /// Gets or sets the status of the order.
     /// When the status changes, an <see cref="OrderStatusChangedEvent"/> is added to the domain events.
@@ -45,9 +45,4 @@ public sealed partial class Order : AggregateRoot
     /// Gets the collection of items in the order.
     /// </summary>
     public ICollection<OrderItem> OrderItems => _orderItems;
-
-    /// <summary>
-    /// Used for concurrency checks.
-    /// </summary>
-    public byte[]? RowVersion { get; set; }
 }

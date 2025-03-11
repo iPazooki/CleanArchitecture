@@ -1,12 +1,10 @@
-﻿using CleanArchitecture.Domain.Entities.Order;
+﻿namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
-
-public sealed class OrderItemConfiguration : BaseEntityConfiguration<OrderItem>
+internal sealed class OrderItemConfiguration : BaseEntityConfiguration<OrderItem>
 {
     public override void Configure(EntityTypeBuilder<OrderItem> builder)
     {
-        
+
         base.Configure(builder);
 
         builder.Property(oi => oi.UnitPrice)
@@ -23,7 +21,7 @@ public sealed class OrderItemConfiguration : BaseEntityConfiguration<OrderItem>
 
         builder.HasIndex(oi => oi.OrderId);
 
-        builder.Property(oi => oi.RowVersion)
+        builder.Property<byte[]>("RowVersion")
             .IsRowVersion();
     }
 }

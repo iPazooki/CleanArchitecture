@@ -1,7 +1,5 @@
-﻿using CleanArchitecture.Domain.Events.Order;
-using CleanArchitecture.Domain.Entities.Book;
-using CleanArchitecture.Domain.Entities.Order;
-using User = CleanArchitecture.Domain.Entities.User.User;
+﻿using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Events.Order;
 
 namespace Domain.UnitTests;
 

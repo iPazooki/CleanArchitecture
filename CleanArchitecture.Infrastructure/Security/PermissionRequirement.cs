@@ -2,7 +2,7 @@
 
 namespace CleanArchitecture.Infrastructure.Security;
 
-public class PermissionRequirement(string permission) : IAuthorizationRequirement
+public sealed class PermissionRequirement(string permission) : IAuthorizationRequirement
 {
     public string Permission => permission;
 }

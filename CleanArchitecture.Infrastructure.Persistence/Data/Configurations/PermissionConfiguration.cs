@@ -3,7 +3,7 @@ using CleanArchitecture.Domain.Entities.Security;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-public sealed class PermissionConfiguration : IEntityTypeConfiguration<Permission>
+internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permission>
 {
     public void Configure(EntityTypeBuilder<Permission> builder)
     {

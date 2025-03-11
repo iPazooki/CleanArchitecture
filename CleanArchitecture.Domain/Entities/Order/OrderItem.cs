@@ -1,16 +1,14 @@
-﻿namespace CleanArchitecture.Domain.Entities.Order;
+﻿namespace CleanArchitecture.Domain.Entities;
 
 public sealed class OrderItem : Entity
 {
-    public Guid OrderId { get; set; }
+    public Guid OrderId { get; init; }
 
-    public Guid BookId { get; init; } 
-    
-    public required Book.Book Book { get; set; }
-    
-    public int Quantity { get; set; } 
+    public Guid BookId { get; init; }
 
-    public decimal UnitPrice { get; set; }
-    
-    public byte[]? RowVersion { get; set; }
+    public required Book Book { get; init; }
+
+    public int Quantity { get; init; }
+
+    public decimal UnitPrice { get; init; }
 }

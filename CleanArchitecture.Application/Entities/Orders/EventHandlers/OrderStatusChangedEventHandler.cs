@@ -4,7 +4,9 @@ public sealed class OrderStatusChangedEventHandler(ILogger<OrderStatusChangedEve
 {
     public Task Handle(OrderStatusChangedEvent notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation("CleanArchitecture Domain Event: {DomainEvent}", notification.GetType().Name);
+        ArgumentNullException.ThrowIfNull(notification);
+
+        logger.LogInformation("CleanArchitecture Domain Event: {@DomainEvent}", notification.GetType().Name);
 
         return Task.CompletedTask;
     }

@@ -1,16 +1,21 @@
-﻿using CleanArchitecture.Domain.Entities.Book;
-using CleanArchitecture.Domain.Entities.Order;
+﻿using System.Text;
+using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Application.Entities.OrderItem.Commands.Create;
 
-internal class CreateOrderItemRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<CreateOrderItemCommand>> validators) 
+internal class CreateOrderItemRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<CreateOrderItemCommand>> validators)
     : BaseRequestHandler<CreateOrderItemCommand>(validators)
 {
-    protected override async Task<Result> HandleRequest(CreateOrderItemCommand request, CancellationToken cancellationToken)
-    {
-        Order? order = await applicationUnitOfWork.Orders.FindAsync(keyValues: [request.OrderId], cancellationToken);
+    private static readonly CompositeFormat _errorMessage = CompositeFormat.Parse(GeneralErrors.GeneralCreateErrorMessage);
 
-        Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.BookId], cancellationToken);
+    protected override async Task<Result> HandleRequest(CreateOrderItemCommand request,
+        CancellationToken cancellationToken)
+    {
+        Order? order = await applicationUnitOfWork.Orders.FindAsync(keyValues: [request.OrderId], cancellationToken)
+            .ConfigureAwait(false);
+
+        Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.BookId], cancellationToken)
+            .ConfigureAwait(false);
 
         if (order is null || book is null)
         {
@@ -19,10 +24,10 @@ internal class CreateOrderItemRequestHandler(IApplicationUnitOfWork applicationU
 
         order.AddOrderItem(book, request.Quantity, request.Price);
 
-        Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken);
+        Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Result.Success()
-            : Result.Failure(string.Format(GeneralErrors.GeneralCreateErrorMessage, nameof(OrderItem)));
+            : Result.Failure(string.Format(CultureInfo.InvariantCulture, _errorMessage, nameof(OrderItem)));
     }
 }

@@ -41,7 +41,7 @@ internal static class BookEndpoints
 
     private static async Task<IResult> GetBook(ISender sender, Guid id)
     {
-        Result<BookResponse> result = await sender.Send(new GetBookQuery(id));
+        Result<BookResponse> result = await sender.Send(new GetBookQuery(id)).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok(result)
@@ -50,7 +50,7 @@ internal static class BookEndpoints
 
     private static async Task<IResult> DeleteBook(ISender sender, [FromBody] DeleteBookCommand command)
     {
-        Result result = await sender.SendWithRetryAsync(command);
+        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -59,7 +59,7 @@ internal static class BookEndpoints
 
     private static async Task<IResult> UpdateBook(ISender sender, UpdateBookCommand command)
     {
-        Result result = await sender.SendWithRetryAsync(command);
+        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -68,10 +68,10 @@ internal static class BookEndpoints
 
     private static async Task<IResult> CreateBook(ISender sender, CreateBookCommand command)
     {
-        Result<Guid> result = await sender.Send(command);
-        
-        return !result.IsSuccess 
-            ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message))) 
+        Result<Guid> result = await sender.Send(command).ConfigureAwait(false);
+
+        return !result.IsSuccess
+            ? Results.BadRequest(string.Join(',', result.Errors.Select(x => x.Message)))
             : Results.Created($"/create-book/{result.Value}", result);
     }
 }

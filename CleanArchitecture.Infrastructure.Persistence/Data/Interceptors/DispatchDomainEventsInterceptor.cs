@@ -8,17 +8,20 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 {
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
+        ArgumentNullException.ThrowIfNull(eventData);
+
         DispatchDomainEvents(eventData.Context);
 
         return base.SavedChanges(eventData, result);
     }
 
-    public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result,
-        CancellationToken cancellationToken = new())
+    public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = new())
     {
-        await DispatchDomainEventsAsync(eventData.Context);
+        ArgumentNullException.ThrowIfNull(eventData);
 
-        return await base.SavedChangesAsync(eventData, result, cancellationToken);
+        await DispatchDomainEventsAsync(eventData.Context).ConfigureAwait(false);
+
+        return await base.SavedChangesAsync(eventData, result, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task DispatchDomainEventsAsync(DbContext? context)
@@ -27,7 +30,7 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 
         IEnumerable<AggregateRoot> entities = context.ChangeTracker
             .Entries<AggregateRoot>()
-            .Where(e => e.Entity.DomainEvents.Any())
+            .Where(e => e.Entity.DomainEvents.Count != 0)
             .Select(e => e.Entity)
             .ToList();
 
@@ -39,7 +42,7 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 
         foreach (INotification domainEvent in domainEvents)
         {
-            await mediator.Publish(domainEvent);
+            await mediator.Publish(domainEvent).ConfigureAwait(false);
         }
     }
 
@@ -49,7 +52,7 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 
         IEnumerable<AggregateRoot> entities = context.ChangeTracker
             .Entries<AggregateRoot>()
-            .Where(e => e.Entity.DomainEvents.Any())
+            .Where(e => e.Entity.DomainEvents.Count != 0)
             .Select(e => e.Entity)
             .ToList();
 

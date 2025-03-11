@@ -7,7 +7,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 /// Represents the unit of work for the application.
 /// </summary>
 /// <param name="context">The application database context.</param>
-public partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
+public sealed partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
 {
     /// <summary>
     /// Saves the changes asynchronously.
@@ -18,14 +18,14 @@ public partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger
     {
         try
         {
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }
-        catch (Exception e)
+        catch (DbUpdateException ex)
         {
-            logger.LogError(e, "An error occurred while saving changes.");
+            logger.LogError(ex, "An error occurred while saving changes.");
 
-            return Result.Failure(e.Message);
+            return Result.Failure(ex.Message);
         }
     }
 
@@ -35,7 +35,7 @@ public partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        await context.DisposeAsync();
+        await context.DisposeAsync().ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 

@@ -1,6 +1,6 @@
 ﻿using CleanArchitecture.Domain.Events.Order;
 
-namespace CleanArchitecture.Domain.Entities.Order;
+namespace CleanArchitecture.Domain.Entities;
 
 public partial class Order
 {
@@ -9,7 +9,7 @@ public partial class Order
     private readonly List<OrderItem> _orderItems = [];
     private OrderStatus _orderStatus;
 
-    public static Result<Order> Create(User.User user, OrderStatus orderStatus)
+    public static Result<Order> Create(User user, OrderStatus orderStatus)
     {
         if (orderStatus!= OrderStatus.Pending)
         {
@@ -17,16 +17,16 @@ public partial class Order
         }
 
         Order order = new() { Customer = user, OrderStatus = orderStatus };
-        
+
         order.AddDomainEvent(new OrderAddedEvent(order));
 
         return order;
     }
 
-    public Result AddOrderItem(Book.Book book, int quantity, decimal unitPrice)
+    public Result AddOrderItem(Book book, int quantity, decimal unitPrice)
     {
         HashSet<Error> errors = [];
-        
+
         if (quantity <= 0)
         {
             errors.Add(OrderErrors.OrderItemQuantityInvalid);
@@ -36,7 +36,7 @@ public partial class Order
         {
             errors.Add(OrderErrors.OrderItemUnitPriceInvalid);
         }
-        
+
         if (errors.Count != 0)
         {
             return Result.Failure(errors.ToArray());
@@ -45,7 +45,7 @@ public partial class Order
         OrderItem orderItem = new() { Book = book, Quantity = quantity, UnitPrice = unitPrice };
 
         _orderItems.Add(orderItem);
-        
+
         return Result.Success();
     }
 

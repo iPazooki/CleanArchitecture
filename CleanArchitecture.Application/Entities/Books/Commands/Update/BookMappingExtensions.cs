@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities.Book;
+﻿using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
@@ -14,6 +14,9 @@ public static class BookMappingExtensions
     /// <param name="request">The update book command containing the new book details.</param>
     public static void UpdateFromRequest(this Book book, UpdateBookCommand request)
     {
+        ArgumentNullException.ThrowIfNull(book);
+        ArgumentNullException.ThrowIfNull(request);
+        
         book.Title = request.Title;
         book.Genre = Genre.FromCode(request.Genre);
     }

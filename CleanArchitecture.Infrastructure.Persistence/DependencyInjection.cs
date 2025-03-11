@@ -26,7 +26,7 @@ public static class DependencyInjection
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
 
         // Throws an exception if the connection string is null or empty.
-        ArgumentException.ThrowIfNullOrEmpty(connectionString, "Connection string 'DefaultConnection' not found.");
+        ArgumentException.ThrowIfNullOrEmpty(connectionString);
 
         // Adds the AuditableEntityInterceptor as a scoped service.
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();

@@ -1,6 +1,6 @@
 ﻿using Moq;
 using MediatR;
-using CleanArchitecture.Domain.Entities.Book;
+using CleanArchitecture.Domain.Entities;
 
 namespace Domain.UnitTests;
 

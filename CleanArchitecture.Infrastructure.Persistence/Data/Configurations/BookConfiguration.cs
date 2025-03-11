@@ -1,11 +1,9 @@
-﻿using CleanArchitecture.Domain.Entities.Book;
-
-namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
+﻿namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
 /// <summary>
 /// Configures the Book entity.
 /// </summary>
-public sealed class BookConfiguration : BaseAggregateRootAuditableConfiguration<Book>
+internal sealed class BookConfiguration : BaseAggregateRootAuditableConfiguration<Book>
 {
     /// <summary>
     /// Configures the properties and relationships of the Book entity.
@@ -14,7 +12,7 @@ public sealed class BookConfiguration : BaseAggregateRootAuditableConfiguration<
     public override void Configure(EntityTypeBuilder<Book> builder)
     {
         base.Configure(builder);
-        
+
         // Configures the Title property with a maximum length of 200 and makes it required.
         builder.Property(b => b.Title)
             .HasMaxLength(200)
@@ -22,7 +20,7 @@ public sealed class BookConfiguration : BaseAggregateRootAuditableConfiguration<
 
         // Configures the Genre property as an owned entity.
         builder.OwnsOne(b => b.Genre);
-        
+
         builder.HasIndex(b => b.Title);
     }
 }

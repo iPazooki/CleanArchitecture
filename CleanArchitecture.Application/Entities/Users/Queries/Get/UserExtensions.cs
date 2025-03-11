@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities.User;
+﻿using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Application.Entities.Users.Queries.Get;
 

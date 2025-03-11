@@ -1,16 +1,12 @@
 ﻿using CleanArchitecture.Domain.Entities.Security;
 
-namespace CleanArchitecture.Domain.Entities.User;
+namespace CleanArchitecture.Domain.Entities;
 
 public partial class User
 {
-    private User(string firstName, string lastName)
-    {
-        FirstName = firstName;
-        LastName = lastName;
-    }
+    private User() { }
 
-    public static Result<User> Create(string firstName, string lastName)
+    public static Result<User> Create(string firstName, string lastName, string? email = null, string? password = null, Address? address = null, Gender? gender = null)
     {
         HashSet<Error> errors = [];
 
@@ -29,41 +25,15 @@ public partial class User
             return Result<User>.Failure(errors.ToArray());
         }
 
-        User user = new(firstName, lastName);
-
-        return Result<User>.Success(user);
-    }
-
-    public static Result<User> Create(string firstName, string lastName, Address? address, Gender? gender)
-    {
-        Result<User> result = Create(firstName, lastName);
-
-        if (!result.IsSuccess)
+        User user = new()
         {
-            return result;
-        }
-
-        User user = result.Value!;
-
-        user.Address = address;
-        user.Gender = gender;
-
-        return Result<User>.Success(user);
-    }
-
-    public static Result<User> Create(string firstName, string lastName, string? email, string? password, Address? address, Gender? gender)
-    {
-        Result<User> result = Create(firstName, lastName, address, gender);
-
-        if (!result.IsSuccess)
-        {
-            return result;
-        }
-
-        User user = result.Value!;
-
-        user.Email = email;
-        user.HashedPassword = password;
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            HashedPassword = password,
+            Address = address,
+            Gender = gender
+        };
 
         return Result<User>.Success(user);
     }

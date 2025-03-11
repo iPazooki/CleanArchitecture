@@ -1,17 +1,9 @@
 ﻿using CleanArchitecture.Domain.Entities.Security;
-using User = CleanArchitecture.Domain.Entities.User.User;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-/// <summary>
-/// Configures the User entity.
-/// </summary>
-public sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
+internal sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
 {
-    /// <summary>
-    /// Configures the properties and relationships of the User entity.
-    /// </summary>
-    /// <param name="builder">The builder used to configure the User entity.</param>
     public override void Configure(EntityTypeBuilder<User> builder)
     {
         base.Configure(builder);
@@ -45,9 +37,9 @@ public sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
 
         builder.HasMany(p => p.Roles)
             .WithMany()
-            .UsingEntity<RoleUser>(r => 
+            .UsingEntity<RoleUser>(r =>
                     r.HasOne<Role>().WithMany().HasForeignKey(ru => ru.RoleId),
-                u => 
+                u =>
                     u.HasOne<User>().WithMany().HasForeignKey(ru => ru.UserId));
 
         builder.HasIndex(p => p.Email).IsUnique();

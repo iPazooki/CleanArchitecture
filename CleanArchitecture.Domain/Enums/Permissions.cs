@@ -1,5 +1,6 @@
 ﻿namespace CleanArchitecture.Domain.Enums;
 
+#pragma warning disable CA1008
 public enum Permissions
 {
     CanRead = 1,
@@ -9,3 +10,4 @@ public enum Permissions
     CanReject = 5,
     CanApprove = 6
 }
+#pragma warning restore CA1008

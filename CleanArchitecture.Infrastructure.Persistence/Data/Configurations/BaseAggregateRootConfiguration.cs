@@ -2,12 +2,12 @@
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
-public abstract class BaseAggregateRootConfiguration<T> : IEntityTypeConfiguration<T> where T : AggregateRoot
+internal abstract class BaseAggregateRootConfiguration<T> : IEntityTypeConfiguration<T> where T : AggregateRoot
 {
     public virtual void Configure(EntityTypeBuilder<T> builder)
     {
         builder.HasKey(x => x.Id);
-        
+
         builder.Ignore(o => o.DomainEvents);
     }
 }
