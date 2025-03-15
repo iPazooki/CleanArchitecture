@@ -28,7 +28,7 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
 
         if (result.IsSuccess)
         {
-            logger.LogInformation("Request handled successfully {Name}, {DateTime}, {@Error}", request.GetType().Name, DateTime.UtcNow, result.Errors);
+            logger.LogInformation("Request handled successfully {Name}, {DateTime}", request.GetType().Name, DateTime.UtcNow);
         }
         else
         {

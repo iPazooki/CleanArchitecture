@@ -16,7 +16,6 @@ internal class GlobalExceptionHandler : IExceptionHandler
         };
     }
 
-
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(exception);
@@ -24,8 +23,7 @@ internal class GlobalExceptionHandler : IExceptionHandler
 
         Type exceptionType = exception.GetType();
 
-        if (_exceptionHandlers.TryGetValue(exceptionType,
-                out Func<HttpContext, Exception, CancellationToken, Task>? exceptionHandler))
+        if (_exceptionHandlers.TryGetValue(exceptionType, out Func<HttpContext, Exception, CancellationToken, Task>? exceptionHandler))
         {
             await exceptionHandler.Invoke(httpContext, exception, cancellationToken).ConfigureAwait(false);
             return true;
@@ -47,8 +45,7 @@ internal class GlobalExceptionHandler : IExceptionHandler
         return true;
     }
 
-    private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex,
-        CancellationToken cancellationToken)
+    private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
     {
         _logger.LogWarning(ex, "An error occurred while processing the request {DateTime} {Path}", DateTime.UtcNow, httpContext.Request.Path);
 
