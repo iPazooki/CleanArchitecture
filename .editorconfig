@@ -289,6 +289,10 @@ dotnet_diagnostic.ca1848.severity = suggestion
 dotnet_diagnostic.ca1802.severity = suggestion
 # CA1812: Use Literals Where Appropriate
 dotnet_diagnostic.ca1812.severity = suggestion
+# CA1031: Do not catch general exception types
+dotnet_diagnostic.ca1031.severity = suggestion
+# CA1062: Validate arguments of public methods
+dotnet_diagnostic.ca1062.severity = suggestion
 
 [CleanArchitecture.Infrastructure.Persistence/Migrations/**.cs]
 dotnet_diagnostic.ca1062.severity = none

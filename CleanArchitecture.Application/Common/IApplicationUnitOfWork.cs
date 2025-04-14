@@ -45,4 +45,6 @@ public interface IApplicationUnitOfWork : IUnitOfWork
     /// Gets the DbSet for <see cref="Permission"/> entities.
     /// </summary>
     public DbSet<Permission> Permissions { get; }
+
+    public DbSet<RefreshToken> RefreshTokens { get; }
 }

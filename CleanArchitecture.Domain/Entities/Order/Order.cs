@@ -39,7 +39,7 @@ public sealed partial class Order : AggregateRoot
     /// <summary>
     /// Gets the date and time when the order was purchased.
     /// </summary>
-    public DateTimeOffset PurchasedDateTime { get; init; } = DateTime.UtcNow;
+    public DateTimeOffset PurchasedDateTime { get; init; } = DateTimeOffset.UtcNow;
 
     /// <summary>
     /// Gets the collection of items in the order.

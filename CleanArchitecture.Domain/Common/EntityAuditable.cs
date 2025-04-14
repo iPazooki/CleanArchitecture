@@ -8,10 +8,10 @@ public class EntityAuditable : Entity
     /// <summary>
     /// Gets or sets the date and time when the entity was created.
     /// </summary>
-    public DateTimeOffset CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
     /// Gets or sets the date and time when the entity was last updated.
     /// </summary>
-    public DateTimeOffset UpdatedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.UtcNow;
 }

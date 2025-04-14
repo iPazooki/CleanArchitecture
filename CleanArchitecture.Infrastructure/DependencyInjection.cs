@@ -18,7 +18,7 @@ public static class DependencyInjection
         // Adds the EmailService to the service collection with a scoped lifetime.
         services.AddScoped<IEmailService, EmailServiceProvider.EmailService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
         return services;
     }

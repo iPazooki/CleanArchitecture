@@ -13,7 +13,7 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
     {
         Stopwatch stopWatch = Stopwatch.StartNew();
 
-        logger.LogInformation("Handling request {Name}, {DateTime} ", request.GetType().Name, DateTime.UtcNow);
+        logger.LogInformation("Handling request {Name}, {DateTime} ", request.GetType().Name, DateTimeOffset.UtcNow);
 
         ArgumentNullException.ThrowIfNull(next);
 
@@ -23,16 +23,16 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
 
         if (stopWatch.ElapsedMilliseconds > SlowRequestThresholdMilliseconds)
         {
-            logger.LogWarning("Request took too long to handle {Name}, {DateTime}, {ElapsedMilliseconds}ms", request.GetType().Name, DateTime.UtcNow, stopWatch.ElapsedMilliseconds);
+            logger.LogWarning("Request took too long to handle {Name}, {DateTime}, {ElapsedMilliseconds}ms", request.GetType().Name, DateTimeOffset.UtcNow, stopWatch.ElapsedMilliseconds);
         }
 
         if (result.IsSuccess)
         {
-            logger.LogInformation("Request handled successfully {Name}, {DateTime}", request.GetType().Name, DateTime.UtcNow);
+            logger.LogInformation("Request handled successfully {Name}, {DateTime}", request.GetType().Name, DateTimeOffset.UtcNow);
         }
         else
         {
-            logger.LogError("Request failed to handle {Name}, {DateTime}, {@Error}", request.GetType().Name, DateTime.UtcNow, result.Errors);
+            logger.LogError("Request failed to handle {Name}, {DateTime}, {@Error}", request.GetType().Name, DateTimeOffset.UtcNow, result.Errors);
         }
 
         return result;

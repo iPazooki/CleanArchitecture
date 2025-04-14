@@ -29,7 +29,7 @@ internal class GlobalExceptionHandler : IExceptionHandler
             return true;
         }
 
-        _logger.LogError(exception, "An error occurred while processing the request {DateTime} {Path}", DateTime.UtcNow, httpContext.Request.Path);
+        _logger.LogError(exception, "An error occurred while processing the request {DateTime} {Path}", DateTimeOffset.UtcNow, httpContext.Request.Path);
 
         ProblemDetails problemDetails = new()
         {
@@ -47,7 +47,7 @@ internal class GlobalExceptionHandler : IExceptionHandler
 
     private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
     {
-        _logger.LogWarning(ex, "An error occurred while processing the request {DateTime} {Path}", DateTime.UtcNow, httpContext.Request.Path);
+        _logger.LogWarning(ex, "An error occurred while processing the request {DateTime} {Path}", DateTimeOffset.UtcNow, httpContext.Request.Path);
 
         await httpContext.Response
             .WriteAsJsonAsync(

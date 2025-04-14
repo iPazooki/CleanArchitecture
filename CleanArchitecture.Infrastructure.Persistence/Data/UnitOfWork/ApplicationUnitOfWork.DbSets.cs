@@ -13,4 +13,6 @@ public sealed partial class ApplicationUnitOfWork
     public DbSet<Role> Roles => context.Set<Role>();
 
     public DbSet<Permission> Permissions => context.Set<Permission>();
+
+    public DbSet<RefreshToken> RefreshTokens => context.Set<RefreshToken>();
 }
