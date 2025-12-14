@@ -9,30 +9,30 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
 {
     private const int SlowRequestThresholdMilliseconds = 1000;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest message, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         Stopwatch stopWatch = Stopwatch.StartNew();
 
-        logger.LogInformation("Handling request {Name}, {DateTime} ", request.GetType().Name, DateTimeOffset.UtcNow);
+        logger.LogInformation("Handling request {Name}, {DateTime} ", message.GetType().Name, DateTimeOffset.UtcNow);
 
         ArgumentNullException.ThrowIfNull(next);
 
-        TResponse result = await next().ConfigureAwait(false);
+        TResponse result = await next(message, cancellationToken).ConfigureAwait(false);
 
         stopWatch.Stop();
 
         if (stopWatch.ElapsedMilliseconds > SlowRequestThresholdMilliseconds)
         {
-            logger.LogWarning("Request took too long to handle {Name}, {DateTime}, {ElapsedMilliseconds}ms", request.GetType().Name, DateTimeOffset.UtcNow, stopWatch.ElapsedMilliseconds);
+            logger.LogWarning("Request took too long to handle {Name}, {DateTime}, {ElapsedMilliseconds}ms", message.GetType().Name, DateTimeOffset.UtcNow, stopWatch.ElapsedMilliseconds);
         }
 
         if (result.IsSuccess)
         {
-            logger.LogInformation("Request handled successfully {Name}, {DateTime}", request.GetType().Name, DateTimeOffset.UtcNow);
+            logger.LogInformation("Request handled successfully {Name}, {DateTime}", message.GetType().Name, DateTimeOffset.UtcNow);
         }
         else
         {
-            logger.LogError("Request failed to handle {Name}, {DateTime}, {@Error}", request.GetType().Name, DateTimeOffset.UtcNow, result.Errors);
+            logger.LogError("Request failed to handle {Name}, {DateTime}, {@Error}", message.GetType().Name, DateTimeOffset.UtcNow, result.Errors);
         }
 
         return result;

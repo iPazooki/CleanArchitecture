@@ -17,11 +17,13 @@ internal static class MediatorPollyExtensions
             .Handle<Exception>()
             .FallbackAsync(Result.Failure("API call is not successful."));
 
-    private static readonly Polly.Wrap.AsyncPolicyWrap<DomainValidation.Result> _policyWrap =
+    private static readonly Polly.Wrap.AsyncPolicyWrap<Result> _policyWrap =
         _fallbackPolicy
             .WrapAsync(_circuitBreakerPolicy)
             .WrapAsync(_retryPolicy);
 
-    public static Task<Result> SendWithRetryAsync(this ISender sender, IRequest<Result> request) =>
-        _policyWrap.ExecuteAsync(() => sender.Send(request));
+    public static async ValueTask<Result> SendWithRetryAsync(this ISender sender, IRequest<Result> request)
+    {
+        return await _policyWrap.ExecuteAsync(async () => await sender.Send(request).ConfigureAwait(false)).ConfigureAwait(false);
+    }
 }

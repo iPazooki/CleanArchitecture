@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using CleanArchitecture.Application.Common.Behaviours;
+using CleanArchitecture.Application.Entities.Books.Commands.Create;
+using CleanArchitecture.Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitecture.Application;
 
@@ -19,10 +21,14 @@ public static class DependencyInjection
         // Adds validators from the executing assembly to the service collection.
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        // Adds MediatR services and registers behaviors from the executing assembly.
-        services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+        services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+
+        services.AddMediator(options =>
+        {
+            options.ServiceLifetime = ServiceLifetime.Scoped;
+            options.GenerateTypesAsInternal = true;
+            options.Assemblies = [typeof(CreateBookCommandHandler), typeof(Book)];
+            options.PipelineBehaviors = [typeof(LoggingBehaviour<,>)];
         });
 
         return services;

@@ -1,5 +1,4 @@
 ﻿using CleanArchitecture.Domain.Common;
-using MediatR;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
@@ -24,7 +23,7 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
         return await base.SavedChangesAsync(eventData, result, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task DispatchDomainEventsAsync(DbContext? context)
+    private async ValueTask DispatchDomainEventsAsync(DbContext? context)
     {
         if (context == null) return;
 
@@ -64,7 +63,8 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 
         foreach (INotification domainEvent in domainEvents)
         {
-            mediator.Publish(domainEvent);
+            // Synchronously wait for the ValueTask to complete
+            mediator.Publish(domainEvent).AsTask().GetAwaiter().GetResult();
         }
     }
 }

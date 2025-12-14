@@ -1,4 +1,4 @@
-﻿global using MediatR;
+﻿global using Mediator;
 global using DomainValidation;
 global using FluentValidation;
 global using System.Globalization;

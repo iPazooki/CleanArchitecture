@@ -4,8 +4,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DomainValidation.NET"/>
-    <PackageReference Include="MediatR"/>
+    <PackageReference Include="DomainValidation.NET" />
+    <PackageReference Include="Mediator.Abstractions" />
   </ItemGroup>
 
 </Project>

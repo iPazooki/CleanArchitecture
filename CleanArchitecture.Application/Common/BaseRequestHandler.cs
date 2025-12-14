@@ -3,7 +3,7 @@
 public abstract class BaseRequestHandler<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IRequestHandler<TRequest, Result<TResponse>> where TRequest : IRequest<Result<TResponse>>
 {
-    public async Task<Result<TResponse>> Handle(TRequest request, CancellationToken cancellationToken)
+    public async ValueTask<Result<TResponse>> Handle(TRequest request, CancellationToken cancellationToken)
     {
         ValidationResult[] validationResults = await Task.WhenAll(
             validators.Select(v => v.ValidateAsync(request, cancellationToken))).ConfigureAwait(false);
@@ -30,7 +30,7 @@ public abstract class BaseRequestHandler<TRequest, TResponse>(IEnumerable<IValid
 public abstract class BaseRequestHandler<TRequest>(IEnumerable<IValidator<TRequest>> validators)
     : IRequestHandler<TRequest, Result> where TRequest : IRequest<Result>
 {
-    public async Task<Result> Handle(TRequest request, CancellationToken cancellationToken)
+    public async ValueTask<Result> Handle(TRequest request, CancellationToken cancellationToken)
     {
         ValidationResult[] validationResults = await Task.WhenAll(
             validators.Select(v => v.ValidateAsync(request, cancellationToken))).ConfigureAwait(false);

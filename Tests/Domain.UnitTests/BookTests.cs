@@ -1,5 +1,5 @@
 ﻿using Moq;
-using MediatR;
+using Mediator;
 using CleanArchitecture.Domain.Entities;
 
 namespace Domain.UnitTests;

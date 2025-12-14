@@ -1,4 +1,4 @@
-﻿global using MediatR;
+﻿global using Mediator;
 global using Polly;
 global using System.Net;
 global using DomainValidation;
