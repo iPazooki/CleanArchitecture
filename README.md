@@ -4,7 +4,7 @@
 
 ## Clean Architecture
 
-A lightweight **.NET 8** based **Clean Architecture** template leveraging **Minimal API**. This repository helps you quickly set up a maintainable project structure that separates core business rules from infrastructure and presentation concerns.
+A lightweight **.NET 10** based **Clean Architecture** template leveraging **Minimal API**. This repository helps you quickly set up a maintainable project structure that separates core business rules from infrastructure and presentation concerns.
 
 ## Why This Template?
 
@@ -33,7 +33,7 @@ A lightweight **.NET 8** based **Clean Architecture** template leveraging **Mini
 ## Getting Started
 
 The following prerequisites are required to build and run the solution:
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (LTS)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 1. Clone the repository to your local machine.
     - ```git clone https://github.com/iPazooki/CleanArchitecture.git```

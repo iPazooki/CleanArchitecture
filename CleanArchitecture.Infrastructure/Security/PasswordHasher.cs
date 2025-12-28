@@ -11,12 +11,10 @@ internal sealed class PasswordHasher : IPasswordHasher
 
     public string HashPassword(string password)
     {
-        using Rfc2898DeriveBytes algorithm = new(password, SaltSize, Iterations, HashAlgorithmName.SHA256);
+        byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA256, KeySize);
 
-        string key = Convert.ToBase64String(algorithm.GetBytes(KeySize));
-        string salt = Convert.ToBase64String(algorithm.Salt);
-
-        return $"{Iterations}.{salt}.{key}";
+        return $"{Iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
     }
 
     public bool VerifyPassword(string password, string? hashedPassword)
@@ -31,8 +29,12 @@ internal sealed class PasswordHasher : IPasswordHasher
         byte[] salt = Convert.FromBase64String(parts[1]);
         byte[] key = Convert.FromBase64String(parts[2]);
 
-        using Rfc2898DeriveBytes algorithm = new(password, salt, iterations, HashAlgorithmName.SHA256);
-        byte[] keyToCheck = algorithm.GetBytes(KeySize);
+        byte[] keyToCheck = Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            salt,
+            iterations,
+            HashAlgorithmName.SHA256,
+            KeySize);
 
         return keyToCheck.SequenceEqual(key);
     }

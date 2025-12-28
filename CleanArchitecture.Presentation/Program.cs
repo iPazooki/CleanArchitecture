@@ -19,12 +19,11 @@ WebApplication app = builder.Build();
 app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseHealthChecks("/health");
 
 // API Endpoints
+app.MapOpenApi();
 app.MapBookEndpoints();
 app.MapOrderEndpoints();
 app.MapUserEndpoints();
