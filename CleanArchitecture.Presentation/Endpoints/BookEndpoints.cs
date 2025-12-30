@@ -8,19 +8,27 @@ internal static class BookEndpoints
     {
         app.MapPost("/create-book", CreateBook)
             .WithSummary("Creates a new book")
-            .WithDescription("Creates a new book with the specified title and genre.");
+            .WithDescription("Creates a new book with the specified title and genre.")
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPut("/update-book", UpdateBook)
             .WithSummary("Updates an existing book")
-            .WithDescription("Updates an existing book with the specified ID.");
+            .WithDescription("Updates an existing book with the specified ID.")
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapDelete("/delete-book", DeleteBook)
             .WithSummary("Deletes an existing book")
-            .WithDescription("Deletes an existing book with the specified ID.");
+            .WithDescription("Deletes an existing book with the specified ID.")
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapGet("/get-book/{id:Guid}", GetBook)
             .WithSummary("Gets a book by ID")
-            .WithDescription("Gets a book with the specified ID.");
+            .WithDescription("Gets a book with the specified ID.")
+            .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetBook(ISender sender, Guid id)

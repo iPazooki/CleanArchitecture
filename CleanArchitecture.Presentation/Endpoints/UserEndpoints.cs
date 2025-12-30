@@ -10,12 +10,16 @@ internal static class UserEndpoints
     {
         app.MapPost("/create-user", CreateUser)
             .WithSummary("Creates a new user")
-            .WithDescription("Creates a new user with the specified details.");
+            .WithDescription("Creates a new user with the specified details.")
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapGet("/get-user/{id:Guid}", GetUser)
             .WithSummary("Gets a user by ID")
             .WithDescription("Gets a user with the specified ID.")
-            .RequireAuthorization(Permissions.CanRead.ToString());
+            .RequireAuthorization(Permissions.CanRead.ToString())
+            .Produces<Result<UserResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetUser(ISender sender, Guid id)

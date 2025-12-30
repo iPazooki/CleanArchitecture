@@ -8,11 +8,15 @@ internal static class MemberEndpoints
     {
         app.MapPost("/login", LoginMember)
             .WithSummary("Logs in a member")
-            .WithDescription("Logs in a member with the specified details.");
+            .WithDescription("Logs in a member with the specified details.")
+            .Produces<Result<JwtTokenResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPost("/refresh-token", RefreshToken)
             .WithSummary("Refreshes the JWT token")
-            .WithDescription("Refreshes the JWT token using the provided refresh token.");
+            .WithDescription("Refreshes the JWT token using the provided refresh token.")
+            .Produces<Result<JwtTokenResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> LoginMember(ISender sender, LoginCommand command)

@@ -20,10 +20,13 @@ app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
-app.UseHealthChecks("/health");
+
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapOpenApi();
+app.MapHealthChecks("/health");
 
 // API Endpoints
-app.MapOpenApi();
 app.MapBookEndpoints();
 app.MapOrderEndpoints();
 app.MapUserEndpoints();
