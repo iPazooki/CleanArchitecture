@@ -9,22 +9,17 @@ internal static class UserEndpoints
     public static void MapUserEndpoints(this WebApplication app)
     {
         app.MapPost("/create-user", CreateUser)
-            .WithOpenApi()
             .WithSummary("Creates a new user")
             .WithDescription("Creates a new user with the specified details.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.Created, "The ID of the created user", typeof(int)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapGet("/get-user/{id:Guid}", GetUser)
-            .WithOpenApi()
             .WithSummary("Gets a user by ID")
             .WithDescription("Gets a user with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The user was found", typeof(UserResponse)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The user was not found"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.Unauthorized, "The request requires user authentication", typeof(ProblemDetails)))
-            .RequireAuthorization(Permissions.CanRead.ToString());
+            .RequireAuthorization(Permissions.CanRead.ToString())
+            .Produces<Result<UserResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetUser(ISender sender, Guid id)

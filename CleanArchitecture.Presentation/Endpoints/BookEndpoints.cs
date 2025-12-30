@@ -7,36 +7,28 @@ internal static class BookEndpoints
     public static void MapBookEndpoints(this WebApplication app)
     {
         app.MapPost("/create-book", CreateBook)
-            .WithOpenApi()
             .WithSummary("Creates a new book")
             .WithDescription("Creates a new book with the specified title and genre.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.Created, "The ID of the created book", typeof(int)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPut("/update-book", UpdateBook)
-            .WithOpenApi()
             .WithSummary("Updates an existing book")
             .WithDescription("Updates an existing book with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NoContent, "The book was successfully updated"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapDelete("/delete-book", DeleteBook)
-            .WithOpenApi()
             .WithSummary("Deletes an existing book")
             .WithDescription("Deletes an existing book with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NoContent, "The book was successfully deleted"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapGet("/get-book/{id:Guid}", GetBook)
-            .WithOpenApi()
             .WithSummary("Gets a book by ID")
             .WithDescription("Gets a book with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The book was found", typeof(BookResponse)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The book was not found"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetBook(ISender sender, Guid id)

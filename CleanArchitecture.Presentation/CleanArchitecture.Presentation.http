@@ -31,5 +31,5 @@ Accept: application/json
 }
 
 ### Get a book by ID
-GET {{HostAddress}}/get-book/1
+GET {{HostAddress}}/get-book/76f212a0-7c2d-4448-bcbb-31bcf02bfbc0
 Accept: application/json

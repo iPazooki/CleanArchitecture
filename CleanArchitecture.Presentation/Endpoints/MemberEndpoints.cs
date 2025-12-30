@@ -7,22 +7,16 @@ internal static class MemberEndpoints
     public static void MapMemberEndpoints(this WebApplication app)
     {
         app.MapPost("/login", LoginMember)
-            .WithOpenApi()
             .WithSummary("Logs in a member")
             .WithDescription("Logs in a member with the specified details.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "JWT Token is created", typeof(int)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError,
-                "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<JwtTokenResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPost("/refresh-token", RefreshToken)
-            .WithOpenApi()
             .WithSummary("Refreshes the JWT token")
             .WithDescription("Refreshes the JWT token using the provided refresh token.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "JWT Token is refreshed", typeof(int)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError,
-                "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<JwtTokenResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> LoginMember(ISender sender, LoginCommand command)

@@ -12,44 +12,34 @@ internal static class OrderEndpoints
     public static void MapOrderEndpoints(this WebApplication app)
     {
         app.MapPost("/create-order", CreateOrder)
-            .WithOpenApi()
             .WithSummary("Creates a new order")
             .WithDescription("Creates a new order with the specified details.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.Created, "The ID of the created order", typeof(int)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPut("/update-order", UpdateOrder)
-            .WithOpenApi()
             .WithSummary("Updates an existing order")
             .WithDescription("Updates an existing order with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NoContent, "The order was successfully updated"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapGet("/get-order/{id:Guid}", GetOrder)
-            .WithOpenApi()
             .WithSummary("Gets an order by ID")
             .WithDescription("Gets an order with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The order was found", typeof(OrderResponse)))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NotFound, "The order was not found"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<OrderResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         app.MapPost("/add-order-item", AddOrderItem)
-            .WithOpenApi()
             .WithSummary("Adds an item to an order")
             .WithDescription("Adds an item to an order with the specified details.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.OK, "The item was successfully added"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapDelete("/remove-order-item", RemoveOrderItem)
-            .WithOpenApi()
             .WithSummary("Removes an item from an order")
             .WithDescription("Removes an item from an order with the specified ID.")
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.NoContent, "The item was successfully removed"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.BadRequest, "Invalid input parameters"))
-            .WithMetadata(new SwaggerResponseAttribute((int)HttpStatusCode.InternalServerError, "An error occurred while processing the request", typeof(ProblemDetails)));
+            .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
     }
 
