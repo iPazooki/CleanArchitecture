@@ -4,6 +4,8 @@ using CleanArchitecture.Presentation.Configuration;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add services to the container.
 builder.Services
     .AddApplicationServices()
@@ -11,20 +13,22 @@ builder.Services
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices();
 
-builder.Logging.ClearProviders();
-builder.Host.UseSerilog(((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration)));
-
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.MapOpenApi();
-app.MapHealthChecks("/health");
 
 // API Endpoints
 app.MapBookEndpoints();
@@ -33,7 +37,6 @@ app.MapUserEndpoints();
 app.MapMemberEndpoints();
 
 app.UseExceptionHandler();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

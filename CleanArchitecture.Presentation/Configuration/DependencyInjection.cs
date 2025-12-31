@@ -29,7 +29,6 @@ internal static class DependencyInjection
 
         services.AddProblemDetails();
 
-        services.AddHealthChecks();
         services.AddOpenApi();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
