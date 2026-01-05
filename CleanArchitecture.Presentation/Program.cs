@@ -1,10 +1,13 @@
-using Serilog;
-using CleanArchitecture.Presentation.Endpoints;
+using CleanArchitecture.Infrastructure.Persistence.Data;
 using CleanArchitecture.Presentation.Configuration;
+using CleanArchitecture.Presentation.Endpoints;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
+if (!IsDesignTime())
+{
+    builder.AddServiceDefaults();
+}
 
 // Add services to the container.
 builder.Services
@@ -13,9 +16,14 @@ builder.Services
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices();
 
+builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
+
 WebApplication app = builder.Build();
 
-app.MapDefaultEndpoints();
+if (!IsDesignTime())
+{
+    app.MapDefaultEndpoints();
+}
 
 app.UseSerilogRequestLogging();
 
@@ -26,6 +34,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
 }
 
 app.MapOpenApi();
@@ -41,3 +53,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 await app.RunAsync().ConfigureAwait(false);
+
+static bool IsDesignTime()
+{
+    // This is true when invoked by `dotnet ef` tools
+    return AppDomain.CurrentDomain.GetAssemblies()
+        .Any(a => a.FullName != null &&
+                  a.FullName.StartsWith("Microsoft.EntityFrameworkCore.Design", StringComparison.OrdinalIgnoreCase));
+}

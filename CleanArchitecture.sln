@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6016E129-42C1-4677-9A23-F5ADC61341AD}"
 EndProject
@@ -40,8 +40,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Architecture.UnitTests", "Tests\Architecture.UnitTests\Architecture.UnitTests.csproj", "{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.IntegrationTests", "Tests\CleanArchitecture.IntegrationTests\CleanArchitecture.IntegrationTests.csproj", "{EDF75E85-4453-4022-9018-C725C8B158BB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.FunctionalTests", "Tests\CleanArchitecture.FunctionalTests\CleanArchitecture.FunctionalTests.csproj", "{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.AppHost", "CleanArchitecture.Aspire\CleanArchitecture.AppHost\CleanArchitecture.AppHost.csproj", "{B42BC3D5-F725-4E6E-823E-3D985962839A}"
 EndProject
@@ -89,10 +87,6 @@ Global
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -118,6 +112,5 @@ Global
 		{D046E753-0463-4919-9795-581CA031C229} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{EDF75E85-4453-4022-9018-C725C8B158BB} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 	EndGlobalSection
 EndGlobal

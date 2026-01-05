@@ -13,7 +13,6 @@
                 // Identify the service in the dashboard:
                 "OTEL_SERVICE_NAME": "CleanArchitecture.Api",
                 "OTEL_RESOURCE_ATTRIBUTES": "service.namespace=CleanArchitecture,deployment.environment=Development"
-
             }
         }
     }

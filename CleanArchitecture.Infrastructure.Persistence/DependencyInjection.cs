@@ -22,34 +22,21 @@ public static class DependencyInjection
     /// <returns>The service collection with the added services.</returns>
     public static IServiceCollection AddInfrastructurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Retrieves the connection string from the configuration.
-        string? connectionString = configuration.GetConnectionString("DefaultConnection");
-
-        // Throws an exception if the connection string is null or empty.
-        ArgumentException.ThrowIfNullOrEmpty(connectionString);
-
         // Adds the AuditableEntityInterceptor as a scoped service.
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
-        // Check if the environment is testing
-        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
-        {
-            // Configures the ApplicationDbContext with the connection string and interceptors.
-            services.AddDbContext<ApplicationDbContext>((sp, options) =>
-            {
-                options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+        string? connectionString = configuration.GetConnectionString("postgresdb");
 
-                #if (UseSQLite)
-                            // Configures the context to use SQLite if the UseSQLite symbol is defined.
-                            options.UseSqlite(connectionString,
-                                builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
-                #else
-                            // Configures the context to use SQL Server if the UseSQLite symbol is not defined.
-                            options.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
-                #endif
-            });
-        }
+        ArgumentNullException.ThrowIfNull(connectionString);
+
+        // Configures the ApplicationDbContext with the connection string and interceptors.
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+
+            options.UseNpgsql(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+        });
 
         // Adds the ApplicationUnitOfWork as a scoped service.
         services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();

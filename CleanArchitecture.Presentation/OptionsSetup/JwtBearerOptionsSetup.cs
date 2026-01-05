@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CleanArchitecture.Presentation.OptionsSetup;
 
-internal class JwtBearerOptionsSetup(IOptions<JwtOptions> jwtOptions): IPostConfigureOptions<JwtBearerOptions>
+internal sealed class JwtBearerOptionsSetup(IOptions<JwtOptions> jwtOptions): IPostConfigureOptions<JwtBearerOptions>
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
     

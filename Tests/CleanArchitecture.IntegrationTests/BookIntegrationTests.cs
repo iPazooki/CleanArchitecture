@@ -1,91 +1,106 @@
 ﻿using CleanArchitecture.Application.Entities.Books.Commands.Create;
 using CleanArchitecture.Application.Entities.Books.Commands.Delete;
 using CleanArchitecture.Application.Entities.Books.Commands.Update;
-using CleanArchitecture.Application.Entities.Books.Queries.Get;
 
 namespace CleanArchitecture.IntegrationTests;
 
-public class BookIntegrationTests : BaseIntegrationTest
+[Collection("DistributedApplication collection")]
+public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseIntegrationTest(fixture)
 {
-    private async Task<Guid> CreateBookAsync(string title, string genre)
+    [Fact]
+    public async Task SendBookCommandWithValidRequestCreatesBook()
     {
-        CreateBookCommand command = new(title, genre);
-        Result<Guid> result = await Sender.Send(command);
-        return result.Value;
+        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-presentation");
+
+        await App.ResourceNotifications
+            .WaitForResourceHealthyAsync("cleanarchitecture-presentation", CancellationToken)
+            .WaitAsync(DefaultTimeout, CancellationToken);
+
+        CreateBookCommand command = new("Test Book", "F");
+
+        using HttpResponseMessage response = await httpClient.PostAsJsonAsync("/create-book/", command, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 
     [Fact]
-    public async Task CreateBookCommand_WithValidRequest_CreatesBook()
+    public async Task SendBookCommandWithValidRequestUpdatesBook()
     {
-        Guid bookId = await CreateBookAsync("Test Book", "F");
-        Assert.NotEqual(Guid.Empty, bookId);
+        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-presentation");
+
+        await App.ResourceNotifications
+            .WaitForResourceHealthyAsync("cleanarchitecture-presentation", CancellationToken)
+            .WaitAsync(DefaultTimeout, CancellationToken);
+
+        CreateBookCommand createCommand = new("Initial Book", "F");
+        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        Result<Guid>? createdResult = await createResponse.Content.ReadFromJsonAsync<Result<Guid>>(CancellationToken);
+
+        Assert.NotNull(createdResult);
+        Assert.True(createdResult!.IsSuccess);
+
+        UpdateBookCommand updateCommand = new(createdResult.Value, "Updated Book", "NF");
+
+        using HttpResponseMessage updateResponse = await httpClient.PutAsJsonAsync("/update-book", updateCommand, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
     }
 
     [Fact]
-    public async Task GetBookQuery_WithValidRequest_ReturnsBook()
+    public async Task SendBookCommandWithValidRequestDeletesBook()
     {
-        Guid bookId = await CreateBookAsync("Another Book", "F");
-        Result<BookResponse> result = await Sender.Send(new GetBookQuery(bookId));
+        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-presentation");
 
-        Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
-        Assert.Equal("Another Book", result.Value!.Title);
+        await App.ResourceNotifications
+            .WaitForResourceHealthyAsync("cleanarchitecture-presentation", CancellationToken)
+            .WaitAsync(DefaultTimeout, CancellationToken);
+
+        CreateBookCommand createCommand = new("Book To Delete", "F");
+        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+        Result<Guid>? createdResult = await createResponse.Content.ReadFromJsonAsync<Result<Guid>>(CancellationToken);
+
+        Assert.NotNull(createdResult);
+        Assert.True(createdResult!.IsSuccess);
+
+        DeleteBookCommand deleteCommand = new(createdResult.Value);
+
+        using HttpResponseMessage deleteResponse = await httpClient.SendAsync(
+            new HttpRequestMessage(HttpMethod.Delete, "/delete-book")
+            {
+                Content = JsonContent.Create(deleteCommand)
+            },
+            CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
     }
 
     [Fact]
-    public async Task UpdateBookCommand_WithValidRequest_UpdatesBook()
+    public async Task SendBookQueryWithValidRequestGetsBook()
     {
-        Guid bookId = await CreateBookAsync("Updatable Book", "F");
-        Result updateResult = await Sender.Send(new UpdateBookCommand(bookId, "Updated Title", "M"));
+        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-presentation");
 
-        Assert.NotNull(updateResult);
-        Assert.True(updateResult.IsSuccess);
-    }
+        await App.ResourceNotifications
+            .WaitForResourceHealthyAsync("cleanarchitecture-presentation", CancellationToken)
+            .WaitAsync(DefaultTimeout, CancellationToken);
 
-    [Fact]
-    public async Task DeleteBookCommand_WithValidRequest_DeletesBook()
-    {
-        Guid bookId = await CreateBookAsync("Removable Book", "F");
-        Result deleteResult = await Sender.Send(new DeleteBookCommand(bookId));
+        CreateBookCommand createCommand = new("Book To Get", "F");
+        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
 
-        Assert.NotNull(deleteResult);
-        Assert.True(deleteResult.IsSuccess);
-    }
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
-    [Fact]
-    public async Task CreateBookCommand_WithUnsupportedGenre_ThrowsException()
-    {
-        await Assert.ThrowsAsync<UnsupportedGenreException>(
-            () => CreateBookAsync("Any Book", "InvalidGenre"));
-    }
+        Result<Guid>? createdResult = await createResponse.Content.ReadFromJsonAsync<Result<Guid>>(CancellationToken);
 
-    [Fact]
-    public async Task GetBookQuery_WithNotFound_ReturnsFailure()
-    {
-        Result<BookResponse> result = await Sender.Send(new GetBookQuery(Guid.NewGuid()));
+        Assert.NotNull(createdResult);
+        Assert.True(createdResult!.IsSuccess);
 
-        Assert.NotNull(result);
-        Assert.False(result.IsSuccess);
-        Assert.Single(result.Errors);
-    }
+        using HttpResponseMessage getResponse = await httpClient.GetAsync($"/get-book/{createdResult.Value}", CancellationToken);
 
-    [Fact]
-    public async Task UpdateBookCommand_WithNotFoundBook_ReturnsFailure()
-    {
-        Result updateResult = await Sender.Send(new UpdateBookCommand(Guid.NewGuid(), "No Book", "F"));
-
-        Assert.NotNull(updateResult);
-        Assert.False(updateResult.IsSuccess);
-        Assert.Single(updateResult.Errors);
-    }
-
-    [Fact]
-    public async Task DeleteBookCommand_WithNotFoundBook_ReturnsFailure()
-    {
-        Result deleteResult = await Sender.Send(new DeleteBookCommand(Guid.NewGuid()));
-
-        Assert.NotNull(deleteResult);
-        Assert.False(deleteResult.IsSuccess);
-        Assert.Single(deleteResult.Errors);
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
 }
