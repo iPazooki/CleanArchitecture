@@ -1,10 +1,10 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using CleanArchitecture.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
-namespace CleanArchitecture.Presentation.OptionsSetup;
+namespace CleanArchitecture.Api.OptionsSetup;
 
 internal sealed class JwtBearerOptionsSetup(IOptions<JwtOptions> jwtOptions): IPostConfigureOptions<JwtBearerOptions>
 {

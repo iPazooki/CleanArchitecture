@@ -8,7 +8,7 @@ if (builder.Environment.IsEnvironment("Testing"))
 
     var postgresdb = postgres.AddDatabase("postgresdb", "testingDb");
 
-    builder.AddProject<Projects.CleanArchitecture_Presentation>("cleanarchitecture-presentation")
+    builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
         .WithReference(postgresdb)
         .WaitFor(postgresdb);
 }
@@ -19,9 +19,9 @@ else
         .WithPgAdmin()
         .WithLifetime(ContainerLifetime.Persistent);
 
-    var postgresdb = postgres.AddDatabase("postgresdb");
+    var postgresdb = postgres.AddDatabase("postgresdb", "cleandb");
 
-    builder.AddProject<Projects.CleanArchitecture_Presentation>("cleanarchitecture-presentation")
+    builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
         .WithReference(postgresdb)
         .WaitFor(postgresdb);
 }

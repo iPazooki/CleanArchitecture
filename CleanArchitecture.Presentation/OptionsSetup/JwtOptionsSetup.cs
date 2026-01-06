@@ -1,7 +1,7 @@
 ﻿using CleanArchitecture.Infrastructure.Security;
 using Microsoft.Extensions.Options;
 
-namespace CleanArchitecture.Presentation.OptionsSetup;
+namespace CleanArchitecture.Api.OptionsSetup;
 
 internal sealed class JwtOptionsSetup(IConfiguration configuration) : IConfigureOptions<JwtOptions>
 {

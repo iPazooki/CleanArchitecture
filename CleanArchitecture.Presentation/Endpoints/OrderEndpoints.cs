@@ -1,11 +1,11 @@
-﻿using CleanArchitecture.Presentation.Configuration;
-using CleanArchitecture.Application.Entities.Orders.Queries.Get;
-using CleanArchitecture.Application.Entities.Orders.Commands.Create;
-using CleanArchitecture.Application.Entities.Orders.Commands.Update;
+﻿using CleanArchitecture.Api.Configuration;
 using CleanArchitecture.Application.Entities.OrderItem.Commands.Create;
 using CleanArchitecture.Application.Entities.OrderItem.Commands.Delete;
+using CleanArchitecture.Application.Entities.Orders.Commands.Create;
+using CleanArchitecture.Application.Entities.Orders.Commands.Update;
+using CleanArchitecture.Application.Entities.Orders.Queries.Get;
 
-namespace CleanArchitecture.Presentation.Endpoints;
+namespace CleanArchitecture.Api.Endpoints;
 
 internal static class OrderEndpoints
 {

@@ -1,8 +1,8 @@
-﻿using CleanArchitecture.Application.Entities.Users.Queries.Get;
-using CleanArchitecture.Application.Entities.Users.Commands.Create;
+﻿using CleanArchitecture.Application.Entities.Users.Commands.Create;
+using CleanArchitecture.Application.Entities.Users.Queries.Get;
 using CleanArchitecture.Domain.Enums;
 
-namespace CleanArchitecture.Presentation.Endpoints;
+namespace CleanArchitecture.Api.Endpoints;
 
 internal static class UserEndpoints
 {

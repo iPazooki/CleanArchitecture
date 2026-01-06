@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 
-namespace CleanArchitecture.Presentation.Configuration;
+namespace CleanArchitecture.Api.Configuration;
 
 internal sealed class GlobalExceptionHandler : IExceptionHandler
 {

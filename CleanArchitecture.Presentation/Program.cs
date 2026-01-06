@@ -1,6 +1,6 @@
+using CleanArchitecture.Api.Configuration;
+using CleanArchitecture.Api.Endpoints;
 using CleanArchitecture.Infrastructure.Persistence.Data;
-using CleanArchitecture.Presentation.Configuration;
-using CleanArchitecture.Presentation.Endpoints;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

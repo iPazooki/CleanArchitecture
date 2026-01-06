@@ -1,6 +1,6 @@
-﻿using CleanArchitecture.Presentation.Configuration;
+﻿using CleanArchitecture.Api.Configuration;
 
-namespace CleanArchitecture.Presentation.Endpoints;
+namespace CleanArchitecture.Api.Endpoints;
 
 internal static class BookEndpoints
 {

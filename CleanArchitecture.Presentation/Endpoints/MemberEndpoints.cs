@@ -1,6 +1,6 @@
 ﻿using CleanArchitecture.Application.Entities.Login.Commands;
 
-namespace CleanArchitecture.Presentation.Endpoints;
+namespace CleanArchitecture.Api.Endpoints;
 
 internal static class MemberEndpoints
 {

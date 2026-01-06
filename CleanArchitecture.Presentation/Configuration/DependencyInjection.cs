@@ -1,9 +1,10 @@
-﻿using Microsoft.OpenApi;
-using Microsoft.AspNetCore.Authorization;
+﻿using CleanArchitecture.Api.OptionsSetup;
 using CleanArchitecture.Infrastructure.Security;
-using CleanArchitecture.Presentation.OptionsSetup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-namespace CleanArchitecture.Presentation.Configuration;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi;
+
+namespace CleanArchitecture.Api.Configuration;
 
 internal static class DependencyInjection
 {
