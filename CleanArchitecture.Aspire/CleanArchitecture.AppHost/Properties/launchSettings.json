@@ -12,8 +12,7 @@
                 "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21065",
                 "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22186",
                 "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21268",
-                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22268",
-                "ASPIRE_CONTAINER_RUNTIME": "podman"
+                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22268"
             }
         }
     }

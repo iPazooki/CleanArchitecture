@@ -1,6 +1,7 @@
 using CleanArchitecture.Api.Configuration;
 using CleanArchitecture.Api.Endpoints;
 using CleanArchitecture.Infrastructure.Persistence.Data;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,15 +33,13 @@ app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
 }
-
-app.MapOpenApi();
 
 // API Endpoints
 app.MapBookEndpoints();

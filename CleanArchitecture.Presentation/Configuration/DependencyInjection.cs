@@ -2,7 +2,6 @@
 using CleanArchitecture.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi;
 
 namespace CleanArchitecture.Api.Configuration;
 
@@ -11,15 +10,6 @@ internal static class DependencyInjection
     public static void AddPresentationServices(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
-
-        services.AddSwaggerGen(s =>
-        {
-            s.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Clean Architecture",
-                Version = "v1"
-            });
-        });
 
         services.ConfigureOptions<JwtOptionsSetup>();
         services.ConfigureOptions<JwtBearerOptionsSetup>();
