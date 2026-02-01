@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Hosting;
 
-var builder = DistributedApplication.CreateBuilder(args);
+IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
 if (builder.Environment.IsEnvironment("Testing"))
 {
-    var postgres = builder.AddPostgres("testingPostgres");
+    IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("testingPostgres");
 
-    var postgresdb = postgres.AddDatabase("postgresdb", "testingDb");
+    IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres.AddDatabase("postgresdb", "testingDb");
 
     builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
         .WithReference(postgresdb)
@@ -14,16 +14,23 @@ if (builder.Environment.IsEnvironment("Testing"))
 }
 else
 {
-    var postgres = builder.AddPostgres("postgres")
+    IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
         .WithDataVolume("postgres_data")
         .WithPgAdmin()
         .WithLifetime(ContainerLifetime.Persistent);
 
-    var postgresdb = postgres.AddDatabase("postgresdb", "cleandb");
+    IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres.AddDatabase("postgresdb", "cleandb");
+
+    IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", 8080)
+        .WithDataVolume()
+        .WithOtlpExporter()
+        .WithLifetime(ContainerLifetime.Persistent);
 
     builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
         .WithReference(postgresdb)
-        .WaitFor(postgresdb);
+        .WaitFor(postgresdb)
+        .WithReference(keycloak)
+        .WaitFor(keycloak);
 }
 
 await builder.Build().RunAsync().ConfigureAwait(false);

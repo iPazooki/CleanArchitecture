@@ -15,7 +15,7 @@ builder.Services
     .AddApplicationServices()
     .AddInfrastructureServices()
     .AddInfrastructurePersistenceServices(builder.Configuration)
-    .AddPresentationServices();
+    .AddPresentationServices(builder);
 
 builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
@@ -34,18 +34,27 @@ app.UseHttpsRedirection();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
 
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    app.MapScalarApiReference(options => options
+    .AddPreferredSecuritySchemes("OAuth2")
+    .AddAuthorizationCodeFlow("OAuth2", flow =>
+    {
+        flow.ClientId = "scalar-client";
+        flow.ClientSecret = "p1dBWWBebmZQyE96axyyXvHtxpPEd9xN";
+        flow.Pkce = Pkce.Sha256;
+        flow.SelectedScopes = ["clean_api.all"];
+    }));
+
+    using IServiceScope scope = app.Services.CreateScope();
+
+    ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
     await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
 }
 
 // API Endpoints
 app.MapBookEndpoints();
 app.MapOrderEndpoints();
-app.MapUserEndpoints();
-app.MapMemberEndpoints();
 
 app.UseExceptionHandler();
 app.UseAuthentication();

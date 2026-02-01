@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities.Security;
-
-namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
+﻿namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
 internal sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
 {
@@ -34,13 +32,6 @@ internal sealed class UserConfiguration : BaseAggregateRootConfiguration<User>
         builder.Property(p => p.HashedPassword)
             .HasMaxLength(50)
             .IsRequired(false);
-
-        builder.HasMany(p => p.Roles)
-            .WithMany()
-            .UsingEntity<RoleUser>(r =>
-                    r.HasOne<Role>().WithMany().HasForeignKey(ru => ru.RoleId),
-                u =>
-                    u.HasOne<User>().WithMany().HasForeignKey(ru => ru.UserId));
 
         builder.HasIndex(p => p.Email).IsUnique();
     }

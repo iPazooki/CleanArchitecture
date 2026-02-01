@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities.Security;
-
-namespace CleanArchitecture.Domain.Entities;
+﻿namespace CleanArchitecture.Domain.Entities;
 
 /// <summary>
 /// Represents a user entity.
@@ -36,9 +34,4 @@ public partial class User : AggregateRoot
     /// Gets or sets the gender of the user.
     /// </summary>
     public Gender? Gender { get; init; }
-
-    /// <summary>
-    /// Gets or sets the roles of the user.
-    /// </summary>
-    public ICollection<Role> Roles { get; init; } = [];
 }
