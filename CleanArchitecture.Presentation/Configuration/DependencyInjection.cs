@@ -30,7 +30,7 @@ internal static class DependencyInjection
                     realm: "clean-api",
                     options =>
                     {
-                        options.TokenValidationParameters.ValidAudiences = ["clean.api"];
+                        options.TokenValidationParameters.ValidAudiences = ["scalar", "account"];
                         options.TokenValidationParameters.ValidIssuers = [validIssuers];
 
                         // For development only - disable HTTPS metadata validation

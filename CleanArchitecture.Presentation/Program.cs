@@ -31,26 +31,8 @@ app.UseSerilogRequestLogging();
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-
-    app.MapScalarApiReference(options => options
-    .AddPreferredSecuritySchemes("OAuth2")
-    .AddAuthorizationCodeFlow("OAuth2", flow =>
-    {
-        flow.ClientId = "scalar-client";
-        flow.ClientSecret = "p1dBWWBebmZQyE96axyyXvHtxpPEd9xN";
-        flow.Pkce = Pkce.Sha256;
-        flow.SelectedScopes = ["clean_api.all"];
-    }));
-
-    using IServiceScope scope = app.Services.CreateScope();
-
-    ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-    await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
-}
+// Extracted development-specific features into an extension method
+await app.UseDevelopmentFeaturesAsync().ConfigureAwait(false);
 
 // API Endpoints
 app.MapBookEndpoints();
