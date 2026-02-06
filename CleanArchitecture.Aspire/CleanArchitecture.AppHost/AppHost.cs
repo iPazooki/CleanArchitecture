@@ -42,6 +42,7 @@ static async Task ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder
     IResourceBuilder<ParameterResource> password = builder.AddParameter("keycloakAdminPassword", () => "admin", secret: true);
 
     IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
+        .WithRealmImport("./Realms")
         .WithDataVolume()
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);

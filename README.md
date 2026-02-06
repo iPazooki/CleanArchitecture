@@ -74,6 +74,37 @@ If you prefer to run only the API (and manage Postgres yourself):
     - `https://localhost:7281/swagger/index.html`
 
 
+## Authentication
+
+This project integrates with Keycloak for authentication. Before running the API with secured endpoints you must provide a client secret for the `scalar` client in Keycloak and store it in the project's user secrets.
+
+Important: for Visual Studio users you can set secrets via the __Manage User Secrets__ UI. The instructions below assume the client in Keycloak is named `scalar`.
+
+### Steps to create and configure a new Client Secret
+
+1. Open your Keycloak admin panel (the instance URL configured for your environment) and select `clean-api` realm.
+2. Go to the `Clients` section and select the `scalar` client.
+3. Open the `Credentials` (or `Client Secrets`) tab for that client.
+4. Create/regenerate a new client secret and copy the secret value.
+
+### Store the secret in Visual Studio (recommended)
+
+1. In Visual Studio, right-click the `CleanArchitecture.Api` project and select __Manage User Secrets__.
+2. In the JSON editor that opens, add an entry for the client secret. Example structure:
+``
+{
+  "ScalarApi:ClientSecret": "YourClientSecret"
+}
+``
+
+### Store the secret in the file system (optionally)
+
+1. Use the `dotnet user-secrets` CLI tool to set the secret from the terminal/command prompt:
+
+```bash
+dotnet user-secrets set "ScalarApi:ClientSecret" "<your-client-secret-here>" --project CleanArchitecture.Api
+```
+
 ## Database Configuration
 
 - **Database**: PostgreSQL
