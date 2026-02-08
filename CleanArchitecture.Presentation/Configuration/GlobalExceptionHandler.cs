@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 
-namespace CleanArchitecture.Presentation.Configuration;
+namespace CleanArchitecture.Api.Configuration;
 
-internal class GlobalExceptionHandler : IExceptionHandler
+internal sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandler> _logger;
     private readonly Dictionary<Type, Func<HttpContext, Exception, CancellationToken, Task>> _exceptionHandlers;

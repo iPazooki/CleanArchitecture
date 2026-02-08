@@ -1,4 +1,4 @@
-﻿namespace CleanArchitecture.Presentation.Configuration;
+﻿namespace CleanArchitecture.Api.Configuration;
 
 internal static class MediatorPollyExtensions
 {

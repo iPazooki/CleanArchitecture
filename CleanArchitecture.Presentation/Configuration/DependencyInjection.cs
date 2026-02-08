@@ -1,27 +1,12 @@
 ﻿using Microsoft.OpenApi;
-using Microsoft.AspNetCore.Authorization;
-using CleanArchitecture.Infrastructure.Security;
-using CleanArchitecture.Presentation.OptionsSetup;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-namespace CleanArchitecture.Presentation.Configuration;
+
+namespace CleanArchitecture.Api.Configuration;
 
 internal static class DependencyInjection
 {
-    public static void AddPresentationServices(this IServiceCollection services)
+    public static void AddPresentationServices(this IServiceCollection services, WebApplicationBuilder builder)
     {
         services.AddEndpointsApiExplorer();
-
-        services.AddSwaggerGen(s =>
-        {
-            s.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Clean Architecture",
-                Version = "v1"
-            });
-        });
-
-        services.ConfigureOptions<JwtOptionsSetup>();
-        services.ConfigureOptions<JwtBearerOptionsSetup>();
 
         services.AddEndpointsApiExplorer();
 
@@ -29,12 +14,69 @@ internal static class DependencyInjection
 
         services.AddProblemDetails();
 
-        services.AddHealthChecks();
-        services.AddOpenApi();
+        // Retrieve Keycloak configurations from builder.Configuration
+        string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
+                           ?? throw new InvalidOperationException("Keycloak ValidIssuers is not configured.");
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        string authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
+                               ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
+
+        string tokenUrl = builder.Configuration["Keycloak:TokenUrl"]
+                       ?? throw new InvalidOperationException("Keycloak TokenUrl is not configured.");
+
+        services.AddAuthentication()
+                .AddKeycloakJwtBearer(
+                    serviceName: "keycloak",
+                    realm: "clean-api",
+                    options =>
+                    {
+                        options.TokenValidationParameters.ValidAudiences = ["scalar", "account"];
+                        options.TokenValidationParameters.ValidIssuers = [validIssuers];
+
+                        // For development only - disable HTTPS metadata validation
+                        if (builder.Environment.IsDevelopment())
+                        {
+                            options.RequireHttpsMetadata = false;
+                        }
+                    });
+
         services.AddAuthorization();
-        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer((document, context, ct) =>
+            {
+                // Ensure Components and SecuritySchemes are initialized
+                if (document.Components == null)
+                {
+                    document.Components = new OpenApiComponents();
+                }
+                if (document.Components.SecuritySchemes == null)
+                {
+                    document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>();
+                }
+
+                document.Components.SecuritySchemes.Add("OAuth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Description = "OAuth2 authentication using Keycloak",
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(authorizationUrl),
+                            TokenUrl = new Uri(tokenUrl),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                { "clean_api.all", "Access to all Clean API operations" }
+                            }
+                        }
+                    }
+                });
+
+
+                return Task.CompletedTask;
+            });
+        });
     }
 }

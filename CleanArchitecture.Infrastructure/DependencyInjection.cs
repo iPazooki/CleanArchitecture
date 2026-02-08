@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using CleanArchitecture.Infrastructure.Security;
 
 namespace CleanArchitecture.Infrastructure;
 
@@ -17,8 +16,6 @@ public static class DependencyInjection
     {
         // Adds the EmailService to the service collection with a scoped lifetime.
         services.AddScoped<IEmailService, EmailServiceProvider.EmailService>();
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
         return services;
     }

@@ -3,23 +3,29 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.Keycloak" Version="13.1.0-preview.1.25616.3" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Keycloak.Authentication" Version="13.1.0-preview.1.25616.3" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.0" />
+    <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.4.0" />
+    <PackageVersion Include="MartinCostello.Logging.XUnit" Version="0.7.0" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.1" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Microsoft.OpenApi" Version="3.1.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.4" />
     <PackageVersion Include="Serilog.Enrichers.Span" Version="3.1.0" />
     <PackageVersion Include="Serilog.Sinks.ApplicationInsights" Version="4.1.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+    <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Polly" Version="8.6.5" />
-    <PackageVersion Include="MediatR" Version="12.4.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="DomainValidation.NET" Version="3.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
@@ -29,13 +35,18 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.1.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6016E129-42C1-4677-9A23-F5ADC61341AD}"
 EndProject
@@ -17,16 +17,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.Infrastructure.Persistence", "CleanArchitecture.Infrastructure.Persistence\CleanArchitecture.Infrastructure.Persistence.csproj", "{ECADBEDE-6A1E-4D9E-A1AC-52446F7C9117}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.Presentation", "CleanArchitecture.Presentation\CleanArchitecture.Presentation.csproj", "{2D3DCB3A-514A-4B85-AAA6-A1B2991862A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.Api", "CleanArchitecture.Presentation\CleanArchitecture.Api.csproj", "{2D3DCB3A-514A-4B85-AAA6-A1B2991862A0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EE04EAF9-B626-43AA-82FB-E52CEF44092D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
-		README.md = README.md
-		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		Directory.Packages.props = Directory.Packages.props
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		nuget.config = nuget.config
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FAC523A6-0A89-488F-97E3-88F255EF862F}"
@@ -41,7 +41,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Architecture.UnitTests", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.IntegrationTests", "Tests\CleanArchitecture.IntegrationTests\CleanArchitecture.IntegrationTests.csproj", "{EDF75E85-4453-4022-9018-C725C8B158BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.FunctionalTests", "Tests\CleanArchitecture.FunctionalTests\CleanArchitecture.FunctionalTests.csproj", "{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.AppHost", "CleanArchitecture.Aspire\CleanArchitecture.AppHost\CleanArchitecture.AppHost.csproj", "{B42BC3D5-F725-4E6E-823E-3D985962839A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.ServiceDefaults", "CleanArchitecture.Aspire\CleanArchitecture.ServiceDefaults\CleanArchitecture.ServiceDefaults.csproj", "{BA7C33EF-7EA9-13B4-2E7E-E363D03CB519}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,10 +87,14 @@ Global
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDF75E85-4453-4022-9018-C725C8B158BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B42BC3D5-F725-4E6E-823E-3D985962839A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7C33EF-7EA9-13B4-2E7E-E363D03CB519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7C33EF-7EA9-13B4-2E7E-E363D03CB519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7C33EF-7EA9-13B4-2E7E-E363D03CB519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7C33EF-7EA9-13B4-2E7E-E363D03CB519}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,8 @@ Global
 		{D046E753-0463-4919-9795-581CA031C229} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{7E3FC4AF-8F57-4E5C-956F-4FEC4469E56A} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
 		{EDF75E85-4453-4022-9018-C725C8B158BB} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
-		{2C2C7C59-3F1A-4DE5-8CC3-75EF1561D5DF} = {F02856EA-C1FB-4D21-80C6-37F02CF460ED}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61C46B56-1731-4BEA-8EA0-EEFBA623663E}
 	EndGlobalSection
 EndGlobal

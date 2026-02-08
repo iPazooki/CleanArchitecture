@@ -1,4 +1,5 @@
 ﻿global using Polly;
+global using Serilog;
 global using Mediator;
 global using DomainValidation;
 global using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,4 @@
 ﻿using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Domain.Entities.Security;
 
 namespace CleanArchitecture.Application.Common;
 
@@ -35,16 +34,4 @@ public interface IApplicationUnitOfWork : IUnitOfWork
     /// Gets the DbSet for <see cref="Order"/> entities.
     /// </summary>
     public DbSet<Order> Orders { get; }
-
-    /// <summary>
-    /// Gets the DbSet for <see cref="Role"/> entities.
-    /// </summary>
-    public DbSet<Role> Roles { get; }
-
-    /// <summary>
-    /// Gets the DbSet for <see cref="Permission"/> entities.
-    /// </summary>
-    public DbSet<Permission> Permissions { get; }
-
-    public DbSet<RefreshToken> RefreshTokens { get; }
 }

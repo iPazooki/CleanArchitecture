@@ -1,5 +1,5 @@
-﻿global using Mediator;
+﻿global using System.Net;
 global using DomainValidation;
-global using CleanArchitecture.Domain.Enums;
-global using CleanArchitecture.Domain.Exceptions;
+global using System.Net.Http.Json;
+global using Aspire.Hosting.Testing;
 global using CleanArchitecture.IntegrationTests.Abstractions;
