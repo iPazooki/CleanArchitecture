@@ -15,6 +15,7 @@ internal static class OrderEndpoints
             .WithSummary("Creates a new order")
             .WithDescription("Creates a new order with the specified details.")
             .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .RequireAuthorization()
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPut("/update-order", UpdateOrder)
