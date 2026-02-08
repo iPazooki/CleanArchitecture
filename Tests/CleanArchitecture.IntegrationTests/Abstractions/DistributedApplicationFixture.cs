@@ -12,7 +12,7 @@ public class DistributedApplicationFixture : IAsyncLifetime
 
     internal CancellationToken _cancellationToken = CancellationToken.None;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestingBuilder
             .CreateAsync<Projects.CleanArchitecture_AppHost>(["--environment=Testing"], _cancellationToken);
@@ -20,7 +20,6 @@ public class DistributedApplicationFixture : IAsyncLifetime
         appHost.Services.AddLogging(logging =>
         {
             logging.SetMinimumLevel(LogLevel.Warning);
-            logging.AddXUnit();
         });
 
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
@@ -33,8 +32,10 @@ public class DistributedApplicationFixture : IAsyncLifetime
         await _app.StartAsync(_cancellationToken).WaitAsync(_defaultTimeout, _cancellationToken);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _app.DisposeAsync();
+
+        GC.SuppressFinalize(this);
     }
 }

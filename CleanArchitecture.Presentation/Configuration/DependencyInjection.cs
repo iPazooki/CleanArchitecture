@@ -34,7 +34,7 @@ internal static class DependencyInjection
                         options.TokenValidationParameters.ValidIssuers = [validIssuers];
 
                         // For development only - disable HTTPS metadata validation
-                        if (builder.Environment.IsDevelopment())
+                        if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
                         {
                             options.RequireHttpsMetadata = false;
                         }

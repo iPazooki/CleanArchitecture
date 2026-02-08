@@ -22,8 +22,7 @@ public class UnitTest1
         // Assert
         foreach (AssemblyName reference in references)
         {
-            Assembly referencedAssembly = Assembly.Load(reference);
-            string? referencedAssemblyName = referencedAssembly.GetName().Name;
+            string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(ApplicationAssemblyName, referencedAssemblyName);
             Assert.NotEqual(InfrastructureAssemblyName, referencedAssemblyName);
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
@@ -42,8 +41,7 @@ public class UnitTest1
         // Assert
         foreach (AssemblyName reference in references)
         {
-            Assembly referencedAssembly = Assembly.Load(reference);
-            string? referencedAssemblyName = referencedAssembly.GetName().Name;
+            string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(InfrastructureAssemblyName, referencedAssemblyName);
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
@@ -63,8 +61,7 @@ public class UnitTest1
         // Assert
         foreach (AssemblyName reference in references)
         {
-            Assembly referencedAssembly = Assembly.Load(reference);
-            string? referencedAssemblyName = referencedAssembly.GetName().Name;
+            string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
         
@@ -83,8 +80,7 @@ public class UnitTest1
         // Assert
         foreach (AssemblyName reference in references)
         {
-            Assembly referencedAssembly = Assembly.Load(reference);
-            string? referencedAssemblyName = referencedAssembly.GetName().Name;
+            string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
         

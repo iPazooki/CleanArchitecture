@@ -82,7 +82,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _httpClient = App.CreateHttpClient("cleanarchitecture-api");
 
@@ -91,10 +91,12 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
             .WaitAsync(DefaultTimeout, CancellationToken);
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
+        GC.SuppressFinalize(this);
+
         _httpClient?.Dispose();
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

@@ -24,9 +24,11 @@ static async Task ConfigureTestingEnvironment(IDistributedApplicationBuilder bui
 
     IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres.AddDatabase("postgresdb", "testingDb");
 
-    builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
+    IResourceBuilder<ProjectResource> project = builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
         .WithReference(postgresdb)
         .WaitFor(postgresdb);
+
+    project.WithEnvironment("ASPNETCORE_ENVIRONMENT", "Testing");
 }
 
 static async Task ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder builder)
