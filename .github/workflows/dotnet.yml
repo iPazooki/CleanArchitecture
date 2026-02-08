@@ -22,7 +22,6 @@ jobs:
       with:
         dotnet-version: 10.0.x
         cache: true
-        cache-dependency-path: '**/packages.lock.json' # Optional: if using lock files
 
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
