@@ -1,6 +1,4 @@
 # This workflow will build a .NET project and publish changes to NuGet
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: .NET Aspire CI
 
 on:
@@ -25,6 +23,11 @@ jobs:
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
 
+    - name: Setup Dev Certs
+      run: |
+        dotnet dev-certs https --clean
+        dotnet dev-certs https --trust
+
     - name: Restore dependencies
       run: dotnet restore
 
@@ -32,5 +35,6 @@ jobs:
       run: dotnet build --no-restore --configuration Release
 
     - name: Test
-      # Aspire integration tests will automatically use the Docker daemon available on ubuntu-latest
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      env:
+        ASPIRE_HOSTING_TESTING_DISABLE_DASHBOARD: true
+      run: dotnet test --no-build --configuration Release --logger "console;verbosity=detailed"

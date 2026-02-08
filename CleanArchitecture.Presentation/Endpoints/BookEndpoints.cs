@@ -10,7 +10,6 @@ internal static class BookEndpoints
             .WithSummary("Creates a new book")
             .WithDescription("Creates a new book with the specified title and genre.")
             .Produces<Result<Guid>>(StatusCodes.Status201Created)
-            .RequireAuthorization()
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         app.MapPut("/update-book", UpdateBook)

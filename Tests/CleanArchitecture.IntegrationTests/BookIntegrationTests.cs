@@ -5,20 +5,16 @@ using CleanArchitecture.Application.Entities.Books.Commands.Update;
 namespace CleanArchitecture.IntegrationTests;
 
 [Collection("DistributedApplication collection")]
-public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseIntegrationTest(fixture)
+public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseIntegrationTest(fixture), IAsyncLifetime
 {
+    private HttpClient _httpClient;
+
     [Fact]
     public async Task SendBookCommandWithValidRequestCreatesBook()
     {
-        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-api");
-
-        await App.ResourceNotifications
-            .WaitForResourceHealthyAsync("cleanarchitecture-api", CancellationToken)
-            .WaitAsync(DefaultTimeout, CancellationToken);
-
         CreateBookCommand command = new("Test Book", "F");
 
-        using HttpResponseMessage response = await httpClient.PostAsJsonAsync("/create-book/", command, CancellationToken);
+        using HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/create-book/", command, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -26,14 +22,8 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     [Fact]
     public async Task SendBookCommandWithValidRequestUpdatesBook()
     {
-        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-api");
-
-        await App.ResourceNotifications
-            .WaitForResourceHealthyAsync("cleanarchitecture-api", CancellationToken)
-            .WaitAsync(DefaultTimeout, CancellationToken);
-
         CreateBookCommand createCommand = new("Initial Book", "F");
-        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -44,7 +34,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
 
         UpdateBookCommand updateCommand = new(createdResult.Value, "Updated Book", "NF");
 
-        using HttpResponseMessage updateResponse = await httpClient.PutAsJsonAsync("/update-book", updateCommand, CancellationToken);
+        using HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync("/update-book", updateCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
     }
@@ -52,14 +42,8 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     [Fact]
     public async Task SendBookCommandWithValidRequestDeletesBook()
     {
-        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-api");
-
-        await App.ResourceNotifications
-            .WaitForResourceHealthyAsync("cleanarchitecture-api", CancellationToken)
-            .WaitAsync(DefaultTimeout, CancellationToken);
-
         CreateBookCommand createCommand = new("Book To Delete", "F");
-        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -70,7 +54,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
 
         DeleteBookCommand deleteCommand = new(createdResult.Value);
 
-        using HttpResponseMessage deleteResponse = await httpClient.SendAsync(
+        using HttpResponseMessage deleteResponse = await _httpClient.SendAsync(
             new HttpRequestMessage(HttpMethod.Delete, "/delete-book")
             {
                 Content = JsonContent.Create(deleteCommand)
@@ -83,14 +67,8 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     [Fact]
     public async Task SendBookQueryWithValidRequestGetsBook()
     {
-        using HttpClient httpClient = App.CreateHttpClient("cleanarchitecture-api");
-
-        await App.ResourceNotifications
-            .WaitForResourceHealthyAsync("cleanarchitecture-api", CancellationToken)
-            .WaitAsync(DefaultTimeout, CancellationToken);
-
         CreateBookCommand createCommand = new("Book To Get", "F");
-        using HttpResponseMessage createResponse = await httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -99,8 +77,24 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         Assert.NotNull(createdResult);
         Assert.True(createdResult!.IsSuccess);
 
-        using HttpResponseMessage getResponse = await httpClient.GetAsync($"/get-book/{createdResult.Value}", CancellationToken);
+        using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/get-book/{createdResult.Value}", CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+    }
+
+    public async Task InitializeAsync()
+    {
+        _httpClient = App.CreateHttpClient("cleanarchitecture-api");
+
+        await App.ResourceNotifications
+            .WaitForResourceHealthyAsync("cleanarchitecture-api", CancellationToken)
+            .WaitAsync(DefaultTimeout, CancellationToken);
+    }
+
+    public Task DisposeAsync()
+    {
+        _httpClient?.Dispose();
+
+        return Task.CompletedTask;
     }
 }
