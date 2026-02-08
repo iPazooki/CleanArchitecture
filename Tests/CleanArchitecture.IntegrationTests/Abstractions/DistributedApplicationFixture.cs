@@ -6,7 +6,7 @@ namespace CleanArchitecture.IntegrationTests.Abstractions;
 
 public class DistributedApplicationFixture : IAsyncLifetime
 {
-    internal readonly TimeSpan _defaultTimeout = TimeSpan.FromMinutes(3);
+    internal readonly TimeSpan _defaultTimeout = TimeSpan.FromMinutes(1);
 
     internal DistributedApplication _app = null!;
 

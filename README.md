@@ -1,6 +1,6 @@
 ﻿![GitHub](https://img.shields.io/github/license/ipazooki/CleanArchitecture)
 ![GitHub contributors](https://img.shields.io/github/contributors/ipazooki/CleanArchitecture)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/ipazooki/CleanArchitecture/dotnet.yml)
+[![.NET Aspire CI](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml/badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml)
 
 ## Clean Architecture
 

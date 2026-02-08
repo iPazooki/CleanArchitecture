@@ -6,6 +6,7 @@ on:
     branches: [ "main", "aspire" ]
   pull_request:
     branches: [ "main", "aspire" ]
+  workflow_dispatch: # Enables manual triggering
 
 jobs:
   build:
