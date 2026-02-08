@@ -13,28 +13,31 @@ internal static class WebApplicationExtensions
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public static async Task UseDevelopmentFeaturesAsync(this WebApplication app)
     {
-        string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
-
-        ArgumentNullException.ThrowIfNull(clientSecret);        
-
-        if (app.Environment.IsDevelopment())
+        if (!app.Environment.IsEnvironment("Testing"))
         {
-            app.MapOpenApi();
+            string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
 
-            app.MapScalarApiReference(options => options
-                .AddPreferredSecuritySchemes("OAuth2")
-                .AddAuthorizationCodeFlow("OAuth2", flow =>
-                {
-                    flow.ClientId = "scalar";
-                    flow.ClientSecret = clientSecret;
-                    flow.Pkce = Pkce.Sha256;
-                    flow.SelectedScopes = ["clean_api.all"];
-                }));
+            ArgumentNullException.ThrowIfNull(clientSecret);
 
-            // Initialize and create the database
-            using IServiceScope scope = app.Services.CreateScope();
-            ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+
+                app.MapScalarApiReference(options => options
+                    .AddPreferredSecuritySchemes("OAuth2")
+                    .AddAuthorizationCodeFlow("OAuth2", flow =>
+                    {
+                        flow.ClientId = "scalar";
+                        flow.ClientSecret = clientSecret;
+                        flow.Pkce = Pkce.Sha256;
+                        flow.SelectedScopes = ["clean_api.all"];
+                    }));
+
+                // Initialize and create the database
+                using IServiceScope scope = app.Services.CreateScope();
+                ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+            } 
         }
     }
 }
