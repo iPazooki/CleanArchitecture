@@ -24,10 +24,14 @@ jobs:
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
 
+    - name: Prepare system for dev-certs trust
+      run: sudo apt-get update && sudo apt-get install -y libnss3-tools ca-certificates
+
     - name: Setup Dev Certs
       run: |
         dotnet dev-certs https --clean
-        dotnet dev-certs https --trust
+        # Attempt to trust; do not fail the job if the operation is not supported in this environment
+        dotnet dev-certs https --trust || true
 
     - name: Restore dependencies
       run: dotnet restore
