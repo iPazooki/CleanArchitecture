@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Infrastructure.Security;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi;
+﻿using Microsoft.OpenApi;
 
 namespace CleanArchitecture.Api.Configuration;
 
@@ -32,7 +30,7 @@ internal static class DependencyInjection
                     realm: "clean-api",
                     options =>
                     {
-                        options.TokenValidationParameters.ValidAudiences = ["scalar", "account"];
+                        options.TokenValidationParameters.ValidAudiences = ["scalar"];
                         options.TokenValidationParameters.ValidIssuers = [validIssuers];
 
                         // For development only - disable HTTPS metadata validation
