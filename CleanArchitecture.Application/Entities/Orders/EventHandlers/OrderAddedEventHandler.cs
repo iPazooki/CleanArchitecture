@@ -6,7 +6,10 @@ public sealed class OrderAddedEventHandler(ILogger<OrderAddedEventHandler> logge
     {
         ArgumentNullException.ThrowIfNull(notification);
 
-        logger.LogInformation("CleanArchitecture Domain Event: {DomainEvent}", notification.GetType().Name);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("CleanArchitecture Domain Event: {DomainEvent}", notification.GetType().Name); 
+        }
 
         return ValueTask.CompletedTask;
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi;
+﻿using CleanArchitecture.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi;
 
 namespace CleanArchitecture.Api.Configuration;
 
@@ -40,7 +42,10 @@ internal static class DependencyInjection
                         }
                     });
 
-        services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        });
 
         services.AddOpenApi(options =>
         {
@@ -68,7 +73,7 @@ internal static class DependencyInjection
                             TokenUrl = new Uri(tokenUrl),
                             Scopes = new Dictionary<string, string>
                             {
-                                { "clean_api.all", "Access to all Clean API operations" }
+                                { "permissions", "Request for roles" }
                             }
                         }
                     }

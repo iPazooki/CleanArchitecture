@@ -14,33 +14,37 @@ internal static class OrderEndpoints
         app.MapPost("/create-order", CreateOrder)
             .WithSummary("Creates a new order")
             .WithDescription("Creates a new order with the specified details.")
-            .Produces<Result<Guid>>(StatusCodes.Status201Created)
-            .RequireAuthorization()
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .Produces<Result<Guid>>(StatusCodes.Status201Created)            
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
 
         app.MapPut("/update-order", UpdateOrder)
             .WithSummary("Updates an existing order")
             .WithDescription("Updates an existing order with the specified ID.")
             .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
 
         app.MapGet("/get-order/{id:Guid}", GetOrder)
             .WithSummary("Gets an order by ID")
             .WithDescription("Gets an order with the specified ID.")
             .Produces<Result<OrderResponse>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         app.MapPost("/add-order-item", AddOrderItem)
             .WithSummary("Adds an item to an order")
             .WithDescription("Adds an item to an order with the specified details.")
             .Produces<Result<Guid>>(StatusCodes.Status201Created)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
 
         app.MapDelete("/remove-order-item", RemoveOrderItem)
             .WithSummary("Removes an item from an order")
             .WithDescription("Removes an item from an order with the specified ID.")
             .Produces<Result<Guid>>(StatusCodes.Status204NoContent)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("AdminOnly");
 
     }
 

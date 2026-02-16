@@ -13,7 +13,10 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
     {
         Stopwatch stopWatch = Stopwatch.StartNew();
 
-        logger.LogInformation("Handling request {Name}, {DateTime} ", message.GetType().Name, DateTimeOffset.UtcNow);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Handling request {Name}, {DateTime} ", message.GetType().Name, DateTimeOffset.UtcNow);
+        }
 
         ArgumentNullException.ThrowIfNull(next);
 
@@ -28,7 +31,10 @@ public class LoggingBehaviour<TRequest, TResponse>(ILogger<LoggingBehaviour<TReq
 
         if (result.IsSuccess)
         {
-            logger.LogInformation("Request handled successfully {Name}, {DateTime}", message.GetType().Name, DateTimeOffset.UtcNow);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Request handled successfully {Name}, {DateTime}", message.GetType().Name, DateTimeOffset.UtcNow);
+            }
         }
         else
         {

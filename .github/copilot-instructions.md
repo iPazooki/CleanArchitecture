@@ -15,7 +15,7 @@ This file tells Copilot how to behave when authoring code, tests, CI config, and
 - Target framework: .NET 10.
 - Naming: PascalCase for types/methods/properties, `I` prefix for interfaces, camelCase for parameters, private fields `_camelCase`.
 - Async: Prefer `async`/`await`, never return `async void`, always propagate CancellationToken when accepting it.
-- DI: Use constructor injection for services. Keep controllers/minimal endpoint handlers thin—delegate to application services.
+- DI: Use constructor injection for services. Keep controllers/minimal endpoint handlers thin; delegate to application services.
 - EF Core: Use explicit configuration for entities and value objects in `Infrastructure.Persistence`. Use migrations to change schema.
 - Formatting: Clear, idiomatic C#; prefer expression-bodied members only for trivial single-line methods.
 - Observability: Inject `ILogger<T>` and add meaningful logs at important decision points (info/warn/error).
