@@ -745,7 +745,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://localhost:7281/scalar/*"
+        "https://localhost:7281/*"
       ],
       "webOrigins": [
         "https://localhost:7281"

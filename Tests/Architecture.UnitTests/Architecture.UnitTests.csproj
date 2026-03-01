@@ -10,6 +10,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
@@ -24,7 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\CleanArchitecture.Application\CleanArchitecture.Application.csproj" />
-    <ProjectReference Include="..\..\CleanArchitecture.Presentation\CleanArchitecture.Api.csproj" />
+    <ProjectReference Include="..\..\CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj" />
   </ItemGroup>
 
 </Project>

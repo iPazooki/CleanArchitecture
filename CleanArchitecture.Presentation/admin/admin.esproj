@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.4110890">
+    <PropertyGroup>
+        <StartupCommand>pnpm dev</StartupCommand>
+        <BuildCommand>pnpm build</BuildCommand>
+        <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+        <ShouldRunBuildScript>false</ShouldRunBuildScript>
+        <BuildOutputFolder>$(MSBuildProjectDirectory)\.next</BuildOutputFolder>
+        <ShouldRunNpmInstall>false</ShouldRunNpmInstall>
+        <ShouldRunBuildScript>false</ShouldRunBuildScript>
+        <RestoreProjectStyle>None</RestoreProjectStyle>
+        <RestorePackages>false</RestorePackages>
+        <ResolveNuGetPackages>false</ResolveNuGetPackages>
+        <IsBuildable>false</IsBuildable>        
+    </PropertyGroup>
+    <ItemGroup>
+        <TypeScriptConfiguration Remove="node_modules\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="src\app\api\" />
+    </ItemGroup>
+</Project>

@@ -3,7 +3,7 @@
 > Role: When generating suggestions or code for this repository, act as a senior software engineer: be conservative, prioritize safety, maintainability, and clear reasoning. Explain trade-offs briefly when making non-obvious choices.
 
 ## Purpose
-This file tells Copilot how to behave when authoring code, tests, CI config, and documentation for the CleanArchitecture template (targets .NET 10, Minimal API, Aspire AppHost, Postgres via EF Core).
+This file tells Copilot how to behave when authoring code, tests, CI config, and documentation for the CleanArchitecture template (targets .NET 10, Minimal API, Aspire AppHost, Postgres via EF Core). Note that the admin project is a JavaScript .esproj (CleanArchitecture.Presentation\admin\admin.esproj) and is not a .NET project.
 
 ## High-level project expectations
 - Preserve Clean Architecture boundaries: Domain, Application, Infrastructure, Infrastructure.Persistence, Presentation, Aspire AppHost.

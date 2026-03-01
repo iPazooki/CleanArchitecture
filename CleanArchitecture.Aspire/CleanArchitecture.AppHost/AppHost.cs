@@ -6,7 +6,7 @@ if (builder.Environment.IsEnvironment("Testing"))
 {
     await ConfigureTestingEnvironment(builder).ConfigureAwait(false);
 }
-else if(builder.Environment.IsDevelopment())
+else if (builder.Environment.IsDevelopment())
 {
     await ConfigureDevelopmentEnvironment(builder).ConfigureAwait(false);
 }
@@ -33,12 +33,11 @@ static async Task ConfigureTestingEnvironment(IDistributedApplicationBuilder bui
 
 static async Task ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder builder)
 {
-    IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
+    IResourceBuilder<PostgresDatabaseResource> postgres = builder.AddPostgres("postgres")
         .WithDataVolume("postgres_data")
         .WithPgAdmin()
-        .WithLifetime(ContainerLifetime.Persistent);
-
-    IResourceBuilder<PostgresDatabaseResource> postgresdb = postgres.AddDatabase("postgresdb", "cleandb");
+        .WithLifetime(ContainerLifetime.Persistent)
+        .AddDatabase("postgresdb", "cleandb");
 
     IResourceBuilder<ParameterResource> username = builder.AddParameter("keycloakAdminUsername", () => "admin");
     IResourceBuilder<ParameterResource> password = builder.AddParameter("keycloakAdminPassword", () => "admin", secret: true);
@@ -49,11 +48,18 @@ static async Task ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);
 
-    builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
-        .WithReference(postgresdb)
-        .WaitFor(postgresdb)
+    IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>("cleanarchitecture-api")
+        .WithReference(postgres)
+        .WaitFor(postgres)
         .WithReference(keycloak)
         .WaitFor(keycloak);
+
+    builder.AddNodeApp("admin", "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
+        .WithHttpEndpoint(targetPort: 3000, port: 65499)
+        .WithArgs("dev")
+        .WithPnpm()
+        .WithReference(apiProject)
+        .WaitFor(apiProject);
 }
 
 
