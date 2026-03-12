@@ -17,19 +17,27 @@ internal static class WebApplicationExtensions
         {
             string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
 
-            ArgumentNullException.ThrowIfNull(clientSecret);
+            if (string.IsNullOrEmpty(clientSecret))
+            {
+                app.Logger.LogError(
+                    "Scalar API client secret is not provided. " +
+                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:ClientSecret'. " +
+                    "Skipping Scalar API reference registration.");
+            }
+            else
+            {
+                app.MapOpenApi();
 
-            app.MapOpenApi();
-
-            app.MapScalarApiReference(options => options
-                .AddPreferredSecuritySchemes("OAuth2")
-                .AddAuthorizationCodeFlow("OAuth2", flow =>
-                {
-                    flow.ClientId = "scalar";
-                    flow.ClientSecret = clientSecret;
-                    flow.Pkce = Pkce.Sha256;
-                    flow.SelectedScopes = ["clean_api.all"];
-                }));
+                app.MapScalarApiReference(options => options
+                    .AddPreferredSecuritySchemes("OAuth2")
+                    .AddAuthorizationCodeFlow("OAuth2", flow =>
+                    {
+                        flow.ClientId = "scalar";
+                        flow.ClientSecret = clientSecret;
+                        flow.Pkce = Pkce.Sha256;
+                        flow.SelectedScopes = ["clean_api.all"];
+                    }));
+            }
         }
 
         // Initialize and create the database

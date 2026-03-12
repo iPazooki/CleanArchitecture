@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi;
+﻿using CleanArchitecture.Infrastructure.Security;
+using Microsoft.OpenApi;
 
 namespace CleanArchitecture.Api.Configuration;
 
@@ -40,24 +41,18 @@ internal static class DependencyInjection
                         }
                     });
 
-        builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-        });
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy(ViewerPolicy.Name, ViewerPolicy.ConfigurePolicy)
+            .AddPolicy(EditorPolicy.Name, EditorPolicy.ConfigurePolicy)
+            .AddPolicy(AdminPolicy.Name, AdminPolicy.ConfigurePolicy);
 
         services.AddOpenApi(options =>
         {
             options.AddDocumentTransformer((document, context, ct) =>
             {
                 // Ensure Components and SecuritySchemes are initialized
-                if (document.Components == null)
-                {
-                    document.Components = new OpenApiComponents();
-                }
-                if (document.Components.SecuritySchemes == null)
-                {
-                    document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>();
-                }
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 
                 document.Components.SecuritySchemes.Add("OAuth2", new OpenApiSecurityScheme
                 {
