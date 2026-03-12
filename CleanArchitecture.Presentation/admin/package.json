@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "next lint",
+    "generate": "orval"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
@@ -42,6 +43,7 @@
     "@types/react-transition-group": "^4.4.12",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.7",
+    "orval": "^8.5.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3"

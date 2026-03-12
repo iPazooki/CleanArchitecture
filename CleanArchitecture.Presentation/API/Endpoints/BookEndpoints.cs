@@ -29,11 +29,26 @@ internal static class BookEndpoints
             .WithDescription("Gets a book with the specified ID.")
             .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
+
+        app.MapGet("/get-books/", GetBooks)
+            .WithSummary("Gets all books")
+            .WithDescription("Gets all books without pagination")
+            .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetBook(ISender sender, Guid id)
     {
         Result<BookResponse> result = await sender.Send(new GetBookQuery(id)).ConfigureAwait(false);
+
+        return result.IsSuccess
+            ? Results.Ok(result)
+            : Results.NotFound();
+    }
+
+    private static async Task<IResult> GetBooks(ISender sender)
+    {
+        Result<IEnumerable<BookResponse>> result = await sender.Send(new GetBooksQuery()).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Results.Ok(result)

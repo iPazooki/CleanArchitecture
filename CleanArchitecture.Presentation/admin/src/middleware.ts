@@ -1,10 +1,6 @@
 ﻿import { withAuth } from "next-auth/middleware"
 
 export default withAuth({
-  pages: {
-    signIn: "/signin",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     authorized: ({ token }) => {
       // If there's no session token, user is not authenticated -> redirect to sign-in

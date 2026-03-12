@@ -1,15 +1,19 @@
+﻿---
+apply: always
+---
+
 ---
 apply: always
 ---
 
-# Copilot Instructions
+# AI Instructions
 
 > Role: When generating suggestions or code for this repository, act as a senior software engineer: be conservative, prioritize safety, maintainability, and clear reasoning. Explain trade-offs briefly when making non-obvious choices.
 
 ## High-level project expectations
 - This repository is **full-stack**:
-  - **Backend:** .NET Clean Architecture (Domain, Application, Infrastructure, Infrastructure.Persistence, Presentation, Aspire AppHost)
-  - **Admin Frontend:** React + Next.js + TypeScript
+    - **Backend:** .NET Clean Architecture (Domain, Application, Infrastructure, Infrastructure.Persistence, Presentation, Aspire AppHost)
+    - **Admin Frontend:** React + Next.js + TypeScript
 - Preserve architecture boundaries and avoid leaking concerns across layers.
 - Prefer explicit, small, well-tested changes. Avoid broad refactors without migration notes and tests.
 - Follow DDD in backend (domain models, value objects, specifications, thin application services/use-cases).
@@ -22,7 +26,7 @@ apply: always
 - **Auth:** Keycloak via NextAuth in admin app + backend auth integration
 - **Database:** PostgreSQL with EF Core/Npgsql
 - **Styling/UI:** Tailwind CSS
-- **Package manager (frontend):** npm
+- **Package manager (frontend):** pnpm
 
 ## Coding conventions
 
@@ -43,6 +47,7 @@ apply: always
 - Use accessible markup and keyboard-friendly interactions.
 - Keep styling consistent with existing Tailwind patterns and design tokens.
 - Avoid introducing large dependencies without strong justification.
+- Frontend should be considered as BFF.
 
 ## Security & secrets
 - Never hard-code credentials, client secrets, tokens, or connection strings.
@@ -65,15 +70,15 @@ apply: always
 
 ### CI expectations
 - Start Aspire AppHost before backend integration tests.
-- Build and type-check frontend (`npm run build`, `npm run lint`, `npm run typecheck` if available).
+- Build and type-check frontend (`pnpm build`, `pnpm lint` if available).
 - Do not merge changes that break auth flow, migrations, or core dashboard/admin routes.
 
 ## Database & migrations
 - Provider: Npgsql (Postgres).
 - Migrations are managed in `Infrastructure.Persistence`.
 - Typical commands:
-  - `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
-  - `dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
+    - `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
+    - `dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
 - Prefer local orchestration via Aspire AppHost.
 
 ## Dependency guidance
@@ -86,10 +91,10 @@ apply: always
 - Small, focused PRs with clear titles.
 - Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.
 - PR description must include:
-  - Why this change is needed
-  - What was changed
-  - How it was tested
-  - Any migration/env/config impact
+    - Why this change is needed
+    - What was changed
+    - How it was tested
+    - Any migration/env/config impact
 
 ## When to ask for human review
 - Authentication/authorization/session changes

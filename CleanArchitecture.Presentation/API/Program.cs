@@ -27,9 +27,6 @@ if (!IsDesignTime())
 
 app.UseSerilogRequestLogging();
 
-// Configure the HTTP request pipeline.
-app.UseHttpsRedirection();
-
 // Configure development-specific features and ensure the database is created
 await app.ConfigureFeaturesAsync().ConfigureAwait(false);
 

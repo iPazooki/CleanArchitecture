@@ -1,5 +1,4 @@
 using CleanArchitecture.Infrastructure.Persistence.Data;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 namespace CleanArchitecture.Api.Configuration;
@@ -40,5 +39,9 @@ internal static class WebApplicationExtensions
             await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
         }
 
+        if (app.Environment.IsProduction())
+        {
+            app.UseHttpsRedirection();
+        }
     }
 }

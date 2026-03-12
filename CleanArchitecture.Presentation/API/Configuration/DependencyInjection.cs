@@ -8,8 +8,6 @@ internal static class DependencyInjection
     {
         services.AddEndpointsApiExplorer();
 
-        services.AddEndpointsApiExplorer();
-
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
         services.AddProblemDetails();
@@ -49,6 +47,8 @@ internal static class DependencyInjection
         {
             options.AddDocumentTransformer((document, context, ct) =>
             {
+                document.Info.Title = "Clean Architecture API";
+                document.Info.Version = "1.0";
                 // Ensure Components and SecuritySchemes are initialized
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
