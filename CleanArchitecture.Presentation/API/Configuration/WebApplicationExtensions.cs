@@ -17,9 +17,16 @@ internal static class WebApplicationExtensions
         {
             string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
 
-            ArgumentNullException.ThrowIfNull(clientSecret);
-
-            app.MapOpenApi();
+            if (string.IsNullOrEmpty(clientSecret))
+            {
+                app.Logger.LogError(
+                    "Scalar API client secret is not provided. " +
+                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:ClientSecret'. " +
+                    "Skipping Scalar API reference registration.");
+            }
+            else
+            {
+                app.MapOpenApi();
 
             app.MapScalarApiReference(options => options
                 .AddPreferredSecuritySchemes("OAuth2")
