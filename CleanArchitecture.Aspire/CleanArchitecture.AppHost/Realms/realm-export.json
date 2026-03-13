@@ -48,15 +48,6 @@
   "roles": {
     "realm": [
       {
-        "id": "36fcccc6-671d-4399-95c6-a1f843ee447f",
-        "name": "Visitor",
-        "description": "Visitor role that will be assigned automatically to users, and it has the least privilege.",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
-        "attributes": {}
-      },
-      {
         "id": "22e54395-a125-412f-840c-b4779c597ffe",
         "name": "default-roles-clean-api",
         "description": "${role_default-roles}",
@@ -78,6 +69,15 @@
         "attributes": {}
       },
       {
+        "id": "308ed26c-72a0-4a52-937d-91e7e50aef09",
+        "name": "edit",
+        "description": "Edit permission",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
+        "attributes": {}
+      },
+      {
         "id": "4a1507a9-f89c-415d-8f97-21b9dae2a571",
         "name": "offline_access",
         "description": "${role_offline-access}",
@@ -87,9 +87,18 @@
         "attributes": {}
       },
       {
-        "id": "dc02c950-7a68-4374-846c-d0f48ff1554b",
-        "name": "Admin",
-        "description": "Administrator with complete access rights.",
+        "id": "dcaba482-0f2f-45ad-8e2e-32eb0673a1ba",
+        "name": "view",
+        "description": "View permission",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
+        "attributes": {}
+      },
+      {
+        "id": "666fef03-5afb-4af2-b0d7-7ce09e7c56c1",
+        "name": "create",
+        "description": "Create permission",
         "composite": false,
         "clientRole": false,
         "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
@@ -99,6 +108,15 @@
         "id": "c9739dca-0c3d-4a0d-891a-9111355943d9",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
+        "attributes": {}
+      },
+      {
+        "id": "48541b3d-759f-4332-b9f3-b213a8ab9690",
+        "name": "delete",
+        "description": "Delete permission",
         "composite": false,
         "clientRole": false,
         "containerId": "54852cfe-5a0d-4b5b-b933-945468ed9c84",
@@ -423,7 +441,49 @@
       ]
     }
   },
-  "groups": [],
+  "groups": [
+    {
+      "id": "94ed7cf3-e066-4fb1-adbb-beb133da9e4a",
+      "name": "administrator",
+      "description": "Administrator group",
+      "path": "/administrator",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [
+        "edit",
+        "view",
+        "create",
+        "delete"
+      ],
+      "clientRoles": {}
+    },
+    {
+      "id": "5a03ecef-bdda-4fdb-9776-aaf3c581ccfc",
+      "name": "editor",
+      "description": "Editor Group",
+      "path": "/editor",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [
+        "edit",
+        "view",
+        "create"
+      ],
+      "clientRoles": {}
+    },
+    {
+      "id": "59b0a6c7-a51f-4d18-b7d7-c843b3359ad3",
+      "name": "viewer",
+      "description": "Viewer group",
+      "path": "/viewer",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [
+        "view"
+      ],
+      "clientRoles": {}
+    }
+  ],
   "defaultRole": {
     "id": "22e54395-a125-412f-840c-b4779c597ffe",
     "name": "default-roles-clean-api",
@@ -745,10 +805,12 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://localhost:7281/*"
+        "https://localhost:7281/scalar/*",
+        "http://localhost:65499/*"
       ],
       "webOrigins": [
-        "https://localhost:7281"
+        "https://localhost:7281",
+        "http://localhost:65499"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -763,7 +825,7 @@
       "attributes": {
         "realm_client": "false",
         "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1770364023",
+        "client.secret.creation.time": "1773297829",
         "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
         "frontchannel.logout.session.required": "true",
@@ -997,8 +1059,9 @@
             "included.client.audience": "scalar",
             "id.token.claim": "false",
             "lightweight.claim": "false",
+            "introspection.token.claim": "true",
             "access.token.claim": "true",
-            "introspection.token.claim": "true"
+            "userinfo.token.claim": "false"
           }
         },
         {
@@ -1656,14 +1719,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "saml-user-property-mapper",
-            "oidc-address-mapper",
             "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
             "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
             "saml-user-attribute-mapper",
-            "saml-role-list-mapper"
+            "saml-role-list-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-property-mapper"
           ]
         }
       },
@@ -1683,14 +1746,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
+            "saml-role-list-mapper",
             "oidc-usermodel-attribute-mapper",
             "saml-user-property-mapper",
             "saml-user-attribute-mapper",
-            "oidc-address-mapper",
-            "oidc-usermodel-property-mapper",
             "oidc-full-name-mapper",
-            "saml-role-list-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-address-mapper"
           ]
         }
       },

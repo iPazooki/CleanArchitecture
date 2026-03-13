@@ -28,27 +28,28 @@ internal static class WebApplicationExtensions
             {
                 app.MapOpenApi();
 
-            app.MapScalarApiReference(options => options
-                .AddPreferredSecuritySchemes("OAuth2")
-                .AddAuthorizationCodeFlow("OAuth2", flow =>
-                {
-                    flow.ClientId = "scalar";
-                    flow.ClientSecret = clientSecret;
-                    flow.Pkce = Pkce.Sha256;
-                    flow.SelectedScopes = ["permissions"];
-                }));
-        }
+                app.MapScalarApiReference(options => options
+                    .AddPreferredSecuritySchemes("OAuth2")
+                    .AddAuthorizationCodeFlow("OAuth2", flow =>
+                    {
+                        flow.ClientId = "scalar";
+                        flow.ClientSecret = clientSecret;
+                        flow.Pkce = Pkce.Sha256;
+                        flow.SelectedScopes = ["permissions"];
+                    }));
+            }
 
-        if (!app.Environment.IsProduction())
-        {
-            using IServiceScope scope = app.Services.CreateScope();
-            ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
-        }
+            if (!app.Environment.IsProduction())
+            {
+                using IServiceScope scope = app.Services.CreateScope();
+                ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+            }
 
-        if (app.Environment.IsProduction())
-        {
-            app.UseHttpsRedirection();
+            if (app.Environment.IsProduction())
+            {
+                app.UseHttpsRedirection();
+            }
         }
     }
 }
