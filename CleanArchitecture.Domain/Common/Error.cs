@@ -38,9 +38,9 @@ public sealed record DomainError(string Code, string Message, ErrorType Type = E
         new(code, message, ErrorType.Failure);
 
     /// <summary>
-    /// Implicit conversion from DomainError to string for backward compatibility.
+    /// Implicit conversion from DomainError to DomainValidation.Error.
     /// </summary>
-    public static implicit operator string(DomainError error) => error?.Code ?? string.Empty;
+    public static implicit operator Error(DomainError error) => new(Message: error.Message, Code: error.Code);
 }
 
 /// <summary>

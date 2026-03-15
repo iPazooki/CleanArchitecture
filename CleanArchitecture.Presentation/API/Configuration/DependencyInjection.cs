@@ -1,10 +1,13 @@
 ﻿using CleanArchitecture.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.OpenApi;
 
 namespace CleanArchitecture.Api.Configuration;
 
 internal static class DependencyInjection
 {
+    const string TestingEnvironment = "Testing";
+
     public static void AddPresentationServices(this IServiceCollection services, WebApplicationBuilder builder)
     {
         services.AddEndpointsApiExplorer();
@@ -13,31 +16,37 @@ internal static class DependencyInjection
 
         services.AddProblemDetails();
 
-        // Retrieve Keycloak configurations from builder.Configuration
-        string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
-                           ?? throw new InvalidOperationException("Keycloak ValidIssuers is not configured.");
+        // Configure authentication based on environment
+        if (builder.Environment.IsEnvironment(TestingEnvironment))
+        {
+            // Use test authentication handler for integration tests
+            services.AddAuthentication(Authentication.TestAuthHandler.AuthenticationScheme)
+                .AddScheme<AuthenticationSchemeOptions, Authentication.TestAuthHandler>(
+                    Authentication.TestAuthHandler.AuthenticationScheme,
+                    options => { });
+        }
+        else
+        {
+            // Retrieve Keycloak configurations from builder.Configuration
+            string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
+                               ?? throw new InvalidOperationException("Keycloak ValidIssuers is not configured.");
 
-        string authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
-                               ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
-
-        string tokenUrl = builder.Configuration["Keycloak:TokenUrl"]
-                       ?? throw new InvalidOperationException("Keycloak TokenUrl is not configured.");
-
-        services.AddAuthentication()
-                .AddKeycloakJwtBearer(
-                    serviceName: "keycloak",
-                    realm: "clean-api",
-                    options =>
-                    {
-                        options.TokenValidationParameters.ValidAudiences = ["scalar"];
-                        options.TokenValidationParameters.ValidIssuers = [validIssuers];
-
-                        // For development only - disable HTTPS metadata validation
-                        if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+            services.AddAuthentication()
+                    .AddKeycloakJwtBearer(
+                        serviceName: "keycloak",
+                        realm: "clean-api",
+                        options =>
                         {
-                            options.RequireHttpsMetadata = false;
-                        }
-                    });
+                            options.TokenValidationParameters.ValidAudiences = ["scalar"];
+                            options.TokenValidationParameters.ValidIssuers = [validIssuers];
+
+                            // For development only - disable HTTPS metadata validation
+                            if (builder.Environment.IsDevelopment())
+                            {
+                                options.RequireHttpsMetadata = false;
+                            }
+                        });
+        }
 
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(ViewerPolicy.Name, ViewerPolicy.ConfigurePolicy)
@@ -52,6 +61,19 @@ internal static class DependencyInjection
             options.ReportApiVersions = true;
             options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
         });
+
+        // Store these for use in OpenApi configuration
+        string? authorizationUrl = null;
+        string? tokenUrl = null;
+
+        if (!builder.Environment.IsEnvironment(TestingEnvironment))
+        {
+            authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
+                           ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
+
+            tokenUrl = builder.Configuration["Keycloak:TokenUrl"]
+                   ?? throw new InvalidOperationException("Keycloak TokenUrl is not configured.");
+        }
 
         services.AddOpenApi("v1", options =>
         {
@@ -73,28 +95,31 @@ internal static class DependencyInjection
                     document.Paths.Add(path.Key, path.Value);
                 }
 
-                // Ensure Components and SecuritySchemes are initialized
-                document.Components ??= new OpenApiComponents();
-                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
-
-                document.Components.SecuritySchemes.Add("OAuth2", new OpenApiSecurityScheme
+                // Only add OAuth2 security scheme in non-Testing environments
+                if (authorizationUrl is not null && tokenUrl is not null)
                 {
-                    Type = SecuritySchemeType.OAuth2,
-                    Description = "OAuth2 authentication using Keycloak",
-                    Flows = new OpenApiOAuthFlows
+                    // Ensure Components and SecuritySchemes are initialized
+                    document.Components ??= new OpenApiComponents();
+                    document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+                    document.Components.SecuritySchemes.Add("OAuth2", new OpenApiSecurityScheme
                     {
-                        AuthorizationCode = new OpenApiOAuthFlow
+                        Type = SecuritySchemeType.OAuth2,
+                        Description = "OAuth2 authentication using Keycloak",
+                        Flows = new OpenApiOAuthFlows
                         {
-                            AuthorizationUrl = new Uri(authorizationUrl),
-                            TokenUrl = new Uri(tokenUrl),
-                            Scopes = new Dictionary<string, string>
+                            AuthorizationCode = new OpenApiOAuthFlow
                             {
-                                { "permissions", "Request for roles" }
+                                AuthorizationUrl = new Uri(authorizationUrl),
+                                TokenUrl = new Uri(tokenUrl),
+                                Scopes = new Dictionary<string, string>
+                                {
+                                    { "permissions", "Request for roles" }
+                                }
                             }
                         }
-                    }
-                });
-
+                    });
+                }
 
                 return Task.CompletedTask;
             });

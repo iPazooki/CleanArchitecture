@@ -1,5 +1,5 @@
 ﻿import { getServerSession } from "next-auth";
-import { getSession } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 /**
@@ -66,6 +66,12 @@ export const orvalFetch = async <T>(
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+        // Handle 401 Unauthorized - session expired or invalid token
+        if (response.status === 401 && typeof window !== "undefined") {
+            // Redirect to login page on client-side
+            signIn("keycloak");
+            // Throw error anyway for proper error handling in UI
+        }
         throw new ApiError(response.status, data, response.headers);
     }
     return {

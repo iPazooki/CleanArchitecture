@@ -91,7 +91,7 @@ internal static class ResultExtensions
             {
                 ["errors"] = errorArray.Select(e => new
                 {
-                    code = e.Code,
+                    code = e.Code ?? "Error",
                     message = e.Message
                 }).ToArray()
             }

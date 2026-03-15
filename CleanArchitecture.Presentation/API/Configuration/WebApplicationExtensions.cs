@@ -42,18 +42,19 @@ internal static class WebApplicationExtensions
                         flow.SelectedScopes = ["permissions"];
                     }));
             }
+        }
 
-            if (!app.Environment.IsProduction())
-            {
-                using IServiceScope scope = app.Services.CreateScope();
-                ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                await context.Database.MigrateAsync().ConfigureAwait(false);
-            }
+        // Run migrations in all non-production environments (Development, Testing, etc.)
+        if (!app.Environment.IsProduction())
+        {
+            using IServiceScope scope = app.Services.CreateScope();
+            ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await context.Database.MigrateAsync().ConfigureAwait(false);
+        }
 
-            if (app.Environment.IsProduction())
-            {
-                app.UseHttpsRedirection();
-            }
+        if (app.Environment.IsProduction())
+        {
+            app.UseHttpsRedirection();
         }
     }
 }
