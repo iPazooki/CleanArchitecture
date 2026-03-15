@@ -1,4 +1,5 @@
 ﻿using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Errors;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
@@ -11,10 +12,15 @@ internal class UpdateBookRequestHandler(IApplicationUnitOfWork applicationUnitOf
 
         if (book is null)
         {
-            return Result.Failure("Book Not Found.");
+            return Result.Failure(BookErrors.BookNotFound);
         }
 
-        book.UpdateFromRequest(request);
+        Result updateResult = book.UpdateFromRequest(request);
+
+        if (!updateResult.IsSuccess)
+        {
+            return updateResult;
+        }
 
         return await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

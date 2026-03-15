@@ -44,12 +44,35 @@ internal static class DependencyInjection
             .AddPolicy(EditorPolicy.Name, EditorPolicy.ConfigurePolicy)
             .AddPolicy(AdminPolicy.Name, AdminPolicy.ConfigurePolicy);
 
-        services.AddOpenApi(options =>
+        // Add API Versioning - URL segment only
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
+        });
+
+        services.AddOpenApi("v1", options =>
         {
             options.AddDocumentTransformer((document, context, ct) =>
             {
                 document.Info.Title = "Clean Architecture API";
-                document.Info.Version = "1.0";
+                document.Info.Version = "v1";
+
+                // Replace {version} placeholder with actual version in all paths
+                Dictionary<string, IOpenApiPathItem> updatedPaths = new();
+                foreach (KeyValuePair<string, IOpenApiPathItem> path in document.Paths)
+                {
+                    string updatedPath = path.Key.Replace("{version}", "1", StringComparison.OrdinalIgnoreCase);
+                    updatedPaths[updatedPath] = path.Value;
+                }
+                document.Paths = new OpenApiPaths();
+                foreach (KeyValuePair<string, IOpenApiPathItem> path in updatedPaths)
+                {
+                    document.Paths.Add(path.Key, path.Value);
+                }
+
                 // Ensure Components and SecuritySchemes are initialized
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();

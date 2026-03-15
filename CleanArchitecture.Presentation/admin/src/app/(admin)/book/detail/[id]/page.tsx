@@ -1,40 +1,28 @@
 ﻿"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
-import { getGetBookId } from "@/lib/api/book-endpoints/book-endpoints";
+import { useGetApiV1BooksId } from "@/lib/api/books/books";
 import { BookResponse } from "@/lib/api/model/bookResponse";
 import Link from "next/link";
 
 export default function BookDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [book, setBook] = useState<BookResponse | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      const fetchBook = async () => {
-        try {
-          const response = await getGetBookId(id as string);
-          if (response.status === 200 && response.data.isSuccess) {
-            setBook(response.data.value!);
-          } else {
-             console.error("Book not found or error in response");
-          }
-        } catch (error) {
-          console.error("Failed to fetch book details", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchBook();
-    }
-  }, [id]);
+  const { data: response, isLoading } = useGetApiV1BooksId(id as string, {
+    query: {
+      enabled: !!id,
+    },
+  });
 
-  if (loading) return <div>Loading book details...</div>;
-  if (!book) return <div>Book not found.</div>;
+  if (isLoading) return <div>Loading book details...</div>;
+
+  const bookResponse = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
+  if (!bookResponse) return <div>Book not found.</div>;
+
+  const book = bookResponse;
 
   return (
     <div>

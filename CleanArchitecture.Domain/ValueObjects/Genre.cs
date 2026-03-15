@@ -10,18 +10,17 @@ public sealed record Genre(string Code)
     /// Creates a Genre instance from a code.
     /// </summary>
     /// <param name="code">The code of the genre.</param>
-    /// <returns>A Genre instance.</returns>
-    /// <exception cref="UnsupportedGenreException">Thrown when the genre is not supported.</exception>
-    public static Genre FromCode(string code)
+    /// <returns>A Result containing the Genre or a validation error.</returns>
+    public static Result<Genre> FromCode(string code)
     {
         Genre genre = new(code);
 
         if (!SupportedGenres.Contains(genre))
         {
-            throw new UnsupportedGenreException(code);
+            return Result<Genre>.Failure(BookErrors.InvalidGenre);
         }
 
-        return genre;
+        return Result<Genre>.Success(genre);
     }
 
     /// <summary>
@@ -62,12 +61,6 @@ public sealed record Genre(string Code)
 
         return genre.ToString();
     }
-
-    /// <summary>
-    /// Explicitly converts a string to a Genre.
-    /// </summary>
-    /// <param name="code">The code to convert.</param>
-    public static explicit operator Genre(string code) => FromCode(code);
 
     /// <summary>
     /// Returns the string representation of the Genre.

@@ -17,5 +17,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="src\app\api\" />
+      <Folder Include="src\lib\api\" />
     </ItemGroup>
 </Project>

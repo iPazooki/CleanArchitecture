@@ -130,9 +130,6 @@ public static class Extensions
         serilogBuilder.Logging.ClearProviders();
         serilogBuilder.Host.UseSerilog(((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration)));
 
-
-
         return builder;
-
     }
 }

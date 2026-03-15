@@ -9,7 +9,8 @@ export default defineConfig({
       mode: "tags-split",
       target: "./src/lib/api",
       schemas: "./src/lib/api/model",
-      client: "fetch",
+      client: "react-query",
+      httpClient: "fetch",
       indexFiles: true,
       clean: true,
       prettier: true,
@@ -19,6 +20,17 @@ export default defineConfig({
           name: "orvalFetch",
         },
       },
+    },
+  },
+  cleanArchitectureZod: {
+    input: {
+      target: "http://localhost:5049/openapi/v1.json",
+    },
+    output: {
+      mode: "tags-split",
+      target: "./src/lib/api/zod",
+      client: "zod",
+      prettier: true,
     },
   },
 });

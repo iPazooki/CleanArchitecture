@@ -21,17 +21,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 public interface IApplicationUnitOfWork : IUnitOfWork
 {
     /// <summary>
-    /// Gets the DbSet for <see cref="User"/> entities.
-    /// </summary>
-    public DbSet<User> Users { get; }
-
-    /// <summary>
     /// Gets the DbSet for <see cref="Book"/> entities.
     /// </summary>
     public DbSet<Book> Books { get; }
-
-    /// <summary>
-    /// Gets the DbSet for <see cref="Order"/> entities.
-    /// </summary>
-    public DbSet<Order> Orders { get; }
 }

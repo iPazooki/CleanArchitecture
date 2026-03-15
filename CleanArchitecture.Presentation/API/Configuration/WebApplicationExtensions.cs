@@ -1,4 +1,5 @@
 using CleanArchitecture.Infrastructure.Persistence.Data;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 namespace CleanArchitecture.Api.Configuration;
@@ -26,9 +27,12 @@ internal static class WebApplicationExtensions
             }
             else
             {
-                app.MapOpenApi();
+                app.MapOpenApi("/openapi/{documentName}.json");
 
                 app.MapScalarApiReference(options => options
+                    .WithTitle("Clean Architecture API - v1")
+                    .WithOpenApiRoutePattern("/openapi/{documentName}.json")
+                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
                     .AddPreferredSecuritySchemes("OAuth2")
                     .AddAuthorizationCodeFlow("OAuth2", flow =>
                     {
@@ -43,7 +47,7 @@ internal static class WebApplicationExtensions
             {
                 using IServiceScope scope = app.Services.CreateScope();
                 ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+                await context.Database.MigrateAsync().ConfigureAwait(false);
             }
 
             if (app.Environment.IsProduction())

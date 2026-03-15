@@ -4,10 +4,7 @@ using CleanArchitecture.Infrastructure.Persistence.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-if (!IsDesignTime())
-{
-    builder.AddServiceDefaults();
-}
+builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services
@@ -20,30 +17,28 @@ builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
 WebApplication app = builder.Build();
 
-if (!IsDesignTime())
-{
-    app.MapDefaultEndpoints();
-}
+app.MapDefaultEndpoints();
 
 app.UseSerilogRequestLogging();
 
 // Configure development-specific features and ensure the database is created
 await app.ConfigureFeaturesAsync().ConfigureAwait(false);
 
-// API Endpoints
-app.MapBookEndpoints();
-app.MapOrderEndpoints();
+// API Versioning
+Asp.Versioning.Builder.ApiVersionSet apiVersionSet = app.NewApiVersionSet()
+    .HasApiVersion(new Asp.Versioning.ApiVersion(1, 0))
+    .ReportApiVersions()
+    .Build();
+
+// API Endpoints with versioning
+RouteGroupBuilder versionedApi = app.MapGroup("/api/v{version:apiVersion}")
+    .WithApiVersionSet(apiVersionSet)
+    .WithGroupName("v1");
+
+versionedApi.MapBookEndpoints();
 
 app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
 await app.RunAsync().ConfigureAwait(false);
-
-static bool IsDesignTime()
-{
-    // This is true when invoked by `dotnet ef` tools
-    return AppDomain.CurrentDomain.GetAssemblies()
-        .Any(a => a.FullName != null &&
-                  a.FullName.StartsWith("Microsoft.EntityFrameworkCore.Design", StringComparison.OrdinalIgnoreCase));
-}

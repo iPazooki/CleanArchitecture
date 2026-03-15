@@ -26,7 +26,22 @@ public static class DependencyInjection
 
         string? connectionString = configuration.GetConnectionString("postgresdb");
 
-        ArgumentNullException.ThrowIfNull(connectionString);
+        // Add a check for Design-Time
+        bool isDesignTime = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design", StringComparison.OrdinalIgnoreCase) == true);
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            if (isDesignTime)
+            {
+                // Use a dummy string for design-time if the tool reaches here
+                connectionString = "Host=localhost;Database=dummy;";
+            }
+            else
+            {
+                throw new InvalidOperationException("Connection string 'postgresdb' not found.");
+            }
+        }
 
         // Configures the ApplicationDbContext with the connection string and interceptors.
         services.AddDbContext<ApplicationDbContext>((sp, options) =>

@@ -10,7 +10,14 @@ internal class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOf
 
     protected override async Task<Result<Guid>> HandleRequest(CreateBookCommand request, CancellationToken cancellationToken)
     {
-        Result<Book> book = Book.Create(request.Title, Genre.FromCode(request.Genre));
+        Result<Genre> genreResult = Genre.FromCode(request.Genre);
+
+        if (!genreResult.IsSuccess)
+        {
+            return Result<Guid>.Failure(genreResult.Errors.ToArray());
+        }
+
+        Result<Book> book = Book.Create(request.Title, genreResult.Value!);
 
         if (!book.IsSuccess)
         {

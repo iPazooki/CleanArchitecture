@@ -144,17 +144,31 @@ KEYCLOAK_ISSUER=http://localhost:8080/realms/clean-api
 
 ## Database Migrations
 
-Migrations are created and applied using EF Core targeting the Postgres-backed persistence project.
+Migrations are managed using Entity Framework Core and are stored in the `CleanArchitecture.Infrastructure.Persistence` project.
 
-To add migrations and update the database, run the following commands from the solution root:
+### Design-Time Migrations
+
+Because .NET Aspire injects connection strings at runtime, the standard EF Core tools cannot find a database connection during design-time. To solve this, the project includes an `ApplicationDbContextFactory` which provides a dummy connection string for the tools.
+
+To add a new migration, run the following command from the solution root:
 
 ```bash
-dotnet ef migrations add InitialCreate --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
-
-dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
+dotnet ef migrations add <MigrationName> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
 ```
 
-Ensure the configured Postgres instance is reachable when running these commands. When running via Aspire, you may prefer to manage schema changes using migrations applied during startup.
+### Applying Migrations
+
+#### Development and Testing
+In non-production environments, migrations are automatically applied during application startup using `context.Database.MigrateAsync()` in `WebApplicationExtensions.cs`.
+
+#### Manual Update
+If you need to manually update the database:
+
+```bash
+dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
+```
+
+Ensure a PostgreSQL instance is reachable if you are running this manually outside of the Aspire orchestrator.
 
 
 ## Contributing

@@ -1,5 +1,5 @@
 ﻿"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -7,54 +7,32 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { getGetBooks, deleteDeleteBook } from "@/lib/api/book-endpoints/book-endpoints";
+import { useGetApiV1Books, useDeleteApiV1BooksId } from "@/lib/api/books/books";
 import { BookResponse } from "@/lib/api/model/bookResponse";
 import Button from "../ui/button/Button";
 import Link from "next/link";
 
 export default function BookTable() {
-  const [books, setBooks] = useState<BookResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: response, isLoading, refetch } = useGetApiV1Books();
 
-  const fetchBooks = async () => {
-    setLoading(true);
-    try {
-      const response = await getGetBooks();
-      console.log("[DEBUG_LOG] API Response:", response);
-      if (response.status === 200 && response.data && response.data.isSuccess) {
-        // Handle both single object and array in value field
-        const value = response.data.value;
-        const data = Array.isArray(value) ? value : (value ? [value] : []);
-        setBooks(data as BookResponse[]);
-      } else {
-        setBooks([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch books", error);
-      setBooks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
+  const deleteMutation = useDeleteApiV1BooksId({
+    mutation: {
+      onSuccess: () => {
+        refetch();
+      },
+    },
+  });
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this book?")) {
-      try {
-        const response = await deleteDeleteBook({ id });
-        if (response.status === 204) {
-          fetchBooks();
-        }
-      } catch (error) {
-        console.error("Failed to delete book", error);
-      }
+      deleteMutation.mutate({ id });
     }
   };
 
-  if (loading) return <div>Loading books...</div>;
+  if (isLoading) return <div>Loading books...</div>;
+
+  const value = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
+  const books = (Array.isArray(value) ? value : (value ? [value] : [])) as BookResponse[];
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
