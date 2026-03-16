@@ -16,9 +16,10 @@ export const config = {
      * Match all routes except:
      * - api (including next-auth)
      * - _next (static files)
-     * - favicon
+     * - Next.js internals
+     * - public/static asset files (anything with a file extension)
      * - signin, signup
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|signin|signup).*)",
+    "/((?!api|_next/static|_next/image|signin|signup|.*\\..*$).*)",
   ],
 }
