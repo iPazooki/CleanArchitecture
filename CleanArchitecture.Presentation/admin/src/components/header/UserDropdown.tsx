@@ -10,14 +10,43 @@ export default function UserDropdown() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
-function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-  e.stopPropagation();
-  setIsOpen((prev) => !prev);
-}
+  function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.stopPropagation();
+    setIsOpen((prev) => !prev);
+  }
 
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  async function handleSignOut() {
+    closeDropdown();
+
+    try {
+      const response = await fetch("/api/auth/federated-logout", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to prepare logout redirect.");
+      }
+
+      const { logoutUrl } = (await response.json()) as { logoutUrl?: string };
+
+      await signOut({
+        redirect: false,
+        callbackUrl: "/signin",
+      });
+
+      window.location.assign(logoutUrl || "/signin");
+    } catch {
+      await signOut({
+        callbackUrl: "/signin",
+      });
+    }
+  }
+
   return (
     <div className="relative">
       <button
@@ -147,7 +176,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
           </li>
         </ul>
         <button
-          onClick={() => signOut()}
+          onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
