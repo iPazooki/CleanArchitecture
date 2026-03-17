@@ -129,10 +129,10 @@ internal static class ResultExtensions
         !IsConflictError(error);
 
     private static bool IsNotFoundError(DomainValidationError error) =>
-        error.Code?.EndsWith(".NotFound", StringComparison.OrdinalIgnoreCase) is true;
+        error.Code?.EndsWith(".NotFound", StringComparison.OrdinalIgnoreCase) ?? false;
 
     private static bool IsConflictError(DomainValidationError error) =>
-        error.Code?.Contains("Conflict", StringComparison.OrdinalIgnoreCase) is true;
+        error.Code?.Contains("Conflict", StringComparison.OrdinalIgnoreCase) ?? false;
 
     private readonly record struct ProblemDetailsMetadata(int StatusCode, string Title, string Type);
 }
