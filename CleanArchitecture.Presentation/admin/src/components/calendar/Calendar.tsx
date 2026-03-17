@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -19,6 +19,36 @@ interface CalendarEvent extends EventInput {
   };
 }
 
+
+function createInitialEvents(): CalendarEvent[] {
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 86400000);
+  const twoDaysFromNow = new Date(today.getTime() + 172800000);
+  const threeDaysFromNow = new Date(today.getTime() + 259200000);
+
+  return [
+    {
+      id: "1",
+      title: "Event Conf.",
+      start: today.toISOString().split("T")[0],
+      extendedProps: { calendar: "Danger" },
+    },
+    {
+      id: "2",
+      title: "Meeting",
+      start: tomorrow.toISOString().split("T")[0],
+      extendedProps: { calendar: "Success" },
+    },
+    {
+      id: "3",
+      title: "Workshop",
+      start: twoDaysFromNow.toISOString().split("T")[0],
+      end: threeDaysFromNow.toISOString().split("T")[0],
+      extendedProps: { calendar: "Primary" },
+    },
+  ];
+}
+
 const Calendar: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -27,8 +57,9 @@ const Calendar: React.FC = () => {
   const [eventStartDate, setEventStartDate] = useState("");
   const [eventEndDate, setEventEndDate] = useState("");
   const [eventLevel, setEventLevel] = useState("");
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>(createInitialEvents);
   const calendarRef = useRef<FullCalendar>(null);
+  const nextEventId = useRef(4);
   const { isOpen, openModal, closeModal } = useModal();
 
   const calendarsEvents = {
@@ -38,30 +69,6 @@ const Calendar: React.FC = () => {
     Warning: "warning",
   };
 
-  useEffect(() => {
-    // Initialize with some events
-    setEvents([
-      {
-        id: "1",
-        title: "Event Conf.",
-        start: new Date().toISOString().split("T")[0],
-        extendedProps: { calendar: "Danger" },
-      },
-      {
-        id: "2",
-        title: "Meeting",
-        start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-        extendedProps: { calendar: "Success" },
-      },
-      {
-        id: "3",
-        title: "Workshop",
-        start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
-        end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
-        extendedProps: { calendar: "Primary" },
-      },
-    ]);
-  }, []);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();
@@ -99,7 +106,7 @@ const Calendar: React.FC = () => {
     } else {
       // Add new event
       const newEvent: CalendarEvent = {
-        id: Date.now().toString(),
+        id: String(nextEventId.current++),
         title: eventTitle,
         start: eventStartDate,
         end: eventEndDate,
@@ -281,3 +288,4 @@ const renderEventContent = (eventInfo: EventContentArg) => {
 };
 
 export default Calendar;
+

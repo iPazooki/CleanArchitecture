@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef, useState, useCallback} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
@@ -168,42 +168,42 @@ const AppSidebar: React.FC = () => {
         </ul>
     );
 
-    const [openSubmenu, setOpenSubmenu] = useState<{
-        type: "main" | "others";
-        index: number;
-    } | null>(null);
     const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
         {}
     );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
     // const isActive = (path: string) => path === pathname;
-    const isActive = useCallback((path: string) => path === pathname, [pathname]);
+    const isActive = (path: string) => path === pathname;
+    type OpenSubmenu = {
+        type: "main" | "others";
+        index: number;
+    } | null;
 
-    useEffect(() => {
-        // Check if the current path matches any submenu item
-        let submenuMatched = false;
-        ["main"].forEach((menuType) => {
-            navItems.forEach((nav, index) => {
-                if (nav.subItems) {
-                    nav.subItems.forEach((subItem) => {
-                        if (isActive(subItem.path)) {
-                            setOpenSubmenu({
-                                type: menuType as "main" | "others",
-                                index,
-                            });
-                            submenuMatched = true;
-                        }
-                    });
-                }
-            });
-        });
+    const [manualSubmenuState, setManualSubmenuState] = useState<{
+        pathname: string;
+        submenu: OpenSubmenu;
+    }>({
+        pathname,
+        submenu: null,
+    });
 
-        // If no submenu item matches, close the open submenu
-        if (!submenuMatched) {
-            setOpenSubmenu(null);
+    const routeMatchedSubmenu: OpenSubmenu = (() => {
+        for (const [index, nav] of navItems.entries()) {
+            if (nav.subItems?.some((subItem) => isActive(subItem.path))) {
+                return {
+                    type: "main",
+                    index,
+                };
+            }
         }
-    }, [pathname, isActive]);
+
+        return null;
+    })();
+
+    const openSubmenu =
+        manualSubmenuState.pathname === pathname
+            ? manualSubmenuState.submenu
+            : routeMatchedSubmenu;
 
     useEffect(() => {
         // Set the height of the submenu items when the submenu is opened
@@ -219,15 +219,27 @@ const AppSidebar: React.FC = () => {
     }, [openSubmenu]);
 
     const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-        setOpenSubmenu((prevOpenSubmenu) => {
+        setManualSubmenuState((previousState) => {
+            const currentOpenSubmenu =
+                previousState.pathname === pathname
+                    ? previousState.submenu
+                    : routeMatchedSubmenu;
+
             if (
-                prevOpenSubmenu &&
-                prevOpenSubmenu.type === menuType &&
-                prevOpenSubmenu.index === index
+                currentOpenSubmenu &&
+                currentOpenSubmenu.type === menuType &&
+                currentOpenSubmenu.index === index
             ) {
-                return null;
+                return {
+                    pathname,
+                    submenu: null,
+                };
             }
-            return {type: menuType, index};
+
+            return {
+                pathname,
+                submenu: {type: menuType, index},
+            };
         });
     };
 
@@ -307,3 +319,4 @@ const AppSidebar: React.FC = () => {
 };
 
 export default AppSidebar;
+

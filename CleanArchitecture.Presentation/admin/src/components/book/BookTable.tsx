@@ -1,6 +1,21 @@
-﻿"use client";
-import React, { useState } from "react";
+"use client";
+
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useState } from "react";
+import {
+  getGetApiV1BooksQueryKey,
+  useDeleteApiV1BooksId,
+  useGetApiV1Books,
+} from "@/lib/api/books/books";
+import type { BookResponse } from "@/lib/api/model";
+import {
+  extractApiErrors,
+  formatErrorMessages,
+} from "@/lib/utils/error-handler";
+import { useModal } from "@/hooks/useModal";
+import Button from "../ui/button/Button";
+import { Modal } from "../ui/modal";
 import {
   Table,
   TableBody,
@@ -8,73 +23,91 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import {
-  getGetApiV1BooksQueryKey,
-  useDeleteApiV1BooksId,
-  useGetApiV1Books,
-} from "@/lib/api/books/books";
-import { BookResponse } from "@/lib/api/model/bookResponse";
-import Button from "../ui/button/Button";
-import Link from "next/link";
-import { Modal } from "../ui/modal";
-import { useModal } from "@/hooks/useModal";
 
 export default function BookTable() {
   const queryClient = useQueryClient();
-  const { data: response, isLoading } = useGetApiV1Books({
-    query: {
-      staleTime: Infinity,
-      gcTime: Infinity,
-    },
-  });
+  const { data: response, error, isLoading } = useGetApiV1Books();
   const { isOpen, openModal, closeModal } = useModal();
-  const [bookToDelete, setBookToDelete] = useState<string | null>(null);
+  const [bookToDelete, setBookToDelete] = useState<BookResponse | null>(null);
+
+  const books =
+    response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value)
+      ? response.data.value
+      : [];
+
+  function handleDeleteClick(book: BookResponse): void {
+    setBookToDelete(book);
+    openModal();
+  }
+
+  function handleCancelDelete(): void {
+    closeModal();
+    setBookToDelete(null);
+  }
 
   const deleteMutation = useDeleteApiV1BooksId({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetApiV1BooksQueryKey() });
-        closeModal();
-        setBookToDelete(null);
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: getGetApiV1BooksQueryKey() });
+        handleCancelDelete();
       },
     },
   });
 
-  const handleDeleteClick = (id: string) => {
-    setBookToDelete(id);
-    openModal();
-  };
-
-  const handleConfirmDelete = () => {
-    if (bookToDelete) {
-      deleteMutation.mutate({ id: bookToDelete });
+  function handleConfirmDelete(): void {
+    if (!bookToDelete?.id) {
+      return;
     }
-  };
 
-  const handleCancelDelete = () => {
-    closeModal();
-    setBookToDelete(null);
-  };
+    deleteMutation.mutate({ id: bookToDelete.id });
+  }
 
-  if (isLoading) return <div>Loading books...</div>;
+  const loadErrorMessage = error ? formatErrorMessages(extractApiErrors(error)) : null;
+  const deleteErrorMessage = deleteMutation.error
+    ? formatErrorMessages(extractApiErrors(deleteMutation.error))
+    : null;
 
-  const value = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
-  const books = (Array.isArray(value) ? value : (value ? [value] : [])) as BookResponse[];
+  if (isLoading) {
+    return <div>Loading books...</div>;
+  }
+
+  if (loadErrorMessage) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {loadErrorMessage}
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      {deleteErrorMessage ? (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {deleteErrorMessage}
+        </div>
+      ) : null}
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.003]">
         <div className="max-w-full overflow-x-auto">
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
                   Title
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
                   Genre
                 </TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
+                >
                   Actions
                 </TableCell>
               </TableRow>
@@ -97,8 +130,10 @@ export default function BookTable() {
                         Edit
                       </Link>
                       <button
-                        onClick={() => handleDeleteClick(book.id!)}
-                        className="text-red-500 hover:text-red-700"
+                        type="button"
+                        onClick={() => handleDeleteClick(book)}
+                        className="text-red-500 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={deleteMutation.isPending}
                       >
                         Delete
                       </button>
@@ -106,28 +141,33 @@ export default function BookTable() {
                   </TableCell>
                 </TableRow>
               ))}
-              {books.length === 0 && (
-                 <TableRow>
-                  <TableCell className="px-5 py-4 text-sm text-center text-gray-800 dark:text-white/90">
+              {books.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    className="px-5 py-4 text-center text-sm text-gray-800 dark:text-white/90"
+                    colSpan={3}
+                  >
                     No books found.
                   </TableCell>
                 </TableRow>
-              )}
+              ) : null}
             </TableBody>
           </Table>
         </div>
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCancelDelete} className="max-w-[700px] m-4">
+      <Modal isOpen={isOpen} onClose={handleCancelDelete} className="m-4 max-w-[700px]">
         <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
             Confirm Delete
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Are you sure you want to delete this book? This action cannot be undone.
+          <p className="mb-6 text-gray-600 dark:text-gray-300">
+            Are you sure you want to delete
+            {bookToDelete ? ` \"${bookToDelete.title}\"` : " this book"}? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-3">
             <Button
+              type="button"
               onClick={handleCancelDelete}
               variant="outline"
               disabled={deleteMutation.isPending}
@@ -135,6 +175,7 @@ export default function BookTable() {
               Cancel
             </Button>
             <Button
+              type="button"
               onClick={handleConfirmDelete}
               variant="primary"
               disabled={deleteMutation.isPending}

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=0",
     "generate": "orval && node scripts/fix-zod-schemas.js"
   },
   "dependencies": {
@@ -46,7 +46,7 @@
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
     "@types/react-transition-group": "^4.4.12",
-    "baseline-browser-mapping": "^2.10.7",
+    "baseline-browser-mapping": "^2.10.8",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.7",
     "orval": "^8.5.1",

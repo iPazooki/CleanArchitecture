@@ -1,22 +1,38 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Suspense, useEffect } from "react";
+
+function resolveCallbackUrl(value: string | null): string {
+  if (!value) {
+    return "/";
+  }
+
+  if (value.startsWith("/")) {
+    return value;
+  }
+
+  if (!URL.canParse(value)) {
+    return "/";
+  }
+
+  const parsedUrl = new URL(value);
+  return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}` || "/";
+}
 
 function SignInContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = resolveCallbackUrl(searchParams.get("callbackUrl"));
 
   useEffect(() => {
-    // Automatically trigger sign-in with Keycloak
-    signIn("keycloak", { callbackUrl });
+    void signIn("keycloak", { callbackUrl });
   }, [callbackUrl]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-xl font-semibold mb-2">Redirecting to Sign In...</h1>
+        <h1 className="mb-2 text-xl font-semibold">Redirecting to Sign In...</h1>
         <p className="text-gray-500">Please wait while we redirect you to the login page.</p>
       </div>
     </div>
