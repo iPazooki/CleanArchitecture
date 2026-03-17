@@ -1,5 +1,6 @@
 ﻿"use client";
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -7,7 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { useGetApiV1Books, useDeleteApiV1BooksId } from "@/lib/api/books/books";
+import {
+  getGetApiV1BooksQueryKey,
+  useDeleteApiV1BooksId,
+  useGetApiV1Books,
+} from "@/lib/api/books/books";
 import { BookResponse } from "@/lib/api/model/bookResponse";
 import Button from "../ui/button/Button";
 import Link from "next/link";
@@ -15,14 +20,20 @@ import { Modal } from "../ui/modal";
 import { useModal } from "@/hooks/useModal";
 
 export default function BookTable() {
-  const { data: response, isLoading, refetch } = useGetApiV1Books();
+  const queryClient = useQueryClient();
+  const { data: response, isLoading } = useGetApiV1Books({
+    query: {
+      staleTime: Infinity,
+      gcTime: Infinity,
+    },
+  });
   const { isOpen, openModal, closeModal } = useModal();
   const [bookToDelete, setBookToDelete] = useState<string | null>(null);
 
   const deleteMutation = useDeleteApiV1BooksId({
     mutation: {
       onSuccess: () => {
-        refetch();
+        queryClient.invalidateQueries({ queryKey: getGetApiV1BooksQueryKey() });
         closeModal();
         setBookToDelete(null);
       },

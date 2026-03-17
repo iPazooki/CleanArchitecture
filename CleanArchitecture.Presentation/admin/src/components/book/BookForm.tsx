@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  getGetApiV1BooksQueryKey,
   useGetApiV1BooksId,
   usePostApiV1Books,
   usePutApiV1BooksId,
@@ -26,6 +28,7 @@ interface BookFormProps {
 
 export default function BookForm({ id }: BookFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [serverErrors, setServerErrors] = useState<DomainError[]>([]);
 
   const {
@@ -55,14 +58,6 @@ export default function BookForm({ id }: BookFormProps) {
     }
   }, [bookResponse, setValue]);
 
-  useEffect(() => {
-    if (fetchError) {
-      setServerErrors([
-        { code: "FetchError", message: "Failed to load book data" },
-      ]);
-    }
-  }, [fetchError]);
-
   // --- Mutations ---
   const applyFieldErrors = (domainErrors: DomainError[]) => {
     const fieldErrors = getFieldErrors(domainErrors, {
@@ -91,8 +86,11 @@ export default function BookForm({ id }: BookFormProps) {
 
   const updateMutation = usePutApiV1BooksId({
     mutation: {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         if (response.status === 204) {
+          await queryClient.invalidateQueries({
+            queryKey: getGetApiV1BooksQueryKey(),
+          });
           router.push("/book/list");
         }
       },
@@ -105,6 +103,9 @@ export default function BookForm({ id }: BookFormProps) {
   });
 
   const loading = createMutation.isPending || updateMutation.isPending;
+  const displayedServerErrors = fetchError
+    ? [{ code: "FetchError", message: "Failed to load book data" }]
+    : serverErrors;
 
   const onSubmit = (data: CreateBookCommand) => {
     setServerErrors([]);
@@ -121,7 +122,7 @@ export default function BookForm({ id }: BookFormProps) {
     <ComponentCard title={id ? "Edit Book" : "Add New Book"}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Display server errors */}
-        {serverErrors.length > 0 && (
+        {displayedServerErrors.length > 0 && (
           <div className="rounded-md bg-red-50 p-4">
             <div className="flex">
               <div className="ml-3">
@@ -130,7 +131,7 @@ export default function BookForm({ id }: BookFormProps) {
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   <ul className="list-disc space-y-1 pl-5">
-                    {serverErrors.map((error, index) => (
+                    {displayedServerErrors.map((error, index) => (
                       <li key={index}>{error.message}</li>
                     ))}
                   </ul>
