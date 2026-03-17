@@ -16,6 +16,7 @@ internal static class BookEndpoints
             .WithDescription("Creates a new book with the specified title and genre.")
             .Produces<Result<Guid>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .RequireAuthorization(EditorPolicy.Name);
 
         books.MapPut("/{id:guid}", UpdateBook)
@@ -24,6 +25,7 @@ internal static class BookEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .RequireAuthorization(EditorPolicy.Name);
 
         books.MapDelete("/{id:guid}", DeleteBook)
@@ -45,7 +47,6 @@ internal static class BookEndpoints
             .WithSummary("Gets all books")
             .WithDescription("Gets all books without pagination")
             .Produces<Result<IEnumerable<BookResponse>>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound)
             .RequireAuthorization(ViewerPolicy.Name);
     }
 
@@ -53,18 +54,14 @@ internal static class BookEndpoints
     {
         Result<BookResponse> result = await sender.Send(new GetBookQuery(id)).ConfigureAwait(false);
 
-        return result.IsSuccess
-            ? Results.Ok(result)
-            : Results.NotFound();
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> GetBooks(ISender sender)
     {
         Result<IEnumerable<BookResponse>> result = await sender.Send(new GetBooksQuery()).ConfigureAwait(false);
 
-        return result.IsSuccess
-            ? Results.Ok(result)
-            : Results.NotFound();
+        return result.ToProblemDetails();
     }
 
     private static async Task<IResult> DeleteBook(ISender sender, Guid id)
@@ -86,8 +83,8 @@ internal static class BookEndpoints
 
     private static async Task<IResult> CreateBook(ISender sender, CreateBookCommand command)
     {
-        Result<Guid> result = await sender.Send(command).ConfigureAwait(false);
+        Result<Guid> result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
 
-        return result.ToCreatedResponse(new Uri($"/api/v1/books/{result.Value}", UriKind.Relative));
+        return result.ToCreatedResponse(id => new Uri($"/api/v1/books/{id}", UriKind.Relative));
     }
 }

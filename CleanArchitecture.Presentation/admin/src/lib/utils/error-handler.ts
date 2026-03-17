@@ -1,32 +1,43 @@
-import { ProblemDetails } from "../api/model";
-import { ApiError } from "@/lib/orval-fetch";
+import type { ProblemDetails } from "../api/model";
+import { isApiError } from "@/lib/utils/api-error";
 
-/**
- * Represents a structured error from ProblemDetails
- */
 export interface DomainError {
   code: string;
   message: string;
 }
 
-/**
- * Extracts structured errors from ProblemDetails response
- */
-export function extractErrors(problemDetails: ProblemDetails): DomainError[] {
+type ProblemDetailsWithErrors = ProblemDetails & {
+  errors?: Array<Partial<DomainError>>;
+};
+
+function isProblemDetails(value: unknown): value is ProblemDetails {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  return ["detail", "errors", "instance", "status", "title", "type"].some(
+    (property) => property in value,
+  );
+}
+
+function getProblemDetailsErrors(problemDetails: ProblemDetails): Array<Partial<DomainError>> | undefined {
+  const { errors } = problemDetails as ProblemDetailsWithErrors;
+  return Array.isArray(errors) ? errors : undefined;
+}
+
+export function extractErrors(problemDetails: ProblemDetails | null | undefined): DomainError[] {
   if (!problemDetails) {
     return [];
   }
 
-  // Check if errors extension exists (our custom format)
-  const extensions = problemDetails as any;
-  if (extensions.errors && Array.isArray(extensions.errors)) {
-    return (extensions.errors as DomainError[]).map((e) => ({
-      code: e.code || "Error",
-      message: e.message || e.code || "An unknown error occurred",
+  const errors = getProblemDetailsErrors(problemDetails);
+  if (errors) {
+    return errors.map((error) => ({
+      code: error.code || "Error",
+      message: error.message || error.code || "An unknown error occurred",
     }));
   }
 
-  // Fallback to generic error
   return [
     {
       code: "Unknown",
@@ -35,21 +46,15 @@ export function extractErrors(problemDetails: ProblemDetails): DomainError[] {
   ];
 }
 
-/**
- * Formats errors for display
- */
 export function formatErrorMessages(errors: DomainError[]): string {
-  return errors.map((e) => e.message).join(", ");
+  return errors.map((error) => error.message).join(", ");
 }
 
-/**
- * Gets field-specific errors for form validation
- */
-export function getFieldErrors(
+export function getFieldErrors<TFieldName extends string>(
   errors: DomainError[],
-  fieldMap: Record<string, string>,
-): Record<string, string> {
-  const fieldErrors: Record<string, string> = {};
+  fieldMap: Record<string, TFieldName>,
+): Partial<Record<TFieldName, string>> {
+  const fieldErrors: Partial<Record<TFieldName, string>> = {};
 
   errors.forEach((error) => {
     for (const [substring, fieldName] of Object.entries(fieldMap)) {
@@ -63,12 +68,8 @@ export function getFieldErrors(
   return fieldErrors;
 }
 
-/**
- * Extracts DomainError[] from an unknown error, handling ApiError with
- * ProblemDetails body for 400, 401, and 422 responses.
- */
 export function extractApiErrors(error: unknown): DomainError[] {
-  if (error instanceof ApiError) {
+  if (isApiError(error)) {
     if (error.status === 401) {
       return [
         {
@@ -77,10 +78,30 @@ export function extractApiErrors(error: unknown): DomainError[] {
         },
       ];
     }
-    if (error.status === 400 || error.status === 422) {
-      return extractErrors(error.data as ProblemDetails);
+
+    if (typeof error.data === "string" && error.data.length > 0) {
+      return [
+        {
+          code: "RequestError",
+          message: error.data,
+        },
+      ];
+    }
+
+    if (isProblemDetails(error.data)) {
+      return extractErrors(error.data);
     }
   }
+
+  if (error instanceof Error && error.message) {
+    return [
+      {
+        code: "UnexpectedError",
+        message: error.message,
+      },
+    ];
+  }
+
   return [
     {
       code: "NetworkError",

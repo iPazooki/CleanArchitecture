@@ -1,28 +1,42 @@
-﻿"use client";
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import ComponentCard from "@/components/common/ComponentCard";
-import { useGetApiV1BooksId } from "@/lib/api/books/books";
-import { BookResponse } from "@/lib/api/model/bookResponse";
+"use client";
+
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useGetApiV1BooksId } from "@/lib/api/books/books";
+import {
+  extractApiErrors,
+  formatErrorMessages,
+} from "@/lib/utils/error-handler";
+import ComponentCard from "@/components/common/ComponentCard";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 
 export default function BookDetailPage() {
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
+  const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
 
-  const { data: response, isLoading } = useGetApiV1BooksId(id as string, {
+  const { data: response, error, isLoading } = useGetApiV1BooksId(bookId ?? "", {
     query: {
-      enabled: !!id,
+      enabled: Boolean(bookId),
     },
   });
 
-  if (isLoading) return <div>Loading book details...</div>;
+  if (isLoading) {
+    return <div>Loading book details...</div>;
+  }
 
-  const bookResponse = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
-  if (!bookResponse) return <div>Book not found.</div>;
+  if (error) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {formatErrorMessages(extractApiErrors(error))}
+      </div>
+    );
+  }
 
-  const book = bookResponse;
+  const book = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
+  if (!book) {
+    return <div>Book not found.</div>;
+  }
 
   return (
     <div>
@@ -39,19 +53,20 @@ export default function BookDetailPage() {
               <p className="text-lg font-semibold text-gray-800 dark:text-white/90">{book.genre}</p>
             </div>
             <div>
-                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</h4>
-                <p className="text-sm text-gray-800 dark:text-white/90">{book.id}</p>
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</h4>
+              <p className="text-sm text-gray-800 dark:text-white/90">{book.id}</p>
             </div>
             <div className="flex gap-4 pt-4">
               <Link
                 href={`/book/edit/${book.id}`}
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600"
+                className="inline-flex items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
               >
                 Edit Book
               </Link>
               <button
+                type="button"
                 onClick={() => router.back()}
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Back to List
               </button>

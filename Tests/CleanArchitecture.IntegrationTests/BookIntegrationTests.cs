@@ -1,6 +1,7 @@
 ﻿using CleanArchitecture.Application.Entities.Books.Commands.Create;
 using CleanArchitecture.Application.Entities.Books.Commands.Delete;
 using CleanArchitecture.Application.Entities.Books.Commands.Update;
+using CleanArchitecture.Application.Entities.Books.Queries.Get;
 
 namespace CleanArchitecture.IntegrationTests;
 
@@ -37,6 +38,15 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         using HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"/api/v1/books/{createdResult.Value}", updateCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
+
+        using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/api/v1/books/{createdResult.Value}", CancellationToken);
+        Result<BookResponse>? getResult = await getResponse.Content.ReadFromJsonAsync<Result<BookResponse>>(CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getResult);
+        Assert.True(getResult!.IsSuccess);
+        Assert.Equal("Updated Book", getResult.Value!.Title);
+        Assert.Equal("NF", getResult.Value.Genre);
     }
 
     [Fact]
@@ -73,6 +83,42 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/api/v1/books/{createdResult.Value}", CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task SendBookQueryWithUnknownIdReturnsNotFound()
+    {
+        using HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/books/{Guid.NewGuid()}", CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SendBookCommandWithUnknownIdReturnsNotFoundOnUpdate()
+    {
+        UpdateBookCommand command = new(Guid.NewGuid(), "Updated Book", "NF");
+
+        using HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"/api/v1/books/{command.Id}", command, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SendBookCommandWithUnknownIdReturnsNotFoundOnDelete()
+    {
+        using HttpResponseMessage response = await _httpClient.DeleteAsync($"/api/v1/books/{Guid.NewGuid()}", CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SendBookCommandWithInvalidGenreReturnsUnprocessableEntity()
+    {
+        CreateBookCommand command = new("Invalid Genre Book", "X");
+
+        using HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/api/v1/books", command, CancellationToken);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
 
     public async ValueTask InitializeAsync()

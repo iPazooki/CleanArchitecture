@@ -1,83 +1,109 @@
-﻿import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import { getSession, signIn } from "next-auth/react";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { ApiError } from "@/lib/utils/api-error";
 
-/**
- * Typed error for non-2xx API responses.
- * Preserves status, parsed body, and headers so callers (including
- * React Query `onError`) can inspect validation / ProblemDetails payloads.
- */
-export class ApiError extends Error {
-  status: number;
-  data: unknown;
-  headers: Headers;
+const apiRoutePrefix = "/api/v1";
 
-  constructor(status: number, data: unknown, headers: Headers) {
-    super(`API request failed with status ${status}`);
-    this.name = "ApiError";
-    this.status = status;
-    this.data = data;
-    this.headers = headers;
-  }
+function isAbsoluteUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url);
 }
 
-/**
- * Custom fetch mutator for Orval.
- * It uses the appropriate session retrieval method based on the environment.
- * It automatically attaches the Authorization: Bearer <token> header to all outgoing requests.
- */
-export const orvalFetch = async <T>(
-    url: string,
-    options: RequestInit
-): Promise<T> => {
-    let accessToken: string | undefined;
-    // Check if we are on the server or client
-    if (typeof window === "undefined") {
-        // Server side: getServerSession with authOptions
-        const session = await getServerSession(authOptions);
-        accessToken = (session as any)?.accessToken;
-    } else {
-        // Client side: getSession from next-auth/react
-        const session = await getSession();
-        accessToken = (session as any)?.accessToken;
+function normalizeRequestPath(url: string): string {
+  return url.startsWith("/") ? url : `/${url}`;
+}
+
+function buildServerApiUrl(path: string): string {
+  const apiBaseUrl = process.env.API_BASE_URL?.trim().replace(/\/+$/, "") ?? "";
+
+  if (!apiBaseUrl) {
+    throw new Error("API_BASE_URL must be configured for server-side API requests.");
+  }
+
+  const normalizedPath = normalizeRequestPath(path);
+
+  if (apiBaseUrl.endsWith(apiRoutePrefix) && normalizedPath === apiRoutePrefix) {
+    return apiBaseUrl;
+  }
+
+  if (apiBaseUrl.endsWith(apiRoutePrefix) && normalizedPath.startsWith(`${apiRoutePrefix}/`)) {
+    return `${apiBaseUrl}${normalizedPath.slice(apiRoutePrefix.length)}`;
+  }
+
+  return `${apiBaseUrl}${normalizedPath}`;
+}
+
+async function resolveAccessToken(): Promise<string | undefined> {
+  if (typeof window === "undefined") {
+    const session = await getServerSession(authOptions);
+    return session?.accessToken;
+  }
+
+  const session = await getSession();
+  return session?.accessToken;
+}
+
+function resolveRequestUrl(url: string): string {
+  if (isAbsoluteUrl(url)) {
+    return url;
+  }
+
+  const normalizedPath = normalizeRequestPath(url);
+
+  if (typeof window !== "undefined") {
+    return normalizedPath;
+  }
+
+  return buildServerApiUrl(normalizedPath);
+}
+
+async function parseResponseBody(response: Response): Promise<unknown> {
+  if (response.status === 204 || response.status === 205) {
+    return undefined;
+  }
+
+  const body = await response.text();
+  if (!body) {
+    return undefined;
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return JSON.parse(body);
+  }
+
+  return body;
+}
+
+export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
+  const accessToken = await resolveAccessToken();
+  const headers = new Headers(options.headers);
+
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+
+  const response = await fetch(resolveRequestUrl(url), {
+    ...options,
+    headers,
+  });
+
+  const data = await parseResponseBody(response);
+
+  if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined") {
+      const callbackUrl = `${window.location.pathname}${window.location.search}`;
+      void signIn("keycloak", { callbackUrl });
     }
-    const headers = new Headers(options.headers);
-    if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-    }
-    // Ensure Base URL is used if provided in environment (server-side only)
-    const baseUrl = process.env.API_BASE_URL || "";
-    const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
-    // BFF/Proxy logic:
-    // When on the client, use '/api/v1' as base to trigger Next.js rewrites.
-    // When on the server, use the direct backend URL.
-    let fullUrl: string;
-    if (typeof window !== "undefined") {
-        fullUrl = `/api/v1${cleanUrl}`;
-    } else {
-        // Backend API doesn't use the /api/v1 prefix
-        fullUrl = url.startsWith("http") ? url : `${cleanBaseUrl}${cleanUrl}`;
-    }
-    // console.log(`[DEBUG_LOG] Fetching URL: ${fullUrl}`);
-    const response = await fetch(fullUrl, {
-        ...options,
-        headers,
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        // Handle 401 Unauthorized - session expired or invalid token
-        if (response.status === 401 && typeof window !== "undefined") {
-            // Redirect to login page on client-side
-            signIn("keycloak");
-            // Throw error anyway for proper error handling in UI
-        }
-        throw new ApiError(response.status, data, response.headers);
-    }
-    return {
-        data,
-        status: response.status,
-        headers: response.headers,
-    } as T;
+
+    throw new ApiError(response.status, data, response.headers);
+  }
+
+  return {
+    data,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 };
+
 export default orvalFetch;

@@ -1,4 +1,5 @@
 ﻿using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Errors;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Delete;
 
@@ -11,7 +12,7 @@ internal class DeleteBookRequestHandler(IApplicationUnitOfWork applicationUnitOf
 
         if (book is null)
         {
-            return Result.Failure("Book Not Found.");
+            return Result.Failure(BookErrors.BookNotFound);
         }
 
         applicationUnitOfWork.Books.Remove(book);

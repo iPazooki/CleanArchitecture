@@ -35,15 +35,10 @@ public sealed class Book : AggregateRootAuditable
     /// <returns>A Result containing the Book or validation errors.</returns>
     public static Result<Book> Create(string title, Genre genre)
     {
-        // Domain validation
-        if (string.IsNullOrWhiteSpace(title))
+        Result titleValidationResult = ValidateTitle(title);
+        if (!titleValidationResult.IsSuccess)
         {
-            return Result<Book>.Failure(BookErrors.TitleIsRequired);
-        }
-
-        if (title.Length > 200)
-        {
-            return Result<Book>.Failure(BookErrors.TitleTooLong);
+            return Result<Book>.Failure(titleValidationResult.Errors.ToArray());
         }
 
         Book book = new(title, genre);
@@ -60,17 +55,35 @@ public sealed class Book : AggregateRootAuditable
     /// <returns>A Result indicating success or validation errors.</returns>
     public Result UpdateTitle(string newTitle)
     {
-        if (string.IsNullOrWhiteSpace(newTitle))
+        Result titleValidationResult = ValidateTitle(newTitle);
+        if (!titleValidationResult.IsSuccess)
         {
-            return Result.Failure(BookErrors.TitleIsRequired);
-        }
-
-        if (newTitle.Length > 200)
-        {
-            return Result.Failure(BookErrors.TitleTooLong);
+            return titleValidationResult;
         }
 
         Title = newTitle;
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Updates the title and genre of the book with domain validation.
+    /// </summary>
+    /// <param name="newTitle">The new title.</param>
+    /// <param name="newGenre">The new genre.</param>
+    /// <returns>A Result indicating success or validation errors.</returns>
+    public Result Update(string newTitle, Genre newGenre)
+    {
+        ArgumentNullException.ThrowIfNull(newGenre);
+
+        Result titleValidationResult = ValidateTitle(newTitle);
+        if (!titleValidationResult.IsSuccess)
+        {
+            return titleValidationResult;
+        }
+
+        Title = newTitle;
+        Genre = newGenre;
+
         return Result.Success();
     }
 
@@ -81,5 +94,20 @@ public sealed class Book : AggregateRootAuditable
     public void UpdateGenre(Genre newGenre)
     {
         Genre = newGenre;
+    }
+
+    private static Result ValidateTitle(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return Result.Failure(BookErrors.TitleIsRequired);
+        }
+
+        if (title.Length > 200)
+        {
+            return Result.Failure(BookErrors.TitleTooLong);
+        }
+
+        return Result.Success();
     }
 }

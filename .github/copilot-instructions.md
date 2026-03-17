@@ -4,110 +4,50 @@ apply: always
 
 # Copilot Instructions
 
-> Role: When generating suggestions or code for this repository, act as a senior software engineer: be conservative, prioritize safety, maintainability, and clear reasoning. Explain trade-offs briefly when making non-obvious choices.
+## Build, test, and lint commands
 
-## High-level project expectations
-- This repository is **full-stack**:
-  - **Backend:** .NET Clean Architecture (Domain, Application, Infrastructure, Infrastructure.Persistence, Presentation, Aspire AppHost)
-  - **Admin Frontend:** React + Next.js + TypeScript
-- Preserve architecture boundaries and avoid leaking concerns across layers.
-- Prefer explicit, small, well-tested changes. Avoid broad refactors without migration notes and tests.
-- Follow DDD in backend (domain models, value objects, specifications, thin application services/use-cases).
-- Use CQRS in backend where valuable; avoid unnecessary complexity for trivial scenarios.
-- In frontend, prefer component composition, clear data flow, and strongly typed contracts.
+### Backend and solution
+- Install the Aspire workload before using the AppHost: `dotnet workload install aspire`
+- Restore packages: `dotnet restore`
+- Build the solution: `dotnet build --configuration Release`
+- Use `dotnet build` as the .NET lint gate. `Directory.Build.props` enables analyzers, enforces code style in build, and treats warnings as errors across all `.csproj` files.
+- Run all tests: `dotnet test --configuration Release`
+- Run one test project: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release`
+- Run a single test class or method: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release --filter "FullyQualifiedName~Domain.UnitTests.BookTests"`
+- Run only the integration suite: `dotnet test Tests\CleanArchitecture.IntegrationTests\CleanArchitecture.IntegrationTests.csproj --configuration Release --filter "FullyQualifiedName~CleanArchitecture.IntegrationTests.BookIntegrationTests"`
+- Run the full local stack through Aspire: `dotnet run --project CleanArchitecture.Aspire\CleanArchitecture.AppHost\CleanArchitecture.AppHost.csproj`
+- Run only the API: `dotnet run --project CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj`
+- Add a migration: `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation\API`
+- Apply migrations manually: `dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation\API`
 
-## Tech profile (current)
-- **Backend:** .NET 10, C# 14, ASP.NET Core MVC, Aspire
-- **Frontend:** Next.js 16, React 19, TypeScript 5.9
-- **Auth:** Keycloak via NextAuth in admin app + backend auth integration
-- **Database:** PostgreSQL with EF Core/Npgsql
-- **Styling/UI:** Tailwind CSS
-- **Package manager (frontend):** npm
+### Admin app
+- Work from `CleanArchitecture.Presentation\admin`
+- Install dependencies: `pnpm install`
+- Start the admin app: `pnpm dev`
+- Build the admin app: `pnpm build`
+- Lint the admin app: `pnpm lint`
+- Regenerate API hooks and Zod schemas: `pnpm generate`
 
-## Coding conventions
+## High-level architecture
 
-### Backend (.NET)
-- Naming: PascalCase for types/methods/properties, `I` prefix for interfaces, camelCase for parameters, private fields `_camelCase`.
-- Async: Prefer `async`/`await`, never return `async void`, propagate `CancellationToken` where relevant.
-- DI: Constructor injection by default.
-- Keep controllers/minimal API handlers thin; delegate logic to application services/handlers.
-- EF Core: explicit entity/value-object configuration in `Infrastructure.Persistence`.
-- Logging: `ILogger<T>` with meaningful structured logs at important decision points.
-- Resilience: use Polly for outbound network calls where appropriate.
+- `CleanArchitecture.sln` is split into Core (`CleanArchitecture.Domain`, `CleanArchitecture.Application`), Infrastructure (`CleanArchitecture.Infrastructure`, `CleanArchitecture.Infrastructure.Persistence`), Presentation (`CleanArchitecture.Presentation\API`, `CleanArchitecture.Presentation\admin`), Aspire (`CleanArchitecture.AppHost`, `CleanArchitecture.ServiceDefaults`), and four test projects.
+- `CleanArchitecture.Presentation\API\Program.cs` is the backend composition root. It adds Aspire service defaults first, then wires the Application, Infrastructure, Infrastructure.Persistence, and Presentation layers through their `Add*Services()` extension methods.
+- The API is a versioned Minimal API. Endpoints are grouped under `/api/v{version:apiVersion}` and then mapped by feature extension classes such as `BookEndpoints`.
+- `CleanArchitecture.Infrastructure.Persistence` owns EF Core concerns: `ApplicationDbContext`, entity configurations, migrations, SaveChanges interceptors, and the unit-of-work implementation.
+- `CleanArchitecture.Aspire\CleanArchitecture.AppHost\AppHost.cs` is the real local-dev entry point. In Development it starts Postgres + PgAdmin, Keycloak with realm import, the API, and the Next.js admin app. In Testing it starts only the API and an ephemeral Postgres database, which is why integration tests do not need a separately managed database or Keycloak instance.
+- `CleanArchitecture.Aspire\CleanArchitecture.ServiceDefaults\Extensions.cs` adds the shared cross-cutting runtime behavior: Serilog, OpenTelemetry, service discovery, resilience handlers, and health endpoints.
+- `CleanArchitecture.Presentation\admin` is a Next.js 16 App Router admin app. It uses NextAuth with Keycloak, TanStack Query for API hooks, and generated API clients/Zod schemas under `src\lib\api` and `src\lib\api\zod`.
 
-### Frontend (React/Next.js/TypeScript)
-- Prefer **TypeScript-first** solutions; avoid `any` unless unavoidable and documented.
-- Build small, reusable components; keep UI components mostly presentational.
-- Keep side effects contained (`useEffect`, server actions, or dedicated hooks) and predictable.
-- Prefer server/client boundaries intentionally in Next.js (`"use client"` only when needed).
-- Use accessible markup and keyboard-friendly interactions.
-- Keep styling consistent with existing Tailwind patterns and design tokens.
-- Avoid introducing large dependencies without strong justification.
+## Key conventions
 
-## Security & secrets
-- Never hard-code credentials, client secrets, tokens, or connection strings.
-- Keycloak and NextAuth secrets/config must come from environment variables or secret stores.
-- Local development secrets: user-secrets (backend) and `.env.local` (frontend, uncommitted).
-- CI secrets must come from repository/runner secret providers.
-- Treat auth/session, token handling, and redirect flows as security-sensitive areas requiring extra review.
-
-## Tests & quality gates
-
-### Backend
-- Unit tests: Domain and Application behavior (xUnit + Moq).
-- Integration tests: run with Aspire AppHost and provisioned Postgres.
-- Keep tests deterministic: explicit seed/setup + cleanup.
-
-### Frontend
-- Add tests for critical UI behavior, auth flow boundaries, and key utility/hooks logic.
-- Prefer focused component/integration tests over brittle snapshot-only testing.
-- Validate loading/error/empty states for data-driven views.
-
-### CI expectations
-- Start Aspire AppHost before backend integration tests.
-- Build and type-check frontend (`npm run build`, `npm run lint`, `npm run typecheck` if available).
-- Do not merge changes that break auth flow, migrations, or core dashboard/admin routes.
-
-## Database & migrations
-- Provider: Npgsql (Postgres).
-- Migrations are managed in `Infrastructure.Persistence`.
-- Typical commands:
-  - `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
-  - `dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation`
-- Prefer local orchestration via Aspire AppHost.
-
-## Dependency guidance
-- Prefer stable, maintained packages with active ecosystems.
-- Avoid adding heavy client libraries unless necessary.
-- When upgrading major versions, document compatibility impacts and test matrix.
-- Keep frontend and backend dependency upgrades isolated and reviewable.
-
-## Pull requests & commits
-- Small, focused PRs with clear titles.
-- Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`.
-- PR description must include:
-  - Why this change is needed
-  - What was changed
-  - How it was tested
-  - Any migration/env/config impact
-
-## When to ask for human review
-- Authentication/authorization/session changes
-- Secrets/configuration handling
-- Database migrations or schema-impacting changes
-- CI/CD workflow changes
-- Public API contract changes
-- Critical dependency additions/upgrades
-
-## Non-functional priorities
-1. Correctness and safety (data integrity, auth, secrets)
-2. Test coverage of behavior
-3. Maintainability and clear boundaries
-4. Performance only when measured bottlenecks exist
-
-## AI response behavior for this repository
-- Prefer minimal, safe diffs over broad rewrites.
-- Explain non-obvious decisions briefly.
-- If assumptions are required, state them explicitly.
-- For multi-layer changes, present plan first (backend, frontend, data, tests).
-- Include test/update steps with every meaningful implementation suggestion.
+- Preserve the layer boundaries enforced by `Tests\Architecture.UnitTests\ArchitectureTests.cs`. Domain must not reference Application, Infrastructure, or Presentation; Application must not reference Infrastructure or Presentation; Infrastructure projects must not reference Presentation.
+- Backend use cases follow CQRS with Mediator source generation and FluentValidation auto-registration from `CleanArchitecture.Application\DependencyInjection.cs`. New features should follow the existing `Entities\<Aggregate>\Commands` and `Entities\<Aggregate>\Queries` layout.
+- Application and domain code return `Result` or `Result<T>`. Minimal API endpoints translate those results to HTTP responses through `CleanArchitecture.Presentation\API\Extensions\ResultExtensions.cs` instead of building ad hoc response shapes.
+- Write endpoints use `SendWithRetryAsync()` from `CleanArchitecture.Presentation\API\Configuration\MediatorPollyExtensions.cs`, which wraps mediator calls with Polly retry, circuit-breaker, and fallback behavior. Read endpoints call `sender.Send()` directly.
+- Non-production startup automatically applies EF Core migrations in `CleanArchitecture.Presentation\API\Configuration\WebApplicationExtensions.cs`. The EF CLI works because `CleanArchitecture.Infrastructure.Persistence\Data\ApplicationDbContextFactory.cs` supplies a design-time Npgsql connection when Aspire has not injected `ConnectionStrings:postgresdb`.
+- Authentication is environment-sensitive. Normal environments use Keycloak JWT bearer auth with named policies from `CleanArchitecture.Infrastructure\Security`; the `Testing` environment swaps in `TestAuthHandler`, which grants the integration test client all required roles.
+- OpenAPI and Scalar are only mapped in Development when the backend user secret `ScalarApi:ClientSecret` is set. This matters for `pnpm generate`, because `orval.config.ts` reads `http://localhost:5049/openapi/v1.json`.
+- Treat `CleanArchitecture.Presentation\admin\src\lib\api` and `CleanArchitecture.Presentation\admin\src\lib\api\zod` as generated output. Update the backend contract and rerun `pnpm generate` instead of hand-editing those files. The repo also relies on `scripts\fix-zod-schemas.js` after generation.
+- Use `pnpm` for the admin app. The repo commits `pnpm-lock.yaml`, the AppHost starts the frontend with `.WithPnpm()`, and `.aiassistant\rules\instructions.md` assumes pnpm-based frontend workflows.
+- The admin app behaves like a thin BFF. `next.config.ts` rewrites browser calls from `/api/v1/*` to `API_BASE_URL`, while `src\lib\orval-fetch.ts` attaches the NextAuth access token for both server-side and client-side requests.
+- Local secrets live in two places: backend user secrets for `ScalarApi:ClientSecret`, and `CleanArchitecture.Presentation\admin\.env.local` for `API_BASE_URL`, `NEXTAUTH_*`, and `KEYCLOAK_*`.

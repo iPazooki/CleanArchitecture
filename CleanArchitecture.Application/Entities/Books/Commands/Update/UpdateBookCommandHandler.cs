@@ -15,7 +15,13 @@ internal class UpdateBookRequestHandler(IApplicationUnitOfWork applicationUnitOf
             return Result.Failure(BookErrors.BookNotFound);
         }
 
-        Result updateResult = book.UpdateFromRequest(request);
+        Result<Genre> genreResult = Genre.FromCode(request.Genre);
+        if (!genreResult.IsSuccess)
+        {
+            return Result.Failure(genreResult.Errors.ToArray());
+        }
+
+        Result updateResult = book.Update(request.Title, genreResult.Value!);
 
         if (!updateResult.IsSuccess)
         {

@@ -1,32 +1,47 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  getGetApiV1BooksIdQueryKey,
   getGetApiV1BooksQueryKey,
   useGetApiV1BooksId,
   usePostApiV1Books,
   usePutApiV1BooksId,
 } from "@/lib/api/books/books";
-import { PostApiV1BooksBody } from "@/lib/api/zod/books/books";
 import type { CreateBookCommand, UpdateBookCommand } from "@/lib/api/model";
+import { PostApiV1BooksBody } from "@/lib/api/zod/books/books";
 import {
   extractApiErrors,
   getFieldErrors,
   type DomainError,
 } from "@/lib/utils/error-handler";
+import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
-import ComponentCard from "../common/ComponentCard";
+
+const genreOptions = [
+  { value: "F", label: "Fiction" },
+  { value: "NF", label: "Non-Fiction" },
+  { value: "M", label: "Mystery" },
+] as const;
+
+const fieldErrorMap = {
+  Title: "title",
+  Genre: "genre",
+} satisfies Record<string, keyof CreateBookCommand>;
 
 interface BookFormProps {
   id?: string;
 }
 
 export default function BookForm({ id }: BookFormProps) {
+  const isEditMode = Boolean(id);
+  const bookId = id ?? "";
   const router = useRouter();
   const queryClient = useQueryClient();
   const [serverErrors, setServerErrors] = useState<DomainError[]>([]);
@@ -34,53 +49,85 @@ export default function BookForm({ id }: BookFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
+    reset,
     setError,
     formState: { errors },
   } = useForm<CreateBookCommand>({
     resolver: zodResolver(PostApiV1BooksBody),
     mode: "onBlur",
+    defaultValues: {
+      title: "",
+      genre: "",
+    },
   });
 
-  // --- Fetch existing book in edit mode ---
   const {
     data: bookResponse,
-    isLoading: fetching,
-    isError: fetchError,
-  } = useGetApiV1BooksId(id!, { query: { enabled: !!id } });
+    error: bookError,
+    isLoading: isFetchingBook,
+  } = useGetApiV1BooksId(bookId, {
+    query: {
+      enabled: isEditMode,
+    },
+  });
 
-  // Populate form when book data arrives
   useEffect(() => {
-    if (bookResponse?.status === 200 && bookResponse.data.isSuccess) {
-      const book = bookResponse.data.value!;
-      setValue("title", book.title || "");
-      setValue("genre", book.genre || "");
+    if (
+      !isEditMode ||
+      bookResponse?.status !== 200 ||
+      !bookResponse.data.isSuccess ||
+      !bookResponse.data.value
+    ) {
+      return;
     }
-  }, [bookResponse, setValue]);
 
-  // --- Mutations ---
-  const applyFieldErrors = (domainErrors: DomainError[]) => {
-    const fieldErrors = getFieldErrors(domainErrors, {
-      Title: "title",
-      Genre: "genre",
+    reset({
+      title: bookResponse.data.value.title,
+      genre: bookResponse.data.value.genre,
     });
-    Object.entries(fieldErrors).forEach(([field, message]) => {
-      setError(field as keyof CreateBookCommand, { type: "server", message });
+  }, [bookResponse, isEditMode, reset]);
+
+  async function invalidateBookQueries(): Promise<void> {
+    await queryClient.invalidateQueries({
+      queryKey: getGetApiV1BooksQueryKey(),
     });
-  };
+
+    if (isEditMode) {
+      await queryClient.invalidateQueries({
+        queryKey: getGetApiV1BooksIdQueryKey(bookId),
+      });
+    }
+  }
+
+  function applyDomainErrors(domainErrors: DomainError[]): void {
+    const fieldErrors = getFieldErrors(domainErrors, fieldErrorMap);
+
+    (Object.keys(fieldErrors) as Array<keyof CreateBookCommand>).forEach((fieldName) => {
+      const message = fieldErrors[fieldName];
+      if (message) {
+        setError(fieldName, {
+          type: "server",
+          message,
+        });
+      }
+    });
+  }
+
+  function handleMutationError(error: unknown): void {
+    const domainErrors = extractApiErrors(error);
+    setServerErrors(domainErrors);
+    applyDomainErrors(domainErrors);
+  }
 
   const createMutation = usePostApiV1Books({
     mutation: {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         if (response.status === 201) {
+          await invalidateBookQueries();
           router.push("/book/list");
         }
       },
-      onError: (error) => {
-        const domainErrors = extractApiErrors(error);
-        setServerErrors(domainErrors);
-        applyFieldErrors(domainErrors);
-      },
+      onError: handleMutationError,
     },
   });
 
@@ -88,58 +135,56 @@ export default function BookForm({ id }: BookFormProps) {
     mutation: {
       onSuccess: async (response) => {
         if (response.status === 204) {
-          await queryClient.invalidateQueries({
-            queryKey: getGetApiV1BooksQueryKey(),
-          });
+          await invalidateBookQueries();
           router.push("/book/list");
         }
       },
-      onError: (error) => {
-        const domainErrors = extractApiErrors(error);
-        setServerErrors(domainErrors);
-        applyFieldErrors(domainErrors);
-      },
+      onError: handleMutationError,
     },
   });
 
-  const loading = createMutation.isPending || updateMutation.isPending;
-  const displayedServerErrors = fetchError
-    ? [{ code: "FetchError", message: "Failed to load book data" }]
-    : serverErrors;
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const displayedServerErrors = bookError ? extractApiErrors(bookError) : serverErrors;
 
-  const onSubmit = (data: CreateBookCommand) => {
+  function onSubmit(formData: CreateBookCommand): void {
     setServerErrors([]);
-    if (id) {
-      updateMutation.mutate({ id, data: { id, ...data } as UpdateBookCommand });
-    } else {
-      createMutation.mutate({ data });
-    }
-  };
 
-  if (fetching) return <div>Loading book data...</div>;
+    if (isEditMode) {
+      const updateCommand: UpdateBookCommand = {
+        id: bookId,
+        title: formData.title,
+        genre: formData.genre,
+      };
+
+      updateMutation.mutate({
+        id: bookId,
+        data: updateCommand,
+      });
+      return;
+    }
+
+    createMutation.mutate({ data: formData });
+  }
+
+  if (isFetchingBook) {
+    return <div>Loading book data...</div>;
+  }
 
   return (
-    <ComponentCard title={id ? "Edit Book" : "Add New Book"}>
+    <ComponentCard title={isEditMode ? "Edit Book" : "Add New Book"}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Display server errors */}
-        {displayedServerErrors.length > 0 && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Validation Errors
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <ul className="list-disc space-y-1 pl-5">
-                    {displayedServerErrors.map((error, index) => (
-                      <li key={index}>{error.message}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+        {displayedServerErrors.length > 0 ? (
+          <div className="rounded-md bg-red-50 p-4" aria-live="assertive">
+            <h3 className="text-sm font-medium text-red-800">Validation Errors</h3>
+            <div className="mt-2 text-sm text-red-700">
+              <ul className="list-disc space-y-1 pl-5">
+                {displayedServerErrors.map((error) => (
+                  <li key={`${error.code}-${error.message}`}>{error.message}</li>
+                ))}
+              </ul>
             </div>
           </div>
-        )}
+        ) : null}
 
         <div>
           <Label htmlFor="title">
@@ -149,12 +194,13 @@ export default function BookForm({ id }: BookFormProps) {
             id="title"
             type="text"
             placeholder="Book Title"
-            {...register("title")}
             aria-invalid={errors.title ? "true" : "false"}
+            disabled={isSaving}
+            {...register("title")}
           />
-          {errors.title && (
+          {errors.title ? (
             <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-          )}
+          ) : null}
         </div>
 
         <div>
@@ -163,32 +209,35 @@ export default function BookForm({ id }: BookFormProps) {
           </Label>
           <select
             id="genre"
-            {...register("genre")}
-            className="w-full rounded-lg border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
             aria-invalid={errors.genre ? "true" : "false"}
+            className="w-full rounded-lg border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+            disabled={isSaving}
+            {...register("genre")}
           >
             <option value="">Select Genre</option>
-            <option value="F">Fiction</option>
-            <option value="NF">Non-Fiction</option>
-            <option value="M">Mystery</option>
+            {genreOptions.map((genreOption) => (
+              <option key={genreOption.value} value={genreOption.value}>
+                {genreOption.label}
+              </option>
+            ))}
           </select>
-          {errors.genre && (
+          {errors.genre ? (
             <p className="mt-1 text-sm text-red-600">{errors.genre.message}</p>
-          )}
+          ) : null}
           <p className="mt-1 text-sm text-gray-500">
             Select a genre: Fiction (F), Non-Fiction (NF), or Mystery (M)
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button disabled={loading}>
-            {loading ? "Saving..." : id ? "Update Book" : "Create Book"}
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? "Saving..." : isEditMode ? "Update Book" : "Create Book"}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            disabled={loading}
+            disabled={isSaving}
           >
             Cancel
           </Button>
