@@ -1,4 +1,5 @@
 ﻿using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Errors;
 
 namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
@@ -9,6 +10,8 @@ internal class GetBookQueryHandler(IApplicationUnitOfWork applicationUnitOfWork,
     {
         Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 
-        return book is null ? Result<BookResponse>.Failure("Book Not Found.") : Result<BookResponse>.Success(book.ToResponse());
+        return book is null
+            ? Result<BookResponse>.Failure(BookErrors.BookNotFound)
+            : Result<BookResponse>.Success(book.ToResponse());
     }
 }

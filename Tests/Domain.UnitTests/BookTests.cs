@@ -52,6 +52,53 @@ public class BookTests
     }
 
     [Fact]
+    public void Book_Update_ShouldReturnSuccess_WhenTitleAndGenreAreValid()
+    {
+        // Arrange
+        Result<Book> createResult = Book.Create("Original Title", Genre.Fiction);
+        Book book = createResult.Value!;
+
+        // Act
+        Result result = book.Update("Updated Title", Genre.NonFiction);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Updated Title", book.Title);
+        Assert.Equal(Genre.NonFiction, book.Genre);
+    }
+
+    [Fact]
+    public void Book_Update_ShouldReturnFailure_WhenTitleIsEmpty()
+    {
+        // Arrange
+        Result<Book> createResult = Book.Create("Original Title", Genre.Fiction);
+        Book book = createResult.Value!;
+
+        // Act
+        Result result = book.Update(string.Empty, Genre.NonFiction);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(BookErrors.TitleIsRequired.Message, result.Errors.First().Message);
+    }
+
+    [Fact]
+    public void Book_Update_ShouldReturnFailure_WhenTitleIsTooLong()
+    {
+        // Arrange
+        Result<Book> createResult = Book.Create("Original Title", Genre.Fiction);
+        Book book = createResult.Value!;
+        string title = new('T', 201);
+
+        // Act
+        Result result = book.Update(title, Genre.NonFiction);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(BookErrors.TitleTooLong.Message, result.Errors.First().Message);
+    }
+
+    [Fact]
     public void Book_DomainEvents_ShouldBeManagedCorrectly()
     {
         // Arrange

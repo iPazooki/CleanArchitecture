@@ -9,6 +9,12 @@ namespace CleanArchitecture.Api.Extensions;
 /// </summary>
 internal static class ResultExtensions
 {
+    private const string BadRequestType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1";
+    private const string NotFoundType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.5";
+    private const string ConflictType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10";
+    private const string ValidationType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.21";
+    private const string ServerErrorType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1";
+
     /// <summary>
     /// Converts a Result to an IResult with appropriate ProblemDetails response.
     /// </summary>
@@ -38,10 +44,13 @@ internal static class ResultExtensions
     /// <summary>
     /// Converts a Result&lt;T&gt; to an IResult with Created response or ProblemDetails.
     /// </summary>
-    public static IResult ToCreatedResponse<T>(this Result<T> result, Uri uri)
+    public static IResult ToCreatedResponse<T>(this Result<T> result, Func<T, Uri> uriFactory)
     {
+        ArgumentNullException.ThrowIfNull(uriFactory);
+
         if (result.IsSuccess)
         {
+            Uri uri = uriFactory(result.Value!);
             return Results.Created(uri.ToString(), result);
         }
 
@@ -70,23 +79,17 @@ internal static class ResultExtensions
             return Results.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "Server Error",
+                type: ServerErrorType,
                 detail: "An unknown error occurred.");
         }
 
-        // Convert DomainValidation.Error to our format
-        // DomainValidation.Error has Code and Message properties
+        ProblemDetailsMetadata metadata = GetProblemDetailsMetadata(errorArray);
 
-        // For now, treat all as validation errors (422)
-        // You can enhance this to parse error codes if needed
-        int statusCode = StatusCodes.Status422UnprocessableEntity;
-        string title = "Validation Error";
-
-        // Create ProblemDetails with structured errors
         ProblemDetails problemDetails = new()
         {
-            Status = statusCode,
-            Title = title,
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            Status = metadata.StatusCode,
+            Title = metadata.Title,
+            Type = metadata.Type,
             Extensions =
             {
                 ["errors"] = errorArray.Select(e => new
@@ -99,4 +102,37 @@ internal static class ResultExtensions
 
         return Results.Problem(problemDetails);
     }
+
+    private static ProblemDetailsMetadata GetProblemDetailsMetadata(DomainValidationError[] errors)
+    {
+        if (Array.Exists(errors, IsNotFoundError))
+        {
+            return new(StatusCodes.Status404NotFound, "Not Found", NotFoundType);
+        }
+
+        if (Array.Exists(errors, IsConflictError))
+        {
+            return new(StatusCodes.Status409Conflict, "Conflict", ConflictType);
+        }
+
+        if (Array.TrueForAll(errors, IsValidationError))
+        {
+            return new(StatusCodes.Status422UnprocessableEntity, "Validation Error", ValidationType);
+        }
+
+        return new(StatusCodes.Status400BadRequest, "Bad Request", BadRequestType);
+    }
+
+    private static bool IsValidationError(DomainValidationError error) =>
+        !string.IsNullOrWhiteSpace(error.Code) &&
+        !IsNotFoundError(error) &&
+        !IsConflictError(error);
+
+    private static bool IsNotFoundError(DomainValidationError error) =>
+        error.Code?.EndsWith(".NotFound", StringComparison.OrdinalIgnoreCase) is true;
+
+    private static bool IsConflictError(DomainValidationError error) =>
+        error.Code?.Contains("Conflict", StringComparison.OrdinalIgnoreCase) is true;
+
+    private readonly record struct ProblemDetailsMetadata(int StatusCode, string Title, string Type);
 }
