@@ -8,39 +8,47 @@ public class GenreTests
     [InlineData("M")]
     public void FromCode_Valid_ReturnsExpectedGenre(string code)
     {
-        Genre genre = Genre.FromCode(code);
-        Assert.NotNull(genre);
-        Assert.Equal(code, genre.Code);
+        Result<Genre> result = Genre.FromCode(code);
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(code, result.Value!.Code);
     }
 
     [Fact]
-    public void FromCode_Invalid_ThrowsUnsupportedGenreException()
+    public void FromCode_Invalid_ReturnsFailure()
     {
-        Assert.Throws<UnsupportedGenreException>(() => Genre.FromCode("XYZ"));
+        Result<Genre> result = Genre.FromCode("XYZ");
+
+        Assert.False(result.IsSuccess);
     }
 
     [Theory]
     [InlineData("f")]
     [InlineData("nf")]
     [InlineData("m")]
-    public void FromCode_CaseSensitive_ThrowsUnsupportedGenreException(string code)
+    public void FromCode_CaseSensitive_ReturnsFailure(string code)
     {
-        Assert.Throws<UnsupportedGenreException>(() => Genre.FromCode(code));
+        Result<Genre> result = Genre.FromCode(code);
+
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
     public void Equals_SameCode_ReturnsTrue()
     {
-        Genre first = Genre.FromCode("F");
-        Genre second = Genre.FromCode("F");
+        Genre first = Genre.FromCode("F").Value!;
+        Genre second = Genre.FromCode("F").Value!;
+
         Assert.Equal(first, second);
     }
 
     [Fact]
     public void Equals_DifferentCode_ReturnsFalse()
     {
-        Genre first = Genre.FromCode("F");
-        Genre second = Genre.FromCode("NF");
+        Genre first = Genre.FromCode("F").Value!;
+        Genre second = Genre.FromCode("NF").Value!;
+
         Assert.NotEqual(first, second);
     }
 

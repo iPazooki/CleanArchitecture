@@ -9,12 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
     <PackageReference Include="Aspire.Hosting.Keycloak" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CleanArchitecture.Presentation\CleanArchitecture.Api.csproj" />
+    <ProjectReference Include="..\..\CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj" />
   </ItemGroup>
 
 </Project>

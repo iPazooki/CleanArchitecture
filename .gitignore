@@ -402,3 +402,4 @@ FodyWeavers.xsd
 CleanArchitecture.Presentation/app.db
 CleanArchitecture.Presentation/app.db-shm
 CleanArchitecture.Presentation/app.db-wal
+/CleanArchitecture.Presentation/admin/obj/*

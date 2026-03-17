@@ -14,7 +14,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     {
         CreateBookCommand command = new("Test Book", "F");
 
-        using HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/create-book/", command, CancellationToken);
+        using HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/api/v1/books", command, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -23,7 +23,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     public async Task SendBookCommandWithValidRequestUpdatesBook()
     {
         CreateBookCommand createCommand = new("Initial Book", "F");
-        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/api/v1/books", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -34,7 +34,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
 
         UpdateBookCommand updateCommand = new(createdResult.Value, "Updated Book", "NF");
 
-        using HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync("/update-book", updateCommand, CancellationToken);
+        using HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"/api/v1/books/{createdResult.Value}", updateCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
     }
@@ -43,7 +43,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     public async Task SendBookCommandWithValidRequestDeletesBook()
     {
         CreateBookCommand createCommand = new("Book To Delete", "F");
-        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/api/v1/books", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -52,14 +52,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         Assert.NotNull(createdResult);
         Assert.True(createdResult!.IsSuccess);
 
-        DeleteBookCommand deleteCommand = new(createdResult.Value);
-
-        using HttpResponseMessage deleteResponse = await _httpClient.SendAsync(
-            new HttpRequestMessage(HttpMethod.Delete, "/delete-book")
-            {
-                Content = JsonContent.Create(deleteCommand)
-            },
-            CancellationToken);
+        using HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"/api/v1/books/{createdResult.Value}", CancellationToken);
 
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
     }
@@ -68,7 +61,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
     public async Task SendBookQueryWithValidRequestGetsBook()
     {
         CreateBookCommand createCommand = new("Book To Get", "F");
-        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/create-book", createCommand, CancellationToken);
+        using HttpResponseMessage createResponse = await _httpClient.PostAsJsonAsync("/api/v1/books", createCommand, CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
 
@@ -77,7 +70,7 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         Assert.NotNull(createdResult);
         Assert.True(createdResult!.IsSuccess);
 
-        using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/get-book/{createdResult.Value}", CancellationToken);
+        using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/api/v1/books/{createdResult.Value}", CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
     }

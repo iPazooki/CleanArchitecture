@@ -26,7 +26,7 @@ public class BookTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(BookErrors.TitleIsRequired, result.Errors.First().Message);
+        Assert.Equal(BookErrors.TitleIsRequired.Message, result.Errors.First().Message);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class BookTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(BookErrors.TitleIsRequired, result.Errors.First().Message);
+        Assert.Equal(BookErrors.TitleIsRequired.Message, result.Errors.First().Message);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class BookTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal(BookErrors.TitleIsRequired, result.Errors.First().Message);
+        Assert.Equal(BookErrors.TitleIsRequired.Message, result.Errors.First().Message);
     }
 
     [Fact]

@@ -21,17 +21,17 @@ A lightweight **.NET 10** based **Clean Architecture** template leveraging **Min
 
 ## Project Structure
 
-1. **Domain Layer**  
+1. **Domain Layer**
    - Entities, value objects, and domain services.
-2. **Application Layer**  
+2. **Application Layer**
    - Interfaces, DTOs, commands, queries, and validators.
-3. **Infrastructure Layer**  
+3. **Infrastructure Layer**
    - Persistence, database repositories, and external service integrations.
-4. **Infrastructure.Persistence Layer**  
+4. **Infrastructure.Persistence Layer**
    - EF Core `DbContext`, Postgres configuration, and migrations.
-5. **Presentation Layer**  
+5. **Presentation Layer**
    - Minimal API endpoints, middleware, and request/response handling.
-6. **Aspire AppHost**  
+6. **Aspire AppHost**
    - `.NET Aspire` AppHost project that wires up the API, Postgres, and shared service defaults.
 
 
@@ -105,6 +105,36 @@ Important: for Visual Studio users you can set secrets via the __Manage User Sec
 dotnet user-secrets set "ScalarApi:ClientSecret" "<your-client-secret-here>" --project CleanArchitecture.Api
 ```
 
+## Admin Portal Configuration
+
+The project includes an admin dashboard located in `CleanArchitecture.Presentation/admin`. To run the admin portal, you need to configure the environment variables in a `.env.local` file.
+
+1. Navigate to the admin directory:
+   ```bash
+   cd CleanArchitecture.Presentation/admin
+   ```
+2. Create or update the `.env.local` file with the following configurations:
+
+```plain text
+API_BASE_URL=http://localhost:5049/
+
+NEXTAUTH_URL=http://localhost:65499
+NEXTAUTH_SECRET=<random string>
+
+KEYCLOAK_CLIENT_ID=scalar
+KEYCLOAK_CLIENT_SECRET=<client secret>
+KEYCLOAK_ISSUER=http://localhost:8080/realms/clean-api
+```
+
+### Where to find these values:
+
+- **API_BASE_URL**: The base URL where your CleanArchitecture API is running.
+- **NEXTAUTH_URL**: The URL of your admin portal (used for authentication callbacks).
+- **NEXTAUTH_SECRET**: A random secret string used to hash tokens. You can generate one using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+- **KEYCLOAK_CLIENT_ID**: The client ID configured in Keycloak (e.g., `scalar`).
+- **KEYCLOAK_CLIENT_SECRET**: The client secret from your Keycloak client's **Credentials** tab.
+- **KEYCLOAK_ISSUER**: The issuer URL of your Keycloak realm (e.g., `http://localhost:8080/realms/clean-api`).
+
 ## Database Configuration
 
 - **Database**: PostgreSQL
@@ -114,17 +144,31 @@ dotnet user-secrets set "ScalarApi:ClientSecret" "<your-client-secret-here>" --p
 
 ## Database Migrations
 
-Migrations are created and applied using EF Core targeting the Postgres-backed persistence project.
+Migrations are managed using Entity Framework Core and are stored in the `CleanArchitecture.Infrastructure.Persistence` project.
 
-To add migrations and update the database, run the following commands from the solution root:
+### Design-Time Migrations
+
+Because .NET Aspire injects connection strings at runtime, the standard EF Core tools cannot find a database connection during design-time. To solve this, the project includes an `ApplicationDbContextFactory` which provides a dummy connection string for the tools.
+
+To add a new migration, run the following command from the solution root:
 
 ```bash
-dotnet ef migrations add InitialCreate --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
-
-dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation
+dotnet ef migrations add <MigrationName> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
 ```
 
-Ensure the configured Postgres instance is reachable when running these commands. When running via Aspire, you may prefer to manage schema changes using migrations applied during startup.
+### Applying Migrations
+
+#### Development and Testing
+In non-production environments, migrations are automatically applied during application startup using `context.Database.MigrateAsync()` in `WebApplicationExtensions.cs`.
+
+#### Manual Update
+If you need to manually update the database:
+
+```bash
+dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
+```
+
+Ensure a PostgreSQL instance is reachable if you are running this manually outside of the Aspire orchestrator.
 
 
 ## Contributing
