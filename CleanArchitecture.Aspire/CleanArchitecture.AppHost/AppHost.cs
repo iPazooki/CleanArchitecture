@@ -114,12 +114,17 @@ static (string Username, string Password) ResolveKeycloakAdminCredentials(IConfi
         return (username, password);
     }
 
-    string keyVaultUri = configuration[KeyVaultUriConfigurationKey]
-        ?? throw new InvalidOperationException(
-            "Keycloak admin credentials are not set in environment variables and Key Vault is not configured. " +
-            $"Set '{KeyVaultUriConfigurationKey}' and the configured secret names, or provide both KEYCLOAK_ADMIN_USERNAME and KEYCLOAK_ADMIN_PASSWORD.");
+    string? keyVaultUri = configuration[KeyVaultUriConfigurationKey];
 
-    SecretClient secretClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
+    if (string.IsNullOrWhiteSpace(keyVaultUri) ||
+        !Uri.TryCreate(keyVaultUri, UriKind.Absolute, out Uri? keyVaultEndpoint))
+    {
+        throw new InvalidOperationException(
+            "Keycloak admin credentials are not set in environment variables and Key Vault is not configured. " +
+            $"Set '{KeyVaultUriConfigurationKey}' to an absolute Azure Key Vault URI and configure the secret names, or provide both KEYCLOAK_ADMIN_USERNAME and KEYCLOAK_ADMIN_PASSWORD.");
+    }
+
+    SecretClient secretClient = new(keyVaultEndpoint, new DefaultAzureCredential());
 
     username ??= GetRequiredSecretValue(
         secretClient,
