@@ -1,9 +1,16 @@
+using Azure;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 const string TestingEnvironment = "Testing";
 const string AdminAppName = "admin";
 const string ApiProjectName = "cleanarchitecture-api";
 const string PostgresDatabaseResourceName = "postgresdb";
+const string KeyVaultUriConfigurationKey = "KeyVaultUri";
+const string KeycloakAdminUsernameSecretNameConfigurationKey = "KeyVaultSecrets:KeycloakAdminUsernameSecretName";
+const string KeycloakAdminPasswordSecretNameConfigurationKey = "KeyVaultSecrets:KeycloakAdminPasswordSecretName";
 
 const int AdminHostPort = 65499;   // Pinned for stable local dev URL
 const int AdminTargetPort = 3000;  // Next.js internal port
@@ -48,8 +55,7 @@ static void ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder build
         .WithLifetime(ContainerLifetime.Persistent)
         .AddDatabase(PostgresDatabaseResourceName, "cleandb");
 
-    string keycloakAdminUsername = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_USERNAME") ?? "admin";
-    string keycloakAdminPassword = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_PASSWORD") ?? "admin";
+    (string keycloakAdminUsername, string keycloakAdminPassword) = ResolveKeycloakAdminCredentials(builder.Configuration);
 
     IResourceBuilder<ParameterResource> username =
         builder.AddParameter("keycloakAdminUsername", () => keycloakAdminUsername);
@@ -96,4 +102,56 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WaitFor(postgresdb)
         .WithReference(keycloak)
         .WaitFor(keycloak);
+}
+
+static (string Username, string Password) ResolveKeycloakAdminCredentials(IConfiguration configuration)
+{
+    string? username = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_USERNAME");
+    string? password = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_PASSWORD");
+
+    if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
+    {
+        return (username, password);
+    }
+
+    string keyVaultUri = configuration[KeyVaultUriConfigurationKey]
+        ?? throw new InvalidOperationException(
+            "Keycloak admin credentials are not set in environment variables and Key Vault is not configured. " +
+            $"Set '{KeyVaultUriConfigurationKey}' and the configured secret names, or provide both KEYCLOAK_ADMIN_USERNAME and KEYCLOAK_ADMIN_PASSWORD.");
+
+    SecretClient secretClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
+
+    username ??= GetRequiredSecretValue(
+        secretClient,
+        configuration[KeycloakAdminUsernameSecretNameConfigurationKey] ?? "keycloak-admin-username");
+
+    password ??= GetRequiredSecretValue(
+        secretClient,
+        configuration[KeycloakAdminPasswordSecretNameConfigurationKey] ?? "keycloak-admin-password");
+
+    return (username, password);
+}
+
+static string GetRequiredSecretValue(SecretClient secretClient, string secretName)
+{
+    try
+    {
+        KeyVaultSecret secret = secretClient.GetSecret(secretName).Value;
+
+        return string.IsNullOrWhiteSpace(secret.Value)
+            ? throw new InvalidOperationException($"The Azure Key Vault secret '{secretName}' is empty.")
+            : secret.Value;
+    }
+    catch (CredentialUnavailableException ex)
+    {
+        throw new InvalidOperationException(
+            "Azure credentials are unavailable. Authenticate locally with Visual Studio or Azure CLI, or run with a managed identity.",
+            ex);
+    }
+    catch (RequestFailedException ex)
+    {
+        throw new InvalidOperationException(
+            $"Failed to retrieve Azure Key Vault secret '{secretName}'. Ensure the vault URI and secret name are correct and access is granted.",
+            ex);
+    }
 }
