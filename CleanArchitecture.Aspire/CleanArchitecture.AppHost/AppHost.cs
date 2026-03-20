@@ -106,12 +106,20 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);
 
-    builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
+    IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithExternalHttpEndpoints()
         .WithReference(postgresdb)
         .WaitFor(postgresdb)
         .WithReference(keycloak)
         .WaitFor(keycloak);
+
+    builder.AddNodeApp(AdminAppName, "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
+        .WithExternalHttpEndpoints()
+        .WithHttpEndpoint(targetPort: AdminTargetPort, port: AdminHostPort)
+        .WithArgs("build")
+        .WithPnpm()
+        .WithReference(apiProject)
+        .WaitFor(apiProject);
 }
 
 static (string Username, string Password) ResolveKeycloakAdminCredentials(IConfiguration configuration)
