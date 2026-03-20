@@ -101,11 +101,13 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         builder.AddParameter("keycloakAdminPassword", () => keycloakAdminPassword, secret: true);
 
     IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, username, password)
+        .WithExternalHttpEndpoints()
         .WithDataVolume()
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);
 
     builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
+        .WithExternalHttpEndpoints()
         .WithReference(postgresdb)
         .WaitFor(postgresdb)
         .WithReference(keycloak)
