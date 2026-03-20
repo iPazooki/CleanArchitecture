@@ -1,16 +1,10 @@
-using Azure;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Microsoft.Extensions.Configuration;
+using Aspire.Hosting.Azure;
 using Microsoft.Extensions.Hosting;
 
 const string TestingEnvironment = "Testing";
 const string AdminAppName = "admin";
 const string ApiProjectName = "cleanarchitecture-api";
-const string PostgresDatabaseResourceName = "postgresdb";
-const string KeyVaultUriConfigurationKey = "KeyVaultUri";
-const string KeycloakAdminUsernameSecretNameConfigurationKey = "KeyVaultSecrets:KeycloakAdminUsernameSecretName";
-const string KeycloakAdminPasswordSecretNameConfigurationKey = "KeyVaultSecrets:KeycloakAdminPasswordSecretName";
+const string PostgresDatabaseResourceName = "mrpanel";
 
 const int AdminHostPort = 65499;   // Pinned for stable local dev URL
 const int AdminTargetPort = 3000;  // Next.js internal port
@@ -53,15 +47,13 @@ static void ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder build
         .WithDataVolume("postgres_data")
         .WithPgAdmin()
         .WithLifetime(ContainerLifetime.Persistent)
-        .AddDatabase(PostgresDatabaseResourceName, "cleandb");
-
-    (string keycloakAdminUsername, string keycloakAdminPassword) = ResolveKeycloakAdminCredentials(builder.Configuration);
+        .AddDatabase(PostgresDatabaseResourceName, "mrpaneldb");
 
     IResourceBuilder<ParameterResource> username =
-        builder.AddParameter("keycloakAdminUsername", () => keycloakAdminUsername);
+        builder.AddParameter("keycloakAdminUsername", "admin");
 
     IResourceBuilder<ParameterResource> password =
-        builder.AddParameter("keycloakAdminPassword", () => keycloakAdminPassword, secret: true);
+        builder.AddParameter("keycloakAdminPassword", "admin", secret: true);
 
     IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, username, password)
         .WithRealmImport("./Realms")
@@ -85,96 +77,50 @@ static void ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder build
 
 static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builder)
 {
-    IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
-        .WithDataVolume("postgres_data")
-        .WithLifetime(ContainerLifetime.Persistent);
+    IResourceBuilder<AzureKeyVaultResource> keyVault = builder.AddAzureKeyVault("keyvault");
 
-    IResourceBuilder<PostgresDatabaseResource> postgresdb =
-        postgres.AddDatabase(PostgresDatabaseResourceName, "cleandb");
+    // Azure PostgreSQL Flexible Server with password auth (credentials stored in Key Vault)
+    IResourceBuilder<AzurePostgresFlexibleServerResource> postgres = builder.AddAzurePostgresFlexibleServer("postgres")
+        .WithPasswordAuthentication(keyVault);
 
-    (string keycloakAdminUsername, string keycloakAdminPassword) = ResolveKeycloakAdminCredentials(builder.Configuration);
+    IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(PostgresDatabaseResourceName, "mrpaneldb");
+    IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloak", "keycloakdb");
 
-    IResourceBuilder<ParameterResource> username =
-        builder.AddParameter("keycloakAdminUsername", () => keycloakAdminUsername);
+    // Keycloak admin credentials via Aspire parameters (set at deployment time)
+    IResourceBuilder<ParameterResource> keycloakAdminUsername = builder.AddParameter("keycloakAdminUsername");
 
-    IResourceBuilder<ParameterResource> password =
-        builder.AddParameter("keycloakAdminPassword", () => keycloakAdminPassword, secret: true);
+    IResourceBuilder<ParameterResource> keycloakAdminPassword = builder.AddParameter("keycloakAdminPassword", secret: true);
 
-    IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, username, password)
-        .WithExternalHttpEndpoints()
-        .WithDataVolume()
-        .WithOtlpExporter()
-        .WithLifetime(ContainerLifetime.Persistent);
+    // Keycloak on ACA, backed by Azure PostgreSQL via KC_DB environment variables
+    IResourceBuilder<KeycloakResource> keycloak =
+        builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
+            .WithExternalHttpEndpoints()
+            .WithEnvironment("KC_DB", "postgres")
+            .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.Resource.HostName;
+                context.EnvironmentVariables["KC_DB_URL_PORT"] = "5432";
+                context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression;
+                context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression;
+            })
+            .WaitFor(keycloakDb);
 
+    // API on ACA
     IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithExternalHttpEndpoints()
-        .WithReference(postgresdb)
-        .WaitFor(postgresdb)
+        .WithReference(appDb)
+        .WaitFor(appDb)
         .WithReference(keycloak)
-        .WaitFor(keycloak);
+        .WaitFor(keycloak)
+        .WithReference(keyVault);
 
+    // Admin app on ACA
     builder.AddNodeApp(AdminAppName, "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
         .WithExternalHttpEndpoints()
-        .WithHttpEndpoint(targetPort: AdminTargetPort, port: AdminHostPort)
-        .WithArgs("build")
+        .WithHttpEndpoint(targetPort: AdminTargetPort)
+        .WithArgs("start")
         .WithPnpm()
         .WithReference(apiProject)
         .WaitFor(apiProject);
-}
-
-static (string Username, string Password) ResolveKeycloakAdminCredentials(IConfiguration configuration)
-{
-    string? username = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_USERNAME");
-    string? password = Environment.GetEnvironmentVariable("KEYCLOAK_ADMIN_PASSWORD");
-
-    if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
-    {
-        return (username, password);
-    }
-
-    string? keyVaultUri = configuration[KeyVaultUriConfigurationKey];
-
-    if (string.IsNullOrWhiteSpace(keyVaultUri) ||
-        !Uri.TryCreate(keyVaultUri, UriKind.Absolute, out Uri? keyVaultEndpoint))
-    {
-        throw new InvalidOperationException(
-            "Keycloak admin credentials are not set in environment variables and Key Vault is not configured. " +
-            $"Set '{KeyVaultUriConfigurationKey}' to an absolute Azure Key Vault URI and configure the secret names, or provide both KEYCLOAK_ADMIN_USERNAME and KEYCLOAK_ADMIN_PASSWORD.");
-    }
-
-    SecretClient secretClient = new(keyVaultEndpoint, new DefaultAzureCredential());
-
-    username ??= GetRequiredSecretValue(
-        secretClient,
-        configuration[KeycloakAdminUsernameSecretNameConfigurationKey] ?? "keycloak-admin-username");
-
-    password ??= GetRequiredSecretValue(
-        secretClient,
-        configuration[KeycloakAdminPasswordSecretNameConfigurationKey] ?? "keycloak-admin-password");
-
-    return (username, password);
-}
-
-static string GetRequiredSecretValue(SecretClient secretClient, string secretName)
-{
-    try
-    {
-        KeyVaultSecret secret = secretClient.GetSecret(secretName).Value;
-
-        return string.IsNullOrWhiteSpace(secret.Value)
-            ? throw new InvalidOperationException($"The Azure Key Vault secret '{secretName}' is empty.")
-            : secret.Value;
-    }
-    catch (CredentialUnavailableException ex)
-    {
-        throw new InvalidOperationException(
-            "Azure credentials are unavailable. Authenticate locally with Visual Studio or Azure CLI, or run with a managed identity.",
-            ex);
-    }
-    catch (RequestFailedException ex)
-    {
-        throw new InvalidOperationException(
-            $"Failed to retrieve Azure Key Vault secret '{secretName}'. Ensure the vault URI and secret name are correct and access is granted.",
-            ex);
-    }
 }
