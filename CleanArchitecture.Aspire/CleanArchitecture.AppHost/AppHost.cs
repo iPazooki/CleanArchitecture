@@ -92,7 +92,15 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     IResourceBuilder<PostgresDatabaseResource> postgresdb =
         postgres.AddDatabase(PostgresDatabaseResourceName, "cleandb");
 
-    IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort)
+    (string keycloakAdminUsername, string keycloakAdminPassword) = ResolveKeycloakAdminCredentials(builder.Configuration);
+
+    IResourceBuilder<ParameterResource> username =
+        builder.AddParameter("keycloakAdminUsername", () => keycloakAdminUsername);
+
+    IResourceBuilder<ParameterResource> password =
+        builder.AddParameter("keycloakAdminPassword", () => keycloakAdminPassword, secret: true);
+
+    IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, username, password)
         .WithDataVolume()
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);

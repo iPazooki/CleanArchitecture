@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import { getEnvVars } from "@/config/env-vars";
 
+const { API_BASE_URL } = getEnvVars();
 const apiRoutePrefix = "/api/v1";
-const normalizedApiBaseUrl = process.env.API_BASE_URL?.trim().replace(/\/+$/, "") ?? "";
+const normalizedApiBaseUrl = API_BASE_URL.trim().replace(/\/+$/, "");
 
 function getRewriteDestination(): string | undefined {
   if (!normalizedApiBaseUrl) {

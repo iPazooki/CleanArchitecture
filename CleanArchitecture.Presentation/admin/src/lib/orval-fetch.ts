@@ -2,7 +2,9 @@ import { getServerSession } from "next-auth";
 import { getSession, signIn } from "next-auth/react";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ApiError } from "@/lib/utils/api-error";
+import { getEnvVars } from "@/config/env-vars";
 
+const { API_BASE_URL } = getEnvVars();
 const apiRoutePrefix = "/api/v1";
 
 function isAbsoluteUrl(url: string): boolean {
@@ -14,7 +16,7 @@ function normalizeRequestPath(url: string): string {
 }
 
 function buildServerApiUrl(path: string): string {
-  const apiBaseUrl = process.env.API_BASE_URL?.trim().replace(/\/+$/, "") ?? "";
+  const apiBaseUrl = API_BASE_URL.trim().replace(/\/+$/, "");
 
   if (!apiBaseUrl) {
     throw new Error("API_BASE_URL must be configured for server-side API requests.");

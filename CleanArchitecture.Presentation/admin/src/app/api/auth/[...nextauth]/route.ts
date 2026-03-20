@@ -1,13 +1,15 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
+import { getEnvVars } from "@/config/env-vars";
 
-const keycloakIssuer = process.env.KEYCLOAK_ISSUER?.replace(/\/+$/, "") ?? "";
+const { KEYCLOAK_ISSUER, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET, NEXTAUTH_SECRET } = getEnvVars();
+const keycloakIssuer = KEYCLOAK_ISSUER.replace(/\/+$/, "");
 
 export const authOptions = {
   providers: [
     KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID ?? "",
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "",
+      clientId: KEYCLOAK_CLIENT_ID,
+      clientSecret: KEYCLOAK_CLIENT_SECRET,
       issuer: keycloakIssuer,
       authorization: {
         params: {
@@ -19,7 +21,7 @@ export const authOptions = {
   pages: {
     signIn: "/signin",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },

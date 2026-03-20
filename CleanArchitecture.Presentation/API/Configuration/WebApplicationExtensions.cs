@@ -54,6 +54,7 @@ internal static class WebApplicationExtensions
 
         if (app.Environment.IsProduction())
         {
+            app.UseHsts();
             app.UseHttpsRedirection();
         }
     }

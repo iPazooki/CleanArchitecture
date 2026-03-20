@@ -12,7 +12,9 @@
                 "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21065",
                 "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22186",
                 "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21268",
-                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22268"
+                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22268",
+                "KEYCLOAK_ADMIN_USERNAME": "admin",
+                "KEYCLOAK_ADMIN_PASSWORD": "admin"
             }
         }
     }
