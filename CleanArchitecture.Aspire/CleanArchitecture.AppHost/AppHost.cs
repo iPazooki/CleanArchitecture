@@ -16,7 +16,7 @@ if (builder.Environment.IsEnvironment(TestingEnvironment))
 {
     ConfigureTestingEnvironment(builder);
 }
-else if (builder.Environment.IsDevelopment())
+else if (builder.Environment.IsDevelopment() && builder.ExecutionContext.IsRunMode)
 {
     ConfigureDevelopmentEnvironment(builder);
 }
@@ -84,7 +84,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WithPasswordAuthentication(keyVault);
 
     IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(PostgresDatabaseResourceName, "mrpaneldb");
-    IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloak", "keycloakdb");
+    IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloakResource", "keycloakdb");
 
     // Keycloak admin credentials via Aspire parameters (set at deployment time)
     IResourceBuilder<ParameterResource> keycloakAdminUsername = builder.AddParameter("keycloakAdminUsername");
@@ -94,7 +94,6 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     // Keycloak on ACA, backed by Azure PostgreSQL via KC_DB environment variables
     IResourceBuilder<KeycloakResource> keycloak =
         builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
-            .WithExternalHttpEndpoints()
             .WithEnvironment("KC_DB", "postgres")
             .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
             .WithEnvironment(context =>
@@ -108,7 +107,6 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 
     // API on ACA
     IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
-        .WithExternalHttpEndpoints()
         .WithReference(appDb)
         .WaitFor(appDb)
         .WithReference(keycloak)
@@ -117,7 +115,6 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 
     // Admin app on ACA
     builder.AddNodeApp(AdminAppName, "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
-        .WithExternalHttpEndpoints()
         .WithHttpEndpoint(targetPort: AdminTargetPort)
         .WithArgs("start")
         .WithPnpm()
