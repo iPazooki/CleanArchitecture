@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getEnvVars } from "@/config/env-vars";
 
-const { NEXTAUTH_URL, KEYCLOAK_ISSUER, NEXTAUTH_SECRET } = getEnvVars();
-
-function getBaseUrl(request: NextRequest): string {
-  return NEXTAUTH_URL.trim().replace(/\/+$/, "") ?? request.nextUrl.origin;
+function getBaseUrl(request: NextRequest, nextAuthUrl: string): string {
+  const normalizedNextAuthUrl = nextAuthUrl.trim().replace(/\/+$/, "");
+  return normalizedNextAuthUrl || request.nextUrl.origin;
 }
 
 function createLogoutUrl(issuer: string): URL {
@@ -14,7 +13,8 @@ function createLogoutUrl(issuer: string): URL {
 }
 
 export async function GET(request: NextRequest) {
-  const signInUrl = new URL("/signin", getBaseUrl(request));
+  const { NEXTAUTH_URL, KEYCLOAK_ISSUER, NEXTAUTH_SECRET } = getEnvVars();
+  const signInUrl = new URL("/signin", getBaseUrl(request, NEXTAUTH_URL));
   const issuer = KEYCLOAK_ISSUER.trim();
 
   if (!issuer) {

@@ -31,13 +31,19 @@ internal static class DependencyInjection
             string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
                                ?? throw new InvalidOperationException("Keycloak ValidIssuers is not configured.");
 
+            string realm = builder.Configuration["Keycloak:Realm"]
+                               ?? throw new InvalidOperationException("Keycloak Realm is not configured.");
+
+            string audience = builder.Configuration["Keycloak:Audience"]
+                                  ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
+
             services.AddAuthentication()
                     .AddKeycloakJwtBearer(
                         serviceName: "keycloak",
-                        realm: "clean-api",
+                        realm: realm,
                         options =>
                         {
-                            options.TokenValidationParameters.ValidAudiences = ["scalar"];
+                            options.TokenValidationParameters.ValidAudiences = [audience];
                             options.TokenValidationParameters.ValidIssuers = [validIssuers];
 
                             // For development only - disable HTTPS metadata validation
