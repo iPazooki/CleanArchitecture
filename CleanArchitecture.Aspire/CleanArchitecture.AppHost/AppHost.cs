@@ -1,4 +1,5 @@
 using Aspire.Hosting.Azure;
+using Aspire.Hosting.JavaScript;
 using Microsoft.Extensions.Hosting;
 
 const string TestingEnvironment = "Testing";
@@ -88,46 +89,37 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(PostgresDatabaseResourceName, "mrpaneldb");
     IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloakResource", "keycloakdb");
 
-    // Public URLs and secrets supplied at deployment time
-    IResourceBuilder<ParameterResource> adminPublicUrl = builder.AddParameter("adminPublicUrl");
-    IResourceBuilder<ParameterResource> authPublicUrl = builder.AddParameter("authPublicUrl");
-    IResourceBuilder<ParameterResource> apiPublicUrl = builder.AddParameter("apiPublicUrl");
-
+    // Public URLs are derived from ACA external endpoints; only secrets and non-endpoint settings are supplied at deployment time.
     IResourceBuilder<ParameterResource> nextAuthSecret = builder.AddParameter("nextAuthSecret", secret: true);
     IResourceBuilder<ParameterResource> keycloakClientId = builder.AddParameter("keycloakClientId");
     IResourceBuilder<ParameterResource> keycloakClientSecret = builder.AddParameter("keycloakClientSecret", secret: true);
-    IResourceBuilder<ParameterResource> keycloakRealm = builder.AddParameter("keycloakRealm", "clean-api");
+    IResourceBuilder<ParameterResource> keycloakRealm = builder.AddParameter("keycloakRealm");
+    IResourceBuilder<ParameterResource> keycloakAudience = builder.AddParameter("keycloakAudience");
 
     // Keycloak admin credentials via Aspire parameters (set at deployment time)
     IResourceBuilder<ParameterResource> keycloakAdminUsername = builder.AddParameter("keycloakAdminUsername");
     IResourceBuilder<ParameterResource> keycloakAdminPassword = builder.AddParameter("keycloakAdminPassword", secret: true);
 
     // Keycloak on ACA, backed by Azure PostgreSQL via KC_DB environment variables
-    IResourceBuilder<KeycloakResource> keycloak =
-        builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
-            .WithEnvironment("KC_DB", "postgres")
-            .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
-            .WithEnvironment(context =>
-            {
-                context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.Resource.HostName;
-                context.EnvironmentVariables["KC_DB_URL_PORT"] = "5432";
-                context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression;
-                context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression;
+    IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
+        .WithEnvironment("KC_DB", "postgres")
+        .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
+        .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
+        .WaitFor(keycloakDb);
 
-                string authUrl = authPublicUrl.Resource.ValueExpression;
-                string authHost = authUrl
-                    .Replace("https://", string.Empty, StringComparison.OrdinalIgnoreCase)
-                    .Replace("http://", string.Empty, StringComparison.OrdinalIgnoreCase)
-                    .TrimEnd('/');
+    EndpointReference keycloakPublicEndpoint = keycloak.GetEndpoint("http");
 
-                context.EnvironmentVariables["KC_HOSTNAME"] = authHost;
-                context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
-                context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";
-            })
-            .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
-            .WaitFor(keycloakDb);
+    keycloak.WithEnvironment(context =>
+    {
+        context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.Resource.HostName;
+        context.EnvironmentVariables["KC_DB_URL_PORT"] = "5432";
+        context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression;
+        context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression;
+        context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host).ValueExpression;
+        context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
+        context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";
+    });
 
-    // API on ACA
     IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithReference(appDb)
         .WaitFor(appDb)
@@ -135,23 +127,26 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WaitFor(keycloak)
         .WithExternalHttpEndpoints()
         .WithReference(applicationInsights)
-        .WithReference(keyVault)
-        .WithEnvironment(context =>
-        {
-            string authUrl = authPublicUrl.Resource.ValueExpression.TrimEnd('/');
-            string realm = keycloakRealm.Resource.ValueExpression;
-            string issuer = $"{authUrl}/realms/{realm}";
+        .WithReference(keyVault);
 
-            context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{issuer}/protocol/openid-connect/auth";
-            context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{issuer}/protocol/openid-connect/token";
-            context.EnvironmentVariables["Keycloak__ValidIssuers"] = issuer;
-            context.EnvironmentVariables["Keycloak__Realm"] = realm;
-            context.EnvironmentVariables["Keycloak__Audience"] = "clean-api";
-            context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
-        });
+    EndpointReference apiPublicEndpoint = apiProject.GetEndpoint("https");
 
-    // Admin app on ACA
-    builder.AddNodeApp(AdminAppName, "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
+    apiProject.WithEnvironment(context =>
+    {
+        string authUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
+        string realm = keycloakRealm.Resource.ValueExpression;
+        string audience = keycloakAudience.Resource.ValueExpression;
+        string issuer = $"{authUrl}/realms/{realm}";
+
+        context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{issuer}/protocol/openid-connect/auth";
+        context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{issuer}/protocol/openid-connect/token";
+        context.EnvironmentVariables["Keycloak__ValidIssuers"] = issuer;
+        context.EnvironmentVariables["Keycloak__Realm"] = realm;
+        context.EnvironmentVariables["Keycloak__Audience"] = audience;
+        context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
+    });
+
+    IResourceBuilder<NodeAppResource> adminApp = builder.AddNodeApp(AdminAppName, "../../CleanArchitecture.Presentation/admin", "node_modules/next/dist/bin/next")
         .WithHttpEndpoint(targetPort: AdminTargetPort)
         .WithExternalHttpEndpoints()
         .WithArgs("start")
@@ -159,10 +154,25 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WithReference(apiProject)
         .WaitFor(apiProject)
         .WithEnvironment("NODE_ENV", "production")
-        .WithEnvironment("NEXTAUTH_URL", adminPublicUrl)
         .WithEnvironment("NEXTAUTH_SECRET", nextAuthSecret)
-        .WithEnvironment("API_BASE_URL", apiPublicUrl)
-        .WithEnvironment("KEYCLOAK_ISSUER", authPublicUrl)
         .WithEnvironment("KEYCLOAK_CLIENT_ID", keycloakClientId)
         .WithEnvironment("KEYCLOAK_CLIENT_SECRET", keycloakClientSecret);
+
+    EndpointReference adminPublicEndpoint = adminApp.GetEndpoint("http");
+
+    adminApp.WithEnvironment(context =>
+    {
+        string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
+        string apiUrl = BuildExternalHttpsUrl(apiPublicEndpoint);
+        string keycloakIssuer = $"{BuildExternalHttpsUrl(keycloakPublicEndpoint)}/realms/{keycloakRealm.Resource.ValueExpression}";
+
+        context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
+        context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
+        context.EnvironmentVariables["KEYCLOAK_ISSUER"] = keycloakIssuer;
+    });
+}
+
+static string BuildExternalHttpsUrl(EndpointReference endpoint)
+{
+    return $"https://{endpoint.Property(EndpointProperty.Host).ValueExpression}";
 }

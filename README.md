@@ -73,6 +73,56 @@ If you prefer to run only the API (and manage Postgres yourself):
 3. Visit the Swagger UI (by default):
     - `https://localhost:7281/swagger/index.html`
 
+## Deployment to Azure with `azd`
+
+The Aspire AppHost is configured for Azure deployment through `azd`.
+
+### Prerequisites
+
+- Azure CLI
+- Azure Developer CLI (`azd`)
+- .NET Aspire workload
+
+### Deploy
+
+From the solution root, run:
+
+```bash
+azd up
+```
+
+During deployment, `azd` will provision the Azure resources defined by `CleanArchitecture.Aspire/CleanArchitecture.AppHost/AppHost.cs`, including:
+
+- Azure Container Apps for the API, admin app, and Keycloak
+- Azure Database for PostgreSQL Flexible Server
+- Azure Key Vault
+- Azure Application Insights
+
+### Parameters requested by `azd`
+
+`azd up` should prompt only for values that cannot be derived automatically:
+
+```plain text
+nextAuthSecret
+keycloakClientId
+keycloakClientSecret
+keycloakRealm
+keycloakAdminUsername
+keycloakAdminPassword
+```
+
+### Public URLs
+
+The following public application URLs are now derived automatically from the Azure Container Apps external endpoints during manifest generation and deployment:
+
+- `adminPublicUrl`
+- `apiPublicUrl`
+- `authPublicUrl`
+
+You should no longer need to enter those values manually during `azd up`.
+
+If you later want to use custom domains instead of the default Azure Container Apps hostnames, update the production environment configuration in `CleanArchitecture.Aspire/CleanArchitecture.AppHost/AppHost.cs` and your Azure Container Apps ingress/domain settings accordingly.
+
 
 ## Authentication
 
