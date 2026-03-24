@@ -125,22 +125,22 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
         .WaitFor(appDb)
         .WithReference(keycloak)
         .WaitFor(keycloak)
-        .WithExternalHttpEndpoints()
         .WithReference(applicationInsights)
         .WithReference(keyVault);
 
-    EndpointReference apiPublicEndpoint = apiProject.GetEndpoint("https");
+    EndpointReference apiInternalEndpoint = apiProject.GetEndpoint("http");
 
     apiProject.WithEnvironment(context =>
     {
-        string authUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
+        string publicAuthUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
         string realm = keycloakRealm.Resource.ValueExpression;
         string audience = keycloakAudience.Resource.ValueExpression;
-        string issuer = $"{authUrl}/realms/{realm}";
+        string publicIssuer = $"{publicAuthUrl}/realms/{realm}";
 
-        context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{issuer}/protocol/openid-connect/auth";
-        context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{issuer}/protocol/openid-connect/token";
-        context.EnvironmentVariables["Keycloak__ValidIssuers"] = issuer;
+        context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{publicIssuer}/protocol/openid-connect/auth";
+        context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{publicIssuer}/protocol/openid-connect/token";
+        context.EnvironmentVariables["Keycloak__ValidIssuers"] = publicIssuer;
+        context.EnvironmentVariables["Keycloak__RequireHttpsMetadata"] = "false";
         context.EnvironmentVariables["Keycloak__Realm"] = realm;
         context.EnvironmentVariables["Keycloak__Audience"] = audience;
         context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
@@ -163,7 +163,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     adminApp.WithEnvironment(context =>
     {
         string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
-        string apiUrl = BuildExternalHttpsUrl(apiPublicEndpoint);
+        string apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
         string keycloakIssuer = $"{BuildExternalHttpsUrl(keycloakPublicEndpoint)}/realms/{keycloakRealm.Resource.ValueExpression}";
 
         context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
@@ -175,4 +175,9 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 static string BuildExternalHttpsUrl(EndpointReference endpoint)
 {
     return $"https://{endpoint.Property(EndpointProperty.Host).ValueExpression}";
+}
+
+static string BuildInternalHttpUrl(EndpointReference endpoint)
+{
+    return $"http://{endpoint.Property(EndpointProperty.Host).ValueExpression}:{endpoint.Property(EndpointProperty.Port).ValueExpression}";
 }

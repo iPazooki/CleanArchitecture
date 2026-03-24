@@ -37,6 +37,8 @@ internal static class DependencyInjection
             string audience = builder.Configuration["Keycloak:Audience"]
                                   ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
 
+            bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
+
             services.AddAuthentication()
                     .AddKeycloakJwtBearer(
                         serviceName: "keycloak",
@@ -45,12 +47,7 @@ internal static class DependencyInjection
                         {
                             options.TokenValidationParameters.ValidAudiences = [audience];
                             options.TokenValidationParameters.ValidIssuers = [validIssuers];
-
-                            // For development only - disable HTTPS metadata validation
-                            if (builder.Environment.IsDevelopment())
-                            {
-                                options.RequireHttpsMetadata = false;
-                            }
+                            options.RequireHttpsMetadata = requireHttpsMetadata ?? !builder.Environment.IsDevelopment();
                         });
         }
 
