@@ -34,10 +34,8 @@ internal static class DependencyInjection
             string realm = builder.Configuration["Keycloak:Realm"]
                                ?? throw new InvalidOperationException("Keycloak Realm is not configured.");
 
-            string audience = builder.Configuration["Keycloak:Audience"]
+            string[] audience = builder.Configuration["Keycloak:Audience"]?.Split(",")
                                   ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
-
-            bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
 
             services.AddAuthentication()
                     .AddKeycloakJwtBearer(
@@ -45,9 +43,9 @@ internal static class DependencyInjection
                         realm: realm,
                         options =>
                         {
-                            options.TokenValidationParameters.ValidAudiences = [audience];
+                            options.TokenValidationParameters.ValidAudiences = audience;
                             options.TokenValidationParameters.ValidIssuers = [validIssuers];
-                            options.RequireHttpsMetadata = requireHttpsMetadata ?? !builder.Environment.IsDevelopment();
+                            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
                         });
         }
 
