@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CleanArchitecture.DbMigrator\CleanArchitecture.DbMigrator.csproj" />
     <ProjectReference Include="..\..\CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj" />
   </ItemGroup>
 

@@ -35,9 +35,15 @@ static void ConfigureTestingEnvironment(IDistributedApplicationBuilder builder)
     IResourceBuilder<PostgresDatabaseResource> postgresdb =
         postgres.AddDatabase(PostgresDatabaseResourceName, "testingDb");
 
+    IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>("db-migrator")
+        .WithReference(postgresdb)
+        .WaitFor(postgresdb)
+        .WithEnvironment("ASPNETCORE_ENVIRONMENT", TestingEnvironment);
+
     IResourceBuilder<ProjectResource> project = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithReference(postgresdb)
-        .WaitFor(postgresdb);
+        .WaitFor(postgresdb)
+        .WaitFor(migrator);
 
     project.WithEnvironment("ASPNETCORE_ENVIRONMENT", TestingEnvironment);
 }
@@ -62,9 +68,14 @@ static void ConfigureDevelopmentEnvironment(IDistributedApplicationBuilder build
         .WithOtlpExporter()
         .WithLifetime(ContainerLifetime.Persistent);
 
+    IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>("db-migrator")
+        .WithReference(postgres)
+        .WaitFor(postgres);
+
     IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithReference(postgres)
         .WaitFor(postgres)
+        .WaitFor(migrator)
         .WithReference(keycloak)
         .WaitFor(keycloak);
 
@@ -88,6 +99,10 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 
     IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(PostgresDatabaseResourceName, "mrpaneldb");
     IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloakResource", "keycloakdb");
+
+    IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>("db-migrator")
+        .WithReference(appDb)
+        .WaitFor(appDb);
 
     // Public URLs are derived from ACA external endpoints; only secrets and non-endpoint settings are supplied at deployment time.
     IResourceBuilder<ParameterResource> nextAuthSecret = builder.AddParameter("nextAuthSecret", secret: true);
@@ -123,6 +138,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ApiProjectName)
         .WithReference(appDb)
         .WaitFor(appDb)
+        .WaitFor(migrator)
         .WithReference(keycloak)
         .WaitFor(keycloak)
         .WithReference(applicationInsights)

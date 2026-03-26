@@ -25,8 +25,8 @@ app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure development-specific features and ensure the database is created
-await app.ConfigureFeaturesAsync().ConfigureAwait(false);
+// Configure development-specific features
+app.ConfigureEnvironments();
 
 // API Versioning
 Asp.Versioning.Builder.ApiVersionSet apiVersionSet = app.NewApiVersionSet()
