@@ -1,4 +1,4 @@
-﻿import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import { getSession, signIn } from "next-auth/react";
 import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ApiError } from "@/lib/utils/api-error";
