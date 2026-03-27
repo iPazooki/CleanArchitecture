@@ -24,7 +24,7 @@ public static class DependencyInjection
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
-        string? connectionString = configuration.GetConnectionString("postgresdb");
+        string? connectionString = configuration.GetConnectionString("postgresDatabaseResource");
 
         // Add a check for Design-Time
         bool isDesignTime = AppDomain.CurrentDomain.GetAssemblies()
@@ -39,7 +39,7 @@ public static class DependencyInjection
             }
             else
             {
-                throw new InvalidOperationException("Connection string 'postgresdb' not found.");
+                throw new InvalidOperationException("Connection string 'postgresDatabaseResource' not found.");
             }
         }
 

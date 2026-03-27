@@ -19,10 +19,14 @@ WebApplication app = builder.Build();
 
 app.MapDefaultEndpoints();
 
+app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
 
-// Configure development-specific features and ensure the database is created
-await app.ConfigureFeaturesAsync().ConfigureAwait(false);
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Configure development-specific features
+app.ConfigureEnvironments();
 
 // API Versioning
 Asp.Versioning.Builder.ApiVersionSet apiVersionSet = app.NewApiVersionSet()
@@ -36,9 +40,5 @@ RouteGroupBuilder versionedApi = app.MapGroup("/api/v{version:apiVersion}")
     .WithGroupName("v1");
 
 versionedApi.MapBookEndpoints();
-
-app.UseExceptionHandler();
-app.UseAuthentication();
-app.UseAuthorization();
 
 await app.RunAsync().ConfigureAwait(false);

@@ -1,5 +1,3 @@
-using CleanArchitecture.Infrastructure.Persistence.Data;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 namespace CleanArchitecture.Api.Configuration;
@@ -7,16 +5,16 @@ namespace CleanArchitecture.Api.Configuration;
 internal static class WebApplicationExtensions
 {
     /// <summary>
-    /// Configures development-specific features such as OpenAPI UI, Scalar API reference,
-    /// and ensures the database is created.
+    /// Configures development-specific features such as OpenAPI UI, Scalar API reference
     /// </summary>
     /// <param name="app">The <see cref="WebApplication"/> instance.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public static async Task ConfigureFeaturesAsync(this WebApplication app)
+    public static void ConfigureEnvironments(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {
             string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
+            string? clientId = app.Configuration["ScalarApi:ClientId"];
+            string[]? scopes = app.Configuration["ScalarApi:Scopes"]?.Split(',');
 
             if (string.IsNullOrEmpty(clientSecret))
             {
@@ -25,9 +23,23 @@ internal static class WebApplicationExtensions
                     "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:ClientSecret'. " +
                     "Skipping Scalar API reference registration.");
             }
+            else if (string.IsNullOrEmpty(clientId))
+            {
+                app.Logger.LogError(
+                    "Scalar API audience is not provided. " +
+                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:Audience'. " +
+                    "Skipping Scalar API reference registration.");
+            }
+            else if (scopes is null)
+            {
+                app.Logger.LogError(
+                    "Scalar API scopes are not provided. " +
+                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:Scopes'. " +
+                    "Skipping Scalar API reference registration.");
+            }
             else
             {
-                app.MapOpenApi("/openapi/{documentName}.json");
+                app.MapOpenApi();
 
                 app.MapScalarApiReference(options => options
                     .WithTitle("Clean Architecture API - v1")
@@ -36,24 +48,17 @@ internal static class WebApplicationExtensions
                     .AddPreferredSecuritySchemes("OAuth2")
                     .AddAuthorizationCodeFlow("OAuth2", flow =>
                     {
-                        flow.ClientId = "scalar";
+                        flow.ClientId = clientId;
                         flow.ClientSecret = clientSecret;
                         flow.Pkce = Pkce.Sha256;
-                        flow.SelectedScopes = ["permissions"];
+                        flow.SelectedScopes = scopes;
                     }));
             }
         }
 
-        // Run migrations in all non-production environments (Development, Testing, etc.)
-        if (!app.Environment.IsProduction())
-        {
-            using IServiceScope scope = app.Services.CreateScope();
-            ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await context.Database.MigrateAsync().ConfigureAwait(false);
-        }
-
         if (app.Environment.IsProduction())
         {
+            app.UseHsts();
             app.UseHttpsRedirection();
         }
     }

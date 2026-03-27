@@ -7,7 +7,7 @@ apply: always
 ## Build, test, and lint commands
 
 ### Backend and solution
-- Install the Aspire workload before using the AppHost: `dotnet workload install aspire`
+- Install the Aspire workload before using the AppHost: `dotnet workload install`
 - Restore packages: `dotnet restore`
 - Build the solution: `dotnet build --configuration Release`
 - Use `dotnet build` as the .NET lint gate. `Directory.Build.props` enables analyzers, enforces code style in build, and treats warnings as errors across all `.csproj` files.
@@ -37,6 +37,7 @@ apply: always
 - `CleanArchitecture.Aspire\CleanArchitecture.AppHost\AppHost.cs` is the real local-dev entry point. In Development it starts Postgres + PgAdmin, Keycloak with realm import, the API, and the Next.js admin app. In Testing it starts only the API and an ephemeral Postgres database, which is why integration tests do not need a separately managed database or Keycloak instance.
 - `CleanArchitecture.Aspire\CleanArchitecture.ServiceDefaults\Extensions.cs` adds the shared cross-cutting runtime behavior: Serilog, OpenTelemetry, service discovery, resilience handlers, and health endpoints.
 - `CleanArchitecture.Presentation\admin` is a Next.js 16 App Router admin app. It uses NextAuth with Keycloak, TanStack Query for API hooks, and generated API clients/Zod schemas under `src\lib\api` and `src\lib\api\zod`.
+- The Next.js frontend acts as a Backend for Frontend (BFF), with only the frontend and Keycloak admin UI publicly exposed. The .NET API remains private, allowing internal HTTP communication between the frontend, API, and Keycloak.
 
 ## Key conventions
 

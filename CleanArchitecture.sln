@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApp", "WebApp", "{BC6E57
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "admin", "CleanArchitecture.Presentation\admin\admin.esproj", "{B4BAF6C4-DBD5-339B-101F-18809626F3D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitecture.DbMigrator", "CleanArchitecture.DbMigrator\CleanArchitecture.DbMigrator.csproj", "{B1158678-6625-48FC-8819-A0ECF86C797C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{B4BAF6C4-DBD5-339B-101F-18809626F3D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4BAF6C4-DBD5-339B-101F-18809626F3D9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B4BAF6C4-DBD5-339B-101F-18809626F3D9}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B1158678-6625-48FC-8819-A0ECF86C797C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1158678-6625-48FC-8819-A0ECF86C797C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1158678-6625-48FC-8819-A0ECF86C797C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1158678-6625-48FC-8819-A0ECF86C797C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +133,7 @@ Global
 		{37117016-1B6F-45DA-9523-03F83352A0CB} = {4AA6FF47-8E67-40D2-A0D6-472CBD23E0AC}
 		{BC6E5777-03C5-4E0A-8DE5-63B43609BA7C} = {4AA6FF47-8E67-40D2-A0D6-472CBD23E0AC}
 		{B4BAF6C4-DBD5-339B-101F-18809626F3D9} = {BC6E5777-03C5-4E0A-8DE5-63B43609BA7C}
+		{B1158678-6625-48FC-8819-A0ECF86C797C} = {0CE66AC5-6FBA-42A9-A488-4F803B260B8D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61C46B56-1731-4BEA-8EA0-EEFBA623663E}
