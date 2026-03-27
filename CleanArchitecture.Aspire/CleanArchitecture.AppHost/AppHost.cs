@@ -109,7 +109,6 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     IResourceBuilder<ParameterResource> keycloakClientId = builder.AddParameter("keycloakClientId");
     IResourceBuilder<ParameterResource> keycloakClientSecret = builder.AddParameter("keycloakClientSecret", secret: true);
     IResourceBuilder<ParameterResource> keycloakRealm = builder.AddParameter("keycloakRealm");
-    IResourceBuilder<ParameterResource> keycloakAudience = builder.AddParameter("keycloakAudience");
 
     // Keycloak admin credentials via Aspire parameters (set at deployment time)
     IResourceBuilder<ParameterResource> keycloakAdminUsername = builder.AddParameter("keycloakAdminUsername");
@@ -117,7 +116,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 
     // Keycloak on ACA, backed by Azure PostgreSQL via KC_DB environment variables
     IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
-        .WithEnvironment("KC_DB", "postgres")
+        .WithEnvironment("KC_DB", "postgres") 
         .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
         .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
         .WaitFor(keycloakDb);
@@ -128,8 +127,8 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     {
         context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.Resource.HostName;
         context.EnvironmentVariables["KC_DB_URL_PORT"] = "5432";
-        context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression;
-        context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression;
+        context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression; 
+        context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression; 
         context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host).ValueExpression;
         context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
         context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";
@@ -150,7 +149,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     {
         string publicAuthUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
         string realm = keycloakRealm.Resource.ValueExpression;
-        string audience = keycloakAudience.Resource.ValueExpression;
+        string audience = keycloakClientId.Resource.ValueExpression;
         string publicIssuer = $"{publicAuthUrl}/realms/{realm}";
 
         context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{publicIssuer}/protocol/openid-connect/auth";
