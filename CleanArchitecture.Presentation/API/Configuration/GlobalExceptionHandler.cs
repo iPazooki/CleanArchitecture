@@ -39,6 +39,8 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             Detail = exception.Message
         };
 
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -48,6 +50,8 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
     private async Task HandleUnauthorizedAccessException(HttpContext httpContext, Exception ex, CancellationToken cancellationToken)
     {
         _logger.LogWarning(ex, "An error occurred while processing the request {DateTime} {Path}", DateTimeOffset.UtcNow, httpContext.Request.Path);
+
+        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
         await httpContext.Response
             .WriteAsJsonAsync(

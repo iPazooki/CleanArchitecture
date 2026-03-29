@@ -66,7 +66,7 @@ The solution is configured to run using `.NET Aspire` via the AppHost project.
 
 If you prefer to run only the API (and manage Postgres yourself):
 
-1. Ensure you have a running Postgres instance and that the connection string in `CleanArchitecture.Presentation/appsettings.json` points to it.
+1. Ensure you have a running Postgres instance and that the connection string in `CleanArchitecture.Presentation/API/appsettings.json` points to it.
 2. Build and run the application:
     - `dotnet build`
     - `dotnet run --project CleanArchitecture.Presentation`
@@ -189,7 +189,7 @@ KEYCLOAK_ISSUER=http://localhost:8080/realms/clean-api
 
 - **Database**: PostgreSQL
 - **EF Core Provider**: `Npgsql.EntityFrameworkCore.PostgreSQL`
-- **Configuration**: Connection strings are defined in `CleanArchitecture.Presentation/appsettings.json` and can be overridden in environment-specific files like `CleanArchitecture.Presentation/appsettings.Development.json` or via Aspire resource configuration in `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings*.json`.
+- **Configuration**: Connection strings are defined in `CleanArchitecture.Presentation/API/appsettings.json` and can be overridden in environment-specific files like `CleanArchitecture.Presentation/API/appsettings.Development.json` or via Aspire resource configuration in `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings*.json`.
 
 
 ## Database Migrations
@@ -209,7 +209,7 @@ dotnet ef migrations add <MigrationName> --project CleanArchitecture.Infrastruct
 ### Applying Migrations
 
 #### Development and Testing
-In non-production environments, migrations are automatically applied during application startup using `context.Database.MigrateAsync()` in `WebApplicationExtensions.cs`.
+In non-production environments, migrations are automatically applied during application startup using `context.Database.MigrateAsync()` in `CleanArchitecture.Presentation/API/Configuration/WebApplicationExtensions.cs`.
 
 #### Manual Update
 If you need to manually update the database:

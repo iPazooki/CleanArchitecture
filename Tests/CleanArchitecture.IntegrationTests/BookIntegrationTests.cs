@@ -16,8 +16,12 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         CreateBookCommand command = new("Test Book", "F");
 
         using HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/api/v1/books", command, CancellationToken);
+        Result<Guid>? createdResult = await response.Content.ReadFromJsonAsync<Result<Guid>>(CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(createdResult);
+        Assert.True(createdResult!.IsSuccess);
+        Assert.NotEqual(Guid.Empty, createdResult.Value);
     }
 
     [Fact]
@@ -81,8 +85,14 @@ public class BookIntegrationTests(DistributedApplicationFixture fixture) : BaseI
         Assert.True(createdResult!.IsSuccess);
 
         using HttpResponseMessage getResponse = await _httpClient.GetAsync($"/api/v1/books/{createdResult.Value}", CancellationToken);
+        Result<BookResponse>? getResult = await getResponse.Content.ReadFromJsonAsync<Result<BookResponse>>(CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.NotNull(getResult);
+        Assert.True(getResult!.IsSuccess);
+        Assert.Equal(createdResult.Value, getResult.Value!.Id);
+        Assert.Equal("Book To Get", getResult.Value.Title);
+        Assert.Equal("F", getResult.Value.Genre);
     }
 
     [Fact]
