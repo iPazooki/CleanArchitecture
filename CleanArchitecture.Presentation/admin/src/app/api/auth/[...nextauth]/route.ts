@@ -7,6 +7,34 @@ type RouteHandlerContext = {
   params: Promise<{ nextauth: string[] }>;
 };
 
+type JwtPayload = {
+  roles?: string[];
+  realm_access?: {
+    roles?: string[];
+  };
+};
+
+function parseJwtPayload(token: string): JwtPayload | null {
+  try {
+    const payload = token.split(".")[1];
+
+    if (!payload) {
+      return null;
+    }
+
+    return JSON.parse(Buffer.from(payload, "base64url").toString("utf-8")) as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
+function extractRoles(accessToken: string): string[] {
+  const payload = parseJwtPayload(accessToken);
+  const roles = payload?.roles ?? payload?.realm_access?.roles ?? [];
+
+  return Array.isArray(roles) ? roles : [];
+}
+
 export function getAuthOptions(): NextAuthOptions {
   const { KEYCLOAK_ISSUER, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET, NEXTAUTH_SECRET } = getEnvVars();
   const keycloakIssuer = KEYCLOAK_ISSUER.replace(/\/+$/, "");
@@ -35,6 +63,7 @@ export function getAuthOptions(): NextAuthOptions {
       async jwt({ token, account }) {
         if (account?.access_token) {
           token.accessToken = account.access_token;
+          token.roles = extractRoles(account.access_token);
         }
 
         if (account?.id_token) {
@@ -46,6 +75,7 @@ export function getAuthOptions(): NextAuthOptions {
       async session({ session, token }) {
         if (session.user && token.sub) {
           session.user.id = token.sub;
+          session.user.roles = Array.isArray(token.roles) ? token.roles : [];
         }
 
         if (typeof token.accessToken === "string") {

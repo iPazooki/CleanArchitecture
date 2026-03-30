@@ -9,5 +9,5 @@ namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 /// <param name="Genre">The genre of the book.</param>
 /// <returns>The ID of the created book.</returns>
 public record CreateBookCommand(
-    [property: Required, MaxLength(100)] string Title,
+    [property: Required, MinLength(3), MaxLength(100)] string Title,
     [property: Required, MaxLength(2), MinLength(1)] string Genre) : IRequest<Result<Guid>>;

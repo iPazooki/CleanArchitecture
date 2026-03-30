@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -26,9 +27,13 @@ import {
 
 export default function BookTable() {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const { data: response, error, isLoading } = useGetApiV1Books();
   const { isOpen, openModal, closeModal } = useModal();
   const [bookToDelete, setBookToDelete] = useState<BookResponse | null>(null);
+  const roles = session?.user?.roles ?? [];
+  const canEdit = roles.includes("edit");
+  const canDelete = roles.includes("delete");
 
   const books =
     response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value)
@@ -126,17 +131,21 @@ export default function BookTable() {
                       <Link href={`/book/detail/${book.id}`} className="text-blue-500 hover:text-blue-700">
                         View
                       </Link>
-                      <Link href={`/book/edit/${book.id}`} className="text-orange-500 hover:text-orange-700">
-                        Edit
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteClick(book)}
-                        className="text-red-500 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={deleteMutation.isPending}
-                      >
-                        Delete
-                      </button>
+                      {canEdit ? (
+                        <Link href={`/book/edit/${book.id}`} className="text-orange-500 hover:text-orange-700">
+                          Edit
+                        </Link>
+                      ) : null}
+                      {canDelete ? (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClick(book)}
+                          className="text-red-500 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={deleteMutation.isPending}
+                        >
+                          Delete
+                        </button>
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>

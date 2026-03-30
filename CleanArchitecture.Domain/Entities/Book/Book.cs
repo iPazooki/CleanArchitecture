@@ -36,6 +36,7 @@ public sealed class Book : AggregateRootAuditable
     public static Result<Book> Create(string title, Genre genre)
     {
         Result titleValidationResult = ValidateTitle(title);
+
         if (!titleValidationResult.IsSuccess)
         {
             return Result<Book>.Failure(titleValidationResult.Errors.ToArray());
