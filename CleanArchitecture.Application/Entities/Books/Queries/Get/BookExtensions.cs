@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities;
-
-namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
+﻿namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
 /// <summary>
 /// Provides extension methods for mapping Book entities to BookDto.

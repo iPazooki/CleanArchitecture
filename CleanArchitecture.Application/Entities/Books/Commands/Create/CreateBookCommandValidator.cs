@@ -10,13 +10,13 @@ public class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
     /// </summary>
     public CreateBookCommandValidator()
     {
-        // Rule to ensure the Title property is not empty and has a maximum length of 200 characters.
         RuleFor(v => v.Title)
-            .MaximumLength(200)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Title is required.")
+            .MinimumLength(BookRules.TitleMinLength).WithMessage("Title is too short.")
+            .MaximumLength(BookRules.TitleMaxLength).WithMessage("Title is too long.");
 
-        // Rule to ensure the Genre property is not empty.
         RuleFor(v => v.Genre)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Genre is required.")
+            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage("Genre is of invalid length.");
     }
 }

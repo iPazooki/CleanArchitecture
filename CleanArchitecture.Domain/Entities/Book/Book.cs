@@ -104,7 +104,7 @@ public sealed class Book : AggregateRootAuditable
             return Result.Failure(BookErrors.TitleIsRequired);
         }
 
-        if (title.Length > 200)
+        if (title.Length > BookRules.TitleMaxLength)
         {
             return Result.Failure(BookErrors.TitleTooLong);
         }

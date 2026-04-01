@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 

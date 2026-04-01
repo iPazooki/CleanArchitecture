@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities;
-
-namespace CleanArchitecture.Application.Common;
+﻿namespace CleanArchitecture.Application.Common;
 
 /// <summary>
 /// Represents a unit of work that manages the persistence of changes.

@@ -1,5 +1,4 @@
-﻿using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Domain.Errors;
+﻿using CleanArchitecture.Domain.Errors;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 

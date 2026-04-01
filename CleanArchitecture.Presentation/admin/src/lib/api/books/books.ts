@@ -53,10 +53,15 @@ export type postApiV1BooksResponse400 = {
   status: 400
 }
 
+export type postApiV1BooksResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
 export type postApiV1BooksResponseSuccess = (postApiV1BooksResponse201) & {
   headers: Headers;
 };
-export type postApiV1BooksResponseError = (postApiV1BooksResponse400) & {
+export type postApiV1BooksResponseError = (postApiV1BooksResponse400 | postApiV1BooksResponse422) & {
   headers: Headers;
 };
 
@@ -138,19 +143,12 @@ export type getApiV1BooksResponse200 = {
   status: 200
 }
 
-export type getApiV1BooksResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
 export type getApiV1BooksResponseSuccess = (getApiV1BooksResponse200) & {
   headers: Headers;
 };
-export type getApiV1BooksResponseError = (getApiV1BooksResponse404) & {
-  headers: Headers;
-};
+;
 
-export type getApiV1BooksResponse = (getApiV1BooksResponseSuccess | getApiV1BooksResponseError)
+export type getApiV1BooksResponse = (getApiV1BooksResponseSuccess)
 
 export const getGetApiV1BooksUrl = () => {
 
@@ -182,7 +180,7 @@ export const getGetApiV1BooksQueryKey = () => {
     }
 
     
-export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
+export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -201,10 +199,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetApiV1BooksQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Books>>>
-export type GetApiV1BooksQueryError = ProblemDetails
+export type GetApiV1BooksQueryError = unknown
 
 
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
@@ -214,7 +212,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
       >, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
@@ -224,7 +222,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
       >, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -232,7 +230,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
  * @summary Gets all books
  */
 
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -266,10 +264,15 @@ export type putApiV1BooksIdResponse404 = {
   status: 404
 }
 
+export type putApiV1BooksIdResponse422 = {
+  data: ProblemDetails
+  status: 422
+}
+
 export type putApiV1BooksIdResponseSuccess = (putApiV1BooksIdResponse204) & {
   headers: Headers;
 };
-export type putApiV1BooksIdResponseError = (putApiV1BooksIdResponse400 | putApiV1BooksIdResponse404) & {
+export type putApiV1BooksIdResponseError = (putApiV1BooksIdResponse400 | putApiV1BooksIdResponse404 | putApiV1BooksIdResponse422) & {
   headers: Headers;
 };
 

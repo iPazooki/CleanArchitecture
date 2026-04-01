@@ -11,14 +11,15 @@ import * as zod from 'zod';
  * Creates a new book with the specified title and genre.
  * @summary Creates a new book
  */
-export const postApiV1BooksBodyTitleMax = 100;
+export const postApiV1BooksBodyTitleMin = 3;
+export const postApiV1BooksBodyTitleMax = 200;
 
 export const postApiV1BooksBodyGenreMax = 2;
 
 
 
 export const PostApiV1BooksBody = zod.object({
-  "title": zod.string().max(postApiV1BooksBodyTitleMax),
+  "title": zod.string().min(postApiV1BooksBodyTitleMin).max(postApiV1BooksBodyTitleMax),
   "genre": zod.string().min(1).max(postApiV1BooksBodyGenreMax)
 })
 
@@ -58,10 +59,17 @@ export const PutApiV1BooksIdParams = zod.object({
   "id": zod.uuid()
 })
 
+export const putApiV1BooksIdBodyTitleMin = 3;
+export const putApiV1BooksIdBodyTitleMax = 200;
+
+export const putApiV1BooksIdBodyGenreMax = 2;
+
+
+
 export const PutApiV1BooksIdBody = zod.object({
   "id": zod.uuid(),
-  "title": zod.string(),
-  "genre": zod.string()
+  "title": zod.string().min(putApiV1BooksIdBodyTitleMin).max(putApiV1BooksIdBodyTitleMax),
+  "genre": zod.string().min(1).max(putApiV1BooksIdBodyGenreMax)
 })
 
 /**

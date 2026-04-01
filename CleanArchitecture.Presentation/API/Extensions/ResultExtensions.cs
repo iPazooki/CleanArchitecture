@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using CleanArchitecture.Domain.Common;
 using DomainValidationError = DomainValidation.Error;
 
 namespace CleanArchitecture.Api.Extensions;

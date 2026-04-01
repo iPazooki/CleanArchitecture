@@ -80,6 +80,8 @@ internal static class DependencyInjection
 
         services.AddOpenApi("v1", options =>
         {
+            options.AddSchemaTransformer<FluentValidationOpenApiSchemaTransformer>();
+
             options.AddDocumentTransformer((document, context, ct) =>
             {
                 document.Info.Title = "Clean Architecture API";
