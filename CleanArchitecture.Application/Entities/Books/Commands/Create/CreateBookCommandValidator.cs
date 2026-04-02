@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
+﻿using CleanArchitecture.Domain.Errors;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
 /// <summary>
 /// Validator for the CreateBookCommand.
@@ -12,8 +14,8 @@ public class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
     {
         RuleFor(v => v.Title)
             .NotEmpty().WithMessage("Title is required.")
-            .MinimumLength(BookRules.TitleMinLength).WithMessage("Title is too short.")
-            .MaximumLength(BookRules.TitleMaxLength).WithMessage("Title is too long.");
+            .MinimumLength(BookRules.TitleMinLength).WithMessage(BookErrors.TitleIsRequired.Message)
+            .MaximumLength(BookRules.TitleMaxLength).WithMessage(BookErrors.TitleTooLong.Message);
 
         RuleFor(v => v.Genre)
             .NotEmpty().WithMessage("Genre is required.")
