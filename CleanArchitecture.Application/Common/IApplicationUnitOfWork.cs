@@ -1,11 +1,12 @@
-﻿using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Entities;
 
 namespace CleanArchitecture.Application.Common;
 
 /// <summary>
 /// Represents a unit of work that manages the persistence of changes.
+/// Lifetime is managed by the DI container (scoped); do not manually dispose.
 /// </summary>
-public interface IUnitOfWork : IDisposable, IAsyncDisposable
+public interface IUnitOfWork
 {
     /// <summary>
     /// Saves all changes made in this unit of work asynchronously.

@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace Architecture.UnitTests;
 
-public class UnitTest1
+public class ArchitectureTests
 {
     private const string DomainAssemblyName = "CleanArchitecture.Domain";
     private const string PresentationAssemblyName = "CleanArchitecture.Presentation";
@@ -28,7 +28,7 @@ public class UnitTest1
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
     }
-    
+
     [Fact]
     public void ApplicationShouldOnlyDependOnDomain()
     {
@@ -45,10 +45,10 @@ public class UnitTest1
             Assert.NotEqual(InfrastructureAssemblyName, referencedAssemblyName);
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
-        
+
         Assert.Contains(references, r => r.Name == DomainAssemblyName);
     }
-    
+
     [Fact]
     public void InfrastructureShouldOnlyDependOnApplication()
     {
@@ -64,10 +64,10 @@ public class UnitTest1
             string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
-        
+
         Assert.Contains(references, r => r.Name == ApplicationAssemblyName);
     }
-    
+
     [Fact]
     public void InfrastructurePersistenceShouldOnlyDependOnApplication()
     {
@@ -83,7 +83,7 @@ public class UnitTest1
             string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
-        
+
         Assert.Contains(references, r => r.Name == DomainAssemblyName);
         Assert.Contains(references, r => r.Name == ApplicationAssemblyName);
     }

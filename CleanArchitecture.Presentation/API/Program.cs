@@ -13,6 +13,18 @@ builder.Services
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices(builder);
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(policy => policy.NoCache());
+    options.AddPolicy("GetBooks", policy => policy.Expire(TimeSpan.FromSeconds(30)).Tag("books"));
+    options.AddPolicy("GetBook", policy => policy.Expire(TimeSpan.FromSeconds(60)).Tag("books"));
+});
+
 builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
 WebApplication app = builder.Build();
@@ -22,8 +34,12 @@ app.MapDefaultEndpoints();
 app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
 
+app.UseResponseCompression();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseOutputCache();
 
 // Configure development-specific features
 app.ConfigureEnvironments();

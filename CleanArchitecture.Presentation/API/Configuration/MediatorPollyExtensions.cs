@@ -1,17 +1,25 @@
-﻿namespace CleanArchitecture.Api.Configuration;
+using Polly.Retry;
+using Polly.CircuitBreaker;
+using Polly.Fallback;
+
+namespace CleanArchitecture.Api.Configuration;
 
 internal static class MediatorPollyExtensions
 {
     private const string ApiCallFailureMessage = "API call is not successful.";
+    private const int MaxRetryAttempts = 3;
+    private const int CircuitBreakerFailureThreshold = 2;
 
     public static async ValueTask<Result> SendWithRetryAsync(this ISender sender, IRequest<Result> request)
     {
         ArgumentNullException.ThrowIfNull(sender);
         ArgumentNullException.ThrowIfNull(request);
 
-        Polly.Wrap.AsyncPolicyWrap<Result> policyWrap = CreatePolicyWrap(Result.Failure(ApiCallFailureMessage));
+        ResiliencePipeline<Result> pipeline = CreateResiliencePipeline(Result.Failure(ApiCallFailureMessage));
 
-        return await policyWrap.ExecuteAsync(async () => await sender.Send(request).ConfigureAwait(false)).ConfigureAwait(false);
+        return await pipeline.ExecuteAsync(
+            async ct => await sender.Send(request, ct).ConfigureAwait(false),
+            CancellationToken.None).ConfigureAwait(false);
     }
 
     public static async ValueTask<Result<TResponse>> SendWithRetryAsync<TResponse>(this ISender sender, IRequest<Result<TResponse>> request)
@@ -19,27 +27,46 @@ internal static class MediatorPollyExtensions
         ArgumentNullException.ThrowIfNull(sender);
         ArgumentNullException.ThrowIfNull(request);
 
-        Polly.Wrap.AsyncPolicyWrap<Result<TResponse>> policyWrap = CreatePolicyWrap(Result<TResponse>.Failure(ApiCallFailureMessage));
+        ResiliencePipeline<Result<TResponse>> pipeline = CreateResiliencePipeline(Result<TResponse>.Failure(ApiCallFailureMessage));
 
-        return await policyWrap.ExecuteAsync(async () => await sender.Send(request).ConfigureAwait(false)).ConfigureAwait(false);
+        return await pipeline.ExecuteAsync(
+            async ct => await sender.Send(request, ct).ConfigureAwait(false),
+            CancellationToken.None).ConfigureAwait(false);
     }
 
-    private static Polly.Wrap.AsyncPolicyWrap<TResponse> CreatePolicyWrap<TResponse>(TResponse fallbackResult)
+    private static ResiliencePipeline<TResponse> CreateResiliencePipeline<TResponse>(TResponse fallbackResult)
     {
-        IAsyncPolicy<TResponse> retryPolicy = Policy<TResponse>
-            .Handle<Exception>()
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(2));
+        return new ResiliencePipelineBuilder<TResponse>()
+            .AddFallback(new FallbackStrategyOptions<TResponse>
+            {
+                ShouldHandle = new PredicateBuilder<TResponse>()
+                    .HandleTransientExceptions(),
+                FallbackAction = _ => Outcome.FromResultAsValueTask(fallbackResult)
+            })
+            .AddCircuitBreaker(new CircuitBreakerStrategyOptions<TResponse>
+            {
+                ShouldHandle = new PredicateBuilder<TResponse>()
+                    .HandleTransientExceptions(),
+                FailureRatio = 0.5,
+                MinimumThroughput = CircuitBreakerFailureThreshold,
+                BreakDuration = TimeSpan.FromMinutes(1)
+            })
+            .AddRetry(new RetryStrategyOptions<TResponse>
+            {
+                ShouldHandle = new PredicateBuilder<TResponse>()
+                    .HandleTransientExceptions(),
+                MaxRetryAttempts = MaxRetryAttempts,
+                Delay = TimeSpan.FromSeconds(2),
+                BackoffType = DelayBackoffType.Exponential
+            })
+            .Build();
+    }
 
-        IAsyncPolicy<TResponse> circuitBreakerPolicy = Policy<TResponse>
-            .Handle<Exception>()
-            .CircuitBreakerAsync(2, TimeSpan.FromMinutes(1));
-
-        IAsyncPolicy<TResponse> fallbackPolicy = Policy<TResponse>
-            .Handle<Exception>()
-            .FallbackAsync(fallbackResult);
-
-        return fallbackPolicy
-            .WrapAsync(circuitBreakerPolicy)
-            .WrapAsync(retryPolicy);
+    private static PredicateBuilder<TResponse> HandleTransientExceptions<TResponse>(this PredicateBuilder<TResponse> builder)
+    {
+        return builder
+            .Handle<TimeoutException>()
+            .Handle<HttpRequestException>()
+            .Handle<Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException>();
     }
 }

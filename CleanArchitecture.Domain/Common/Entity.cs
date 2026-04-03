@@ -1,9 +1,12 @@
-﻿namespace CleanArchitecture.Domain.Common;
+namespace CleanArchitecture.Domain.Common;
 
 /// <summary>
 /// Represents the base entity class that other entity classes can inherit from.
+/// Identity is determined solely by <see cref="Id"/>; domain events are transient and excluded from equality.
 /// </summary>
-public abstract class Entity : IEqualityComparer<Entity>
+#pragma warning disable S4035 // IEquatable on abstract base entity is intentional for DDD identity-based equality
+public abstract class Entity : IEquatable<Entity>
+#pragma warning restore S4035
 {
     public Guid Id { get; } = Guid.NewGuid();
 
@@ -17,35 +20,31 @@ public abstract class Entity : IEqualityComparer<Entity>
 
     public void ClearDomainEvents() => _domainEvents.Clear();
 
-    public bool Equals(Entity? x, Entity? y)
+    public bool Equals(Entity? other)
     {
-        if (ReferenceEquals(x, y))
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
         {
             return true;
         }
 
-        if (x is null)
+        if (GetType() != other.GetType())
         {
             return false;
         }
 
-        if (y is null)
-        {
-            return false;
-        }
-
-        if (x.GetType() != y.GetType())
-        {
-            return false;
-        }
-
-        return x.Id.Equals(y.Id) && x._domainEvents.Equals(y._domainEvents);
+        return Id.Equals(other.Id);
     }
 
-    public int GetHashCode(Entity obj)
-    {
-        ArgumentNullException.ThrowIfNull(obj);
+    public override bool Equals(object? obj) => Equals(obj as Entity);
 
-        return HashCode.Combine(obj.Id, obj._domainEvents);
-    }
+    public override int GetHashCode() => Id.GetHashCode();
+
+    public static bool operator ==(Entity? left, Entity? right) => Equals(left, right);
+
+    public static bool operator !=(Entity? left, Entity? right) => !Equals(left, right);
 }

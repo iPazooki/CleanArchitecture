@@ -39,17 +39,14 @@ public sealed record Genre(string Code)
     public static Genre Mystery => new("M");
 
     /// <summary>
-    /// Gets the supported genres.
+    /// Gets the supported genres as a frozen set for O(1) lookup.
     /// </summary>
-    private static IEnumerable<Genre> SupportedGenres
+    private static FrozenSet<Genre> SupportedGenres { get; } = new HashSet<Genre>
     {
-        get
-        {
-            yield return Fiction;
-            yield return NonFiction;
-            yield return Mystery;
-        }
-    }
+        Fiction,
+        NonFiction,
+        Mystery
+    }.ToFrozenSet();
 
     /// <summary>
     /// Implicitly converts a Genre to a string.

@@ -41,7 +41,7 @@ public static class Extensions
 
         builder.Services.Configure<ServiceDiscoveryOptions>(options =>
         {
-            options.AllowedSchemes = ["https"];
+            options.AllowedSchemes = ["https", "http"];
         });
 
         return builder;
