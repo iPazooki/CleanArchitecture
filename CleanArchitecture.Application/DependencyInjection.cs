@@ -20,8 +20,6 @@ public static class DependencyInjection
         // Adds validators from the executing assembly to the service collection.
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
-
         services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;

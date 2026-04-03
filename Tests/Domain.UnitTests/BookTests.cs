@@ -52,6 +52,20 @@ public class BookTests
     }
 
     [Fact]
+    public void Book_Create_ShouldReturnFailureResult_WhenTitleExceeds200Characters()
+    {
+        // Arrange
+        string longTitle = new('T', 201);
+
+        // Act
+        Result<Book> result = Book.Create(longTitle, Genre.Fiction);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(BookErrors.TitleTooLong.Message, result.Errors.First().Message);
+    }
+
+    [Fact]
     public void Book_Update_ShouldReturnSuccess_WhenTitleAndGenreAreValid()
     {
         // Arrange
@@ -136,11 +150,9 @@ public class BookTests
         Result<Book> result2 = Book.Create("Another Title", Genre.NonFiction);
         Book book2 = result2.Value!;
 
-        // Act
-        bool isEqual = book1.Equals(book2);
-
-        // Assert
-        Assert.False(isEqual);
+        // Act & Assert — different entities have different Ids
+        Assert.NotEqual(book1, book2);
+        Assert.False(book1.Equals(book2));
     }
 
     [Fact]
@@ -155,5 +167,6 @@ public class BookTests
 
         // Act & Assert
         Assert.True(book1 != book2);
+        Assert.False(book1 == book2);
     }
 }

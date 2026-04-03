@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Common;
+using CleanArchitecture.Domain.Common;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -6,32 +6,26 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 
 /// <summary>
 /// Interceptor for handling auditable entities during save changes operations.
+/// Sets audit timestamps before the save operation.
 /// </summary>
 /// <param name="timeProvider">The provider for getting the current time.</param>
 public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
     /// <summary>
-    /// Called after changes have been saved to the database.
+    /// Called before changes are saved to the database synchronously.
     /// </summary>
-    /// <param name="eventData">The event data.</param>
-    /// <param name="result">The result of the save operation.</param>
-    /// <returns>The result of the save operation.</returns>
-    public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
         ArgumentNullException.ThrowIfNull(eventData);
 
         UpdateEntities(eventData.Context);
 
-        return base.SavedChanges(eventData, result);
+        return base.SavingChanges(eventData, result);
     }
 
     /// <summary>
     /// Called before changes are saved to the database asynchronously.
     /// </summary>
-    /// <param name="eventData">The event data.</param>
-    /// <param name="result">The result of the save operation.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = new())
     {
         ArgumentNullException.ThrowIfNull(eventData);

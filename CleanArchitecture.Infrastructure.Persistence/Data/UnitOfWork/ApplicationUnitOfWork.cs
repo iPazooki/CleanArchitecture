@@ -1,12 +1,14 @@
-﻿using DomainValidation;
+using DomainValidation;
 using Microsoft.Extensions.Logging;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 
 /// <summary>
 /// Represents the unit of work for the application.
+/// Lifetime is managed by the DI container; context disposal is handled automatically.
 /// </summary>
 /// <param name="context">The application database context.</param>
+/// <param name="logger">The logger instance.</param>
 public sealed partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
 {
     /// <summary>
@@ -27,24 +29,5 @@ public sealed partial class ApplicationUnitOfWork(ApplicationDbContext context, 
 
             return Result.Failure(ex.Message);
         }
-    }
-
-    /// <summary>
-    /// Disposes the context asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public async ValueTask DisposeAsync()
-    {
-        await context.DisposeAsync().ConfigureAwait(false);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Disposes the context.
-    /// </summary>
-    public void Dispose()
-    {
-        context.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

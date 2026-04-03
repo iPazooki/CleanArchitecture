@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using CleanArchitecture.Infrastructure.Persistence.Data;
@@ -20,41 +20,24 @@ public static class DependencyInjection
     /// <returns>The service collection with the added services.</returns>
     public static IServiceCollection AddInfrastructurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Adds the AuditableEntityInterceptor as a scoped service.
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
-        string? connectionString = configuration.GetConnectionString("postgresDatabaseResource");
+        string connectionString = configuration.GetConnectionString("postgresDatabaseResource")
+            ?? throw new InvalidOperationException(
+                "Connection string 'postgresDatabaseResource' not found. " +
+                "Use ApplicationDbContextFactory for design-time operations.");
 
-        // Add a check for Design-Time
-        bool isDesignTime = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design", StringComparison.OrdinalIgnoreCase) == true);
-
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            if (isDesignTime)
-            {
-                // Use a dummy string for design-time if the tool reaches here
-                connectionString = "Host=localhost;Database=dummy;";
-            }
-            else
-            {
-                throw new InvalidOperationException("Connection string 'postgresDatabaseResource' not found.");
-            }
-        }
-
-        // Configures the ApplicationDbContext with the connection string and interceptors.
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
 
-            options.UseNpgsql(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+            options.UseNpgsql(connectionString, builder =>
+                builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
         });
 
-        // Adds the ApplicationUnitOfWork as a scoped service.
         services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
 
-        // Adds the system time provider as a singleton service.
         services.AddSingleton(TimeProvider.System);
 
         return services;
