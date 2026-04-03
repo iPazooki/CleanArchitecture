@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Domain.Entities;
+namespace CleanArchitecture.Domain.Validations.Book;
 
 /// <summary>
 /// Defines shared validation rules for books.

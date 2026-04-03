@@ -1,4 +1,5 @@
 using CleanArchitecture.Domain.Events.Book;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Domain.Entities;
 

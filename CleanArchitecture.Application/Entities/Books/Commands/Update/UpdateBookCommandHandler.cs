@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Errors;
+﻿using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 

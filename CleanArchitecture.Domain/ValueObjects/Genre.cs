@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Domain.ValueObjects;
+﻿using CleanArchitecture.Domain.Validations.Book;
+
+namespace CleanArchitecture.Domain.ValueObjects;
 
 /// <summary>
 /// Represents a genre with a code.

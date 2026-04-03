@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
+﻿using CleanArchitecture.Domain.Validations.Book;
+
+namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
 /// <summary>
 /// Validator for the UpdateBookCommand.
@@ -11,12 +13,12 @@ public class UpdateBookCommandValidator : AbstractValidator<UpdateBookCommand>
     public UpdateBookCommandValidator()
     {
         RuleFor(v => v.Title)
-            .NotEmpty().WithMessage("Title is required.")
-            .MinimumLength(BookRules.TitleMinLength).WithMessage("Title is too short.")
-            .MaximumLength(BookRules.TitleMaxLength).WithMessage("Title is too long.");
+            .NotEmpty().WithMessage(BookErrors.TitleIsRequired.Message)
+            .MinimumLength(BookRules.TitleMinLength).WithMessage(BookErrors.TitleIsTooShort.Message)
+            .MaximumLength(BookRules.TitleMaxLength).WithMessage(BookErrors.TitleTooLong.Message);
 
         RuleFor(v => v.Genre)
-            .NotEmpty().WithMessage("Genre is required.")
-            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage("Genre is of invalid length.");
+            .NotEmpty().WithMessage(BookErrors.GenreIsRequired.Message)
+            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage(BookErrors.GenreIsInvalidLength.Message);
     }
 }

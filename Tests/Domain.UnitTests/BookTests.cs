@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Mediator;
 using CleanArchitecture.Domain.Entities;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace Domain.UnitTests;
 

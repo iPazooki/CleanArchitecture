@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Errors;
+﻿using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
@@ -13,12 +13,12 @@ public class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
     public CreateBookCommandValidator()
     {
         RuleFor(v => v.Title)
-            .NotEmpty().WithMessage("Title is required.")
-            .MinimumLength(BookRules.TitleMinLength).WithMessage(BookErrors.TitleIsRequired.Message)
+            .NotEmpty().WithMessage(BookErrors.TitleIsRequired.Message)
+            .MinimumLength(BookRules.TitleMinLength).WithMessage(BookErrors.TitleIsTooShort.Message)
             .MaximumLength(BookRules.TitleMaxLength).WithMessage(BookErrors.TitleTooLong.Message);
 
         RuleFor(v => v.Genre)
-            .NotEmpty().WithMessage("Genre is required.")
-            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage("Genre is of invalid length.");
+            .NotEmpty().WithMessage(BookErrors.GenreIsRequired.Message)
+            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage(BookErrors.GenreIsInvalidLength.Message);
     }
 }
