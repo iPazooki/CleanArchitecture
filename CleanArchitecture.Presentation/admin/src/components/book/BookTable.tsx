@@ -36,8 +36,8 @@ export default function BookTable() {
   const canDelete = roles.includes("delete");
 
   const books =
-    response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value)
-      ? response.data.value
+    response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value?.items)
+      ? response.data.value.items
       : [];
 
   function handleDeleteClick(book: BookResponse): void {
@@ -92,10 +92,10 @@ export default function BookTable() {
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.003]">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/5">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+            <TableHeader className="border-b border-gray-100 dark:border-white/5">
               <TableRow>
                 <TableCell
                   isHeader
@@ -117,7 +117,7 @@ export default function BookTable() {
                 </TableCell>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+            <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
               {books.map((book) => (
                 <TableRow key={book.id}>
                   <TableCell className="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
@@ -165,7 +165,7 @@ export default function BookTable() {
         </div>
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCancelDelete} className="m-4 max-w-[700px]">
+      <Modal isOpen={isOpen} onClose={handleCancelDelete} className="m-4 max-w-175">
         <div className="p-6">
           <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
             Confirm Delete

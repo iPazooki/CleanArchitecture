@@ -25,10 +25,11 @@ import type {
 
 import type {
   CreateBookCommand,
+  GetApiV1BooksParams,
   ProblemDetails,
   ResultOfBookResponse,
   ResultOfGuid,
-  ResultOfIEnumerableOfBookResponse,
+  ResultOfPaginatedResponseOfBookResponse,
   UpdateBookCommand
 } from '.././model';
 
@@ -135,11 +136,11 @@ export const usePostApiV1Books = <TError = ProblemDetails,
       return useMutation(getPostApiV1BooksMutationOptions(options), queryClient);
     }
     /**
- * Gets all books without pagination
+ * Gets books with pagination support
  * @summary Gets all books
  */
 export type getApiV1BooksResponse200 = {
-  data: ResultOfIEnumerableOfBookResponse
+  data: ResultOfPaginatedResponseOfBookResponse
   status: 200
 }
 
@@ -150,17 +151,24 @@ export type getApiV1BooksResponseSuccess = (getApiV1BooksResponse200) & {
 
 export type getApiV1BooksResponse = (getApiV1BooksResponseSuccess)
 
-export const getGetApiV1BooksUrl = () => {
+export const getGetApiV1BooksUrl = (params?: GetApiV1BooksParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/books`
+  return stringifiedParams.length > 0 ? `/api/v1/books?${stringifiedParams}` : `/api/v1/books`
 }
 
-export const getApiV1Books = async ( options?: RequestInit): Promise<getApiV1BooksResponse> => {
+export const getApiV1Books = async (params?: GetApiV1BooksParams, options?: RequestInit): Promise<getApiV1BooksResponse> => {
   
-  return orvalFetch<getApiV1BooksResponse>(getGetApiV1BooksUrl(),
+  return orvalFetch<getApiV1BooksResponse>(getGetApiV1BooksUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -173,23 +181,23 @@ export const getApiV1Books = async ( options?: RequestInit): Promise<getApiV1Boo
 
 
 
-export const getGetApiV1BooksQueryKey = () => {
+export const getGetApiV1BooksQueryKey = (params?: GetApiV1BooksParams,) => {
     return [
-    `/api/v1/books`
+    `/api/v1/books`, ...(params ? [params] : [])
     ] as const;
     }
 
     
-export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
+export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiV1BooksQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1BooksQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Books>>> = ({ signal }) => getApiV1Books({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Books>>> = ({ signal }) => getApiV1Books(params, { signal, ...requestOptions });
 
       
 
@@ -203,7 +211,7 @@ export type GetApiV1BooksQueryError = unknown
 
 
 export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
+ params: undefined |  GetApiV1BooksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
           TError,
@@ -213,7 +221,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
+ params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
           TError,
@@ -223,7 +231,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
+ params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -231,11 +239,11 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
  */
 
 export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
+ params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiV1BooksQueryOptions(options)
+  const queryOptions = getGetApiV1BooksQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
