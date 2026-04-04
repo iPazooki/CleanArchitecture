@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { hasRole } from "@/lib/auth/permissions";
 
-export function useBookPermissions() {
+export function useUserPermissions() {
   const { data: session } = useSession();
   const roles = session?.user?.roles;
 

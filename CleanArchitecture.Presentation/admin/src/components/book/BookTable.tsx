@@ -14,7 +14,7 @@ import {
   formatErrorMessages,
 } from "@/lib/utils/error-handler";
 import { useModal } from "@/hooks/useModal";
-import { useBookPermissions } from "@/hooks/useBookPermissions";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { getGenreLabel } from "@/lib/books/genre";
 import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
@@ -31,7 +31,7 @@ export default function BookTable() {
   const { data: response, error, isLoading } = useGetApiV1Books();
   const { isOpen, openModal, closeModal } = useModal();
   const [bookToDelete, setBookToDelete] = useState<BookResponse | null>(null);
-  const { canEdit, canDelete } = useBookPermissions();
+  const { canEdit, canDelete } = useUserPermissions();
 
   const books =
     response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value?.items)
