@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using CleanArchitecture.Application.Common.Behaviours;
 using CleanArchitecture.Application.Entities.Books.Commands.Create;
-using CleanArchitecture.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitecture.Application;

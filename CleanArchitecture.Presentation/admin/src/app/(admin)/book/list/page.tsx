@@ -1,8 +1,9 @@
 ﻿import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import BookTable from "@/components/book/BookTable";
+import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Metadata } from "next";
-import React from "react";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -10,18 +11,23 @@ export const metadata: Metadata = {
   description: "View and manage books",
 };
 
-export default function BookListPage() {
+export default async function BookListPage() {
+  const session = await getServerSession(getAuthOptions());
+  const canCreate = (session?.user?.roles ?? []).includes("create");
+
   return (
     <div>
       <PageBreadcrumb pageTitle="Books" />
       <div className="space-y-6">
         <div className="flex justify-end">
+          {canCreate ? (
             <Link
-                href="/book/edit"
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              href="/book/edit"
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-                Add New Book
+              Add New Book
             </Link>
+          ) : null}
         </div>
         <ComponentCard title="All Books">
           <BookTable />

@@ -21,16 +21,5 @@ export default defineConfig({
         },
       },
     },
-  },
-  cleanArchitectureZod: {
-    input: {
-      target: "http://localhost:5049/openapi/v1.json",
-    },
-    output: {
-      mode: "tags-split",
-      target: "./src/lib/api/zod",
-      client: "zod",
-      prettier: true,
-    },
-  },
+  }
 });

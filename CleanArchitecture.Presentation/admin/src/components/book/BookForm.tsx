@@ -13,7 +13,6 @@ import {
   usePutApiV1BooksId,
 } from "@/lib/api/books/books";
 import type { CreateBookCommand, UpdateBookCommand } from "@/lib/api/model";
-import { PostApiV1BooksBody } from "@/lib/api/zod/books/books";
 import {
   extractApiErrors,
   getFieldErrors,
@@ -23,6 +22,7 @@ import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
+import { bookSchema, type BookFormValues } from "@/lib/validations/book";
 
 const genreOptions = [
   { value: "F", label: "Fiction" },
@@ -52,8 +52,8 @@ export default function BookForm({ id }: BookFormProps) {
     reset,
     setError,
     formState: { errors },
-  } = useForm<CreateBookCommand>({
-    resolver: zodResolver(PostApiV1BooksBody),
+  } = useForm<BookFormValues>({
+    resolver: zodResolver(bookSchema),
     mode: "onBlur",
     defaultValues: {
       title: "",
@@ -146,7 +146,7 @@ export default function BookForm({ id }: BookFormProps) {
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const displayedServerErrors = bookError ? extractApiErrors(bookError) : serverErrors;
 
-  function onSubmit(formData: CreateBookCommand): void {
+  function onSubmit(formData: BookFormValues): void {
     setServerErrors([]);
 
     if (isEditMode) {
@@ -163,7 +163,7 @@ export default function BookForm({ id }: BookFormProps) {
       return;
     }
 
-    createMutation.mutate({ data: formData });
+    createMutation.mutate({ data: formData as CreateBookCommand });
   }
 
   if (isFetchingBook) {

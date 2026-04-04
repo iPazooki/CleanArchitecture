@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useGetApiV1BooksId } from "@/lib/api/books/books";
@@ -14,6 +15,8 @@ export default function BookDetailPage() {
   const params = useParams<{ id: string }>();
   const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
+  const { data: session } = useSession();
+  const canEdit = (session?.user?.roles ?? []).includes("edit");
 
   const { data: response, error, isLoading } = useGetApiV1BooksId(bookId ?? "", {
     query: {
@@ -57,12 +60,14 @@ export default function BookDetailPage() {
               <p className="text-sm text-gray-800 dark:text-white/90">{book.id}</p>
             </div>
             <div className="flex gap-4 pt-4">
-              <Link
-                href={`/book/edit/${book.id}`}
-                className="inline-flex items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
-              >
-                Edit Book
-              </Link>
+              {canEdit ? (
+                <Link
+                  href={`/book/edit/${book.id}`}
+                  className="inline-flex items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
+                >
+                  Edit Book
+                </Link>
+              ) : null}
               <button
                 type="button"
                 onClick={() => router.back()}

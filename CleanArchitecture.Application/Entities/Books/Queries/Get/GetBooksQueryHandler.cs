@@ -1,5 +1,3 @@
-using CleanArchitecture.Domain.Entities;
-
 namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
 internal class GetBooksQueryHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<GetBooksQuery>> validators)

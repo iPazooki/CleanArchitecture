@@ -33,6 +33,7 @@ function createProxyHeaders(requestHeaders: Headers): Headers {
   headers.delete("connection");
   headers.delete("content-length");
   headers.delete("host");
+  headers.delete("accept-encoding");
 
   return headers;
 }
@@ -51,9 +52,14 @@ async function proxyRequest(request: NextRequest, context: RouteHandlerContext) 
     cache: "no-store",
   });
 
+  const responseHeaders = new Headers(response.headers);
+  responseHeaders.delete("content-encoding");
+  responseHeaders.delete("content-length");
+  responseHeaders.delete("transfer-encoding");
+
   return new NextResponse(response.body, {
     status: response.status,
-    headers: response.headers,
+    headers: responseHeaders,
   });
 }
 

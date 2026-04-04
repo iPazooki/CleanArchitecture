@@ -1,4 +1,5 @@
 using CleanArchitecture.Domain.Events.Book;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Domain.Entities;
 
@@ -36,6 +37,7 @@ public sealed class Book : AggregateRootAuditable
     public static Result<Book> Create(string title, Genre genre)
     {
         Result titleValidationResult = ValidateTitle(title);
+
         if (!titleValidationResult.IsSuccess)
         {
             return Result<Book>.Failure(titleValidationResult.Errors.ToArray());
@@ -103,7 +105,7 @@ public sealed class Book : AggregateRootAuditable
             return Result.Failure(BookErrors.TitleIsRequired);
         }
 
-        if (title.Length > 200)
+        if (title.Length > BookRules.TitleMaxLength)
         {
             return Result.Failure(BookErrors.TitleTooLong);
         }

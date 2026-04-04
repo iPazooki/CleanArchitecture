@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "generate": "orval && node scripts/fix-zod-schemas.js"
+    "generate": "orval"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",

@@ -6,7 +6,10 @@
  */
 
 export interface CreateBookCommand {
-  /** @maxLength 100 */
+  /**
+   * @minLength 3
+   * @maxLength 200
+   */
   title: string;
   /**
    * @minLength 1

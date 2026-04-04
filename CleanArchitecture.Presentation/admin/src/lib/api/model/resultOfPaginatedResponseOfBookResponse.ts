@@ -4,12 +4,11 @@
  * Clean Architecture API
  * OpenAPI spec version: v1
  */
-import type { BookResponse } from './bookResponse';
 import type { Error } from './error';
+import type { PaginatedResponseOfBookResponse } from './paginatedResponseOfBookResponse';
 
-export interface ResultOfIEnumerableOfBookResponse {
-  /** @nullable */
-  value?: BookResponse[] | null;
+export interface ResultOfPaginatedResponseOfBookResponse {
+  value?: null | PaginatedResponseOfBookResponse;
   isSuccess?: boolean;
   errors?: Error[];
 }

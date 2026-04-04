@@ -8,7 +8,6 @@ export default defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    "src/lib/api/**",
-    "src/lib/api/zod/**",
+    "src/lib/api/**"
   ]),
 ]);
