@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -15,6 +14,8 @@ import {
   formatErrorMessages,
 } from "@/lib/utils/error-handler";
 import { useModal } from "@/hooks/useModal";
+import { useBookPermissions } from "@/hooks/useBookPermissions";
+import { getGenreLabel } from "@/lib/books/genre";
 import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
 import {
@@ -27,13 +28,10 @@ import {
 
 export default function BookTable() {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
   const { data: response, error, isLoading } = useGetApiV1Books();
   const { isOpen, openModal, closeModal } = useModal();
   const [bookToDelete, setBookToDelete] = useState<BookResponse | null>(null);
-  const roles = session?.user?.roles ?? [];
-  const canEdit = roles.includes("edit");
-  const canDelete = roles.includes("delete");
+  const { canEdit, canDelete } = useBookPermissions();
 
   const books =
     response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value?.items)
@@ -124,7 +122,7 @@ export default function BookTable() {
                     {book.title}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
-                    {book.genre}
+                    {getGenreLabel(book.genre)}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
                     <div className="flex items-center gap-3">

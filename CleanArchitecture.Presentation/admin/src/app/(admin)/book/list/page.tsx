@@ -5,6 +5,7 @@ import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { hasRole } from "@/lib/auth/permissions";
 
 export const metadata: Metadata = {
   title: "Books List | Clean Architecture Admin",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function BookListPage() {
   const session = await getServerSession(getAuthOptions());
-  const canCreate = (session?.user?.roles ?? []).includes("create");
+  const canCreate = hasRole(session?.user?.roles, "create");
 
   return (
     <div>

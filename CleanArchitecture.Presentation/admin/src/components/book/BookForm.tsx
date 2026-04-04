@@ -23,12 +23,7 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 import { bookSchema, type BookFormValues } from "@/lib/validations/book";
-
-const genreOptions = [
-  { value: "F", label: "Fiction" },
-  { value: "NF", label: "Non-Fiction" },
-  { value: "M", label: "Mystery" },
-] as const;
+import { genreOptions } from "@/lib/books/genre";
 
 const fieldErrorMap = {
   Title: "title",
