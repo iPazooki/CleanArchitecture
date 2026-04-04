@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useGetApiV1BooksId } from "@/lib/api/books/books";
@@ -10,13 +9,14 @@ import {
 } from "@/lib/utils/error-handler";
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { useBookPermissions } from "@/hooks/useBookPermissions";
+import { getGenreLabel } from "@/lib/books/genre";
 
 export default function BookDetailPage() {
   const params = useParams<{ id: string }>();
   const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
-  const { data: session } = useSession();
-  const canEdit = (session?.user?.roles ?? []).includes("edit");
+  const { canEdit } = useBookPermissions();
 
   const { data: response, error, isLoading } = useGetApiV1BooksId(bookId ?? "", {
     query: {
@@ -53,7 +53,7 @@ export default function BookDetailPage() {
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Genre</h4>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white/90">{book.genre}</p>
+              <p className="text-lg font-semibold text-gray-800 dark:text-white/90">{getGenreLabel(book.genre)}</p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</h4>
