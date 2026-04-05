@@ -37,6 +37,7 @@
     "react-hook-form": "^7.71.2",
     "swiper": "^11.2.10",
     "tailwind-merge": "^2.6.0",
+    "vazirmatn": "^33.0.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

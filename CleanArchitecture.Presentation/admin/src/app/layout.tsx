@@ -4,6 +4,7 @@ import AuthProvider from "@/context/AuthContext";
 import QueryProvider from "@/context/QueryContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
 import "flatpickr/dist/flatpickr.css";
 
@@ -29,9 +30,11 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       <body className="antialiased dark:bg-gray-900">
         <AuthProvider>
           <QueryProvider>
-            <ThemeProvider>
-              <SidebarProvider>{children}</SidebarProvider>
-            </ThemeProvider>
+            <LanguageProvider>
+              <ThemeProvider>
+                <SidebarProvider>{children}</SidebarProvider>
+              </ThemeProvider>
+            </LanguageProvider>
           </QueryProvider>
         </AuthProvider>
       </body>

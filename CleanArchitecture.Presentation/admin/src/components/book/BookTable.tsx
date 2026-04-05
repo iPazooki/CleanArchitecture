@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function BookTable() {
   const queryClient = useQueryClient();
@@ -32,6 +33,7 @@ export default function BookTable() {
   const { isOpen, openModal, closeModal } = useModal();
   const [bookToDelete, setBookToDelete] = useState<BookResponse | null>(null);
   const { canEdit, canDelete } = useUserPermissions();
+  const { t } = useLanguage();
 
   const books =
     response?.status === 200 && response.data.isSuccess && Array.isArray(response.data.value?.items)
@@ -71,7 +73,7 @@ export default function BookTable() {
     : null;
 
   if (isLoading) {
-    return <div>Loading books...</div>;
+    return <div>{t("loading_books")}</div>;
   }
 
   if (loadErrorMessage) {
@@ -99,19 +101,19 @@ export default function BookTable() {
                   isHeader
                   className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
                 >
-                  Title
+                  {t("title")}
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
                 >
-                  Genre
+                  {t("genre")}
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400"
                 >
-                  Actions
+                  {t("actions")}
                 </TableCell>
               </TableRow>
             </TableHeader>
@@ -127,11 +129,11 @@ export default function BookTable() {
                   <TableCell className="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
                     <div className="flex items-center gap-3">
                       <Link href={`/book/detail/${book.id}`} className="text-blue-500 hover:text-blue-700">
-                        View
+                        {t("view")}
                       </Link>
                       {canEdit ? (
                         <Link href={`/book/edit/${book.id}`} className="text-orange-500 hover:text-orange-700">
-                          Edit
+                          {t("edit")}
                         </Link>
                       ) : null}
                       {canDelete ? (
@@ -141,7 +143,7 @@ export default function BookTable() {
                           className="text-red-500 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={deleteMutation.isPending}
                         >
-                          Delete
+                          {t("delete")}
                         </button>
                       ) : null}
                     </div>
@@ -154,7 +156,7 @@ export default function BookTable() {
                     className="px-5 py-4 text-center text-sm text-gray-800 dark:text-white/90"
                     colSpan={3}
                   >
-                    No books found.
+                    {t("no_books_found")}
                   </TableCell>
                 </TableRow>
               ) : null}
@@ -166,11 +168,12 @@ export default function BookTable() {
       <Modal isOpen={isOpen} onClose={handleCancelDelete} className="m-4 max-w-175">
         <div className="p-6">
           <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-            Confirm Delete
+            {t("confirm_delete")}
           </h2>
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Are you sure you want to delete
-            {bookToDelete ? ` \"${bookToDelete.title}\"` : " this book"}? This action cannot be undone.
+            {t("confirm_delete_message_part1")}
+            {bookToDelete ? ` \"${bookToDelete.title}\"` : t("confirm_delete_message_part2")}
+            {t("confirm_delete_message_part3")}
           </p>
           <div className="flex justify-end gap-3">
             <Button
@@ -179,7 +182,7 @@ export default function BookTable() {
               variant="outline"
               disabled={deleteMutation.isPending}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="button"
@@ -187,7 +190,7 @@ export default function BookTable() {
               variant="primary"
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? t("deleting") : t("delete")}
             </Button>
           </div>
         </div>
