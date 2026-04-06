@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState, useMemo, useCallback} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
@@ -48,8 +48,9 @@ const AppSidebar: React.FC = () => {
         {}
     );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    // const isActive = (path: string) => path === pathname;
-    const isActive = (path: string) => path === pathname;
+    
+    const isActive = useCallback((path: string) => path === pathname, [pathname]);
+
     type OpenSubmenu = {
         type: "main" | "others";
         index: number;
@@ -63,9 +64,9 @@ const AppSidebar: React.FC = () => {
         submenu: null,
     });
 
-    const routeMatchedSubmenu: OpenSubmenu = (() => {
+    const routeMatchedSubmenu: OpenSubmenu = useMemo(() => {
         for (const [index, nav] of navItems.entries()) {
-            if (nav.subItems?.some((subItem) => isActive(subItem.path))) {
+            if (nav.subItems?.some((subItem) => subItem.path === pathname)) {
                 return {
                     type: "main",
                     index,
@@ -74,22 +75,27 @@ const AppSidebar: React.FC = () => {
         }
 
         return null;
-    })();
+    }, [pathname]);
 
-    const openSubmenu =
-        manualSubmenuState.pathname === pathname
+    const openSubmenu = useMemo(() => {
+        return manualSubmenuState.pathname === pathname
             ? manualSubmenuState.submenu
             : routeMatchedSubmenu;
+    }, [manualSubmenuState, pathname, routeMatchedSubmenu]);
 
     useEffect(() => {
         // Set the height of the submenu items when the submenu is opened
         if (openSubmenu !== null) {
             const key = `${openSubmenu.type}-${openSubmenu.index}`;
             if (subMenuRefs.current[key]) {
-                setSubMenuHeight((prevHeights) => ({
-                    ...prevHeights,
-                    [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-                }));
+                const newHeight = subMenuRefs.current[key]?.scrollHeight || 0;
+                setSubMenuHeight((prevHeights) => {
+                    if (prevHeights[key] === newHeight) return prevHeights;
+                    return {
+                        ...prevHeights,
+                        [key]: newHeight,
+                    };
+                });
             }
         }
     }, [openSubmenu]);

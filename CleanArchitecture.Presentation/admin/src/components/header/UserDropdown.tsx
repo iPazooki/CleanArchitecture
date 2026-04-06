@@ -5,11 +5,13 @@ import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useSession, signOut } from "next-auth/react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserDropdown() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
+  const { t } = useLanguage();
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
@@ -29,7 +31,7 @@ export default function UserDropdown() {
       });
 
       if (!response.ok) {
-        throw new Error("Unable to prepare logout redirect.");
+        throw new Error(t("unable_to_prepare_logout_redirect"));
       }
 
       const { logoutUrl } = (await response.json()) as { logoutUrl?: string };
@@ -62,7 +64,7 @@ export default function UserDropdown() {
           />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{session?.user?.name || "Anonymous"}</span>
+        <span className="block mr-1 font-medium text-theme-sm">{session?.user?.name || t("anonymous")}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
@@ -87,14 +89,14 @@ export default function UserDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+        className="absolute ltr:right-0 rtl:left-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {session?.user?.name || "User Name"}
+            {session?.user?.name || t("user_name_fallback")}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {session?.user?.email || "user@example.com"}
+            {session?.user?.email || t("user_email_fallback")}
           </span>
         </div>
 
@@ -121,7 +123,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Edit profile
+              {t("edit_profile")}
             </DropdownItem>
           </li>
           <li>
@@ -146,7 +148,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Account settings
+              {t("account_settings")}
             </DropdownItem>
           </li>
           <li>
@@ -171,7 +173,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Support
+              {t("support")}
             </DropdownItem>
           </li>
         </ul>
@@ -194,7 +196,7 @@ export default function UserDropdown() {
               fill=""
             />
           </svg>
-          Sign out
+          {t("sign_out")}
         </button>
       </Dropdown>
     </div>

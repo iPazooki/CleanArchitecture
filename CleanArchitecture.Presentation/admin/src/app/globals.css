@@ -2,9 +2,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root {
+  --font-main: var(--next-font-outfit), Outfit, sans-serif;
+}
+
+[dir="rtl"] {
+  --font-main: var(--next-font-vazirmatn), Vazirmatn, sans-serif;
+}
+
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-outfit: var(--font-main);
+  --font-vazirmatn: var(--next-font-vazirmatn), Vazirmatn, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
