@@ -2,9 +2,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root {
+  --font-main: var(--next-font-outfit), Outfit, sans-serif;
+}
+
+[dir="rtl"] {
+  --font-main: var(--next-font-vazirmatn), Vazirmatn, sans-serif;
+}
+
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-outfit: var(--font-main);
+  --font-vazirmatn: var(--next-font-vazirmatn), Vazirmatn, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -621,6 +630,9 @@ span.flatpickr-weekday,
 .fc-direction-ltr .fc-timegrid-slot-label-frame {
   @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500 dark:text-gray-400;
 }
+.fc-direction-rtl .fc-timegrid-slot-label-frame {
+  @apply px-3 py-1.5 text-right text-sm font-medium text-gray-500 dark:text-gray-400;
+}
 .fc .fc-timegrid-axis-cushion {
   @apply text-sm font-medium text-gray-500 dark:text-gray-400;
 }
@@ -685,17 +697,17 @@ span.flatpickr-weekday,
 
 .carouselTwo .swiper-button-prev,
 .carouselFour .swiper-button-prev {
-  @apply !left-3 sm:!left-4;
+  @apply !left-3 sm:!left-4 rtl:!right-3 rtl:sm:!right-4 rtl:!left-auto;
 }
 
 .carouselTwo .swiper-button-next,
 .carouselFour .swiper-button-next {
-  @apply !right-3 sm:!right-4;
+  @apply !right-3 sm:!right-4 rtl:!left-3 rtl:sm:!left-4 rtl:!right-auto;
 }
 
 .carouselThree .swiper-pagination,
 .carouselFour .swiper-pagination {
-  @apply !bottom-3 !left-1/2 inline-flex !w-auto -translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 shadow-slider-navigation backdrop-blur-[10px] sm:!bottom-5;
+  @apply !bottom-3 !left-1/2 inline-flex !w-auto -translate-x-1/2 rtl:translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 shadow-slider-navigation backdrop-blur-[10px] sm:!bottom-5;
 }
 
 .carouselThree .swiper-pagination-bullet,

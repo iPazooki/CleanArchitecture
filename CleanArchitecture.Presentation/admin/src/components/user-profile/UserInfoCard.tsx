@@ -5,8 +5,10 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserInfoCard() {
+  const { t } = useLanguage();
   const { isOpen, openModal, closeModal } = useModal();
   const handleSave = () => {
     // Handle save logic here
@@ -18,13 +20,13 @@ export default function UserInfoCard() {
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+            {t("personal_info")}
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                {t("first_name")}
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 Mo
@@ -33,7 +35,7 @@ export default function UserInfoCard() {
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                {t("last_name")}
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 Pazooki
@@ -42,7 +44,7 @@ export default function UserInfoCard() {
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
+                {t("email_address")}
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 iPazooki@gmail.com
@@ -51,7 +53,7 @@ export default function UserInfoCard() {
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
+                {t("phone")}
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 +44 7xx xxx 70
@@ -60,10 +62,10 @@ export default function UserInfoCard() {
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
+                {t("bio")}
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Senior Software Engineer
+                {t("user_role")}
               </p>
             </div>
           </div>
@@ -88,7 +90,7 @@ export default function UserInfoCard() {
               fill=""
             />
           </svg>
-          Edit
+          {t("edit")}
         </button>
       </div>
 
@@ -96,22 +98,22 @@ export default function UserInfoCard() {
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Personal Information
+              {t("edit_personal_info")}
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
+              {t("edit_personal_info_desc")}
             </p>
           </div>
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
+                  {t("social_links")}
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
-                    <Label>Facebook</Label>
+                    <Label>{t("facebook")}</Label>
                     <Input
                       type="text"
                       defaultValue="https://www.facebook.com/pazooki/"
@@ -119,12 +121,12 @@ export default function UserInfoCard() {
                   </div>
 
                   <div>
-                    <Label>X.com</Label>
+                    <Label>{t("x_com")}</Label>
                     <Input type="text" defaultValue="https://x.com/iPazooki" />
                   </div>
 
                   <div>
-                    <Label>Linkedin</Label>
+                    <Label>{t("linkedin")}</Label>
                     <Input
                       type="text"
                       defaultValue="https://www.linkedin.com/in/pazooki/"
@@ -132,7 +134,7 @@ export default function UserInfoCard() {
                   </div>
 
                   <div>
-                    <Label>Instagram</Label>
+                    <Label>{t("instagram")}</Label>
                     <Input
                       type="text"
                       defaultValue="https://www.instagram.com/ipazooki/"
@@ -142,43 +144,43 @@ export default function UserInfoCard() {
               </div>
               <div className="mt-7">
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
+                  {t("personal_info")}
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
+                    <Label>{t("first_name")}</Label>
                     <Input type="text" defaultValue="Mo" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
+                    <Label>{t("last_name")}</Label>
                     <Input type="text" defaultValue="Pazooki" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
+                    <Label>{t("email_address")}</Label>
                     <Input type="text" defaultValue="iPazooki@gmail.com" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
+                    <Label>{t("phone")}</Label>
                     <Input type="text" defaultValue="+44 7xx xxx 70" />
                   </div>
 
                   <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Senior Software Engineer" />
+                    <Label>{t("bio")}</Label>
+                    <Input type="text" defaultValue={t("user_role")} />
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                {t("close")}
               </Button>
               <Button size="sm" onClick={handleSave}>
-                Save Changes
+                {t("save_changes")}
               </Button>
             </div>
           </form>
