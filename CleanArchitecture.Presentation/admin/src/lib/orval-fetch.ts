@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { getSession, signIn } from "next-auth/react";
-import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthOptions } from "@/lib/auth/auth-options";
 import { ApiError } from "@/lib/utils/api-error";
 import { getEnvVars } from "@/config/env-vars";
 

@@ -1,23 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import {
-  getGetApiV1BooksIdQueryKey,
-  getGetApiV1BooksQueryKey,
-  useGetApiV1BooksId,
-  usePostApiV1Books,
-  usePutApiV1BooksId,
-} from "@/lib/api/books/books";
-import type { CreateBookCommand, UpdateBookCommand } from "@/lib/api/model";
-import {
-  extractApiErrors,
-  getFieldErrors,
-  type DomainError,
-} from "@/lib/utils/error-handler";
+import { useGetApiV1BooksId } from "@/lib/api/books/books";
+import { extractApiErrors } from "@/lib/utils/error-handler";
+import { useBookMutation } from "@/hooks/useBookMutation";
 import ComponentCard from "../common/ComponentCard";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -25,11 +14,6 @@ import Button from "../ui/button/Button";
 import { bookSchema, type BookFormValues } from "@/lib/validations/book";
 import { genreOptions } from "@/lib/books/genre";
 import { useLanguage } from "@/context/LanguageContext";
-
-const fieldErrorMap = {
-  Title: "title",
-  Genre: "genre",
-} satisfies Record<string, keyof CreateBookCommand>;
 
 interface BookFormProps {
   id?: string;
@@ -39,8 +23,6 @@ export default function BookForm({ id }: BookFormProps) {
   const isEditMode = Boolean(id);
   const bookId = id ?? "";
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [serverErrors, setServerErrors] = useState<DomainError[]>([]);
   const { t } = useLanguage();
 
   const {
@@ -57,6 +39,8 @@ export default function BookForm({ id }: BookFormProps) {
       genre: "",
     },
   });
+
+  const { submit, isSaving, serverErrors } = useBookMutation({ id, setError });
 
   const {
     data: bookResponse,
@@ -84,84 +68,7 @@ export default function BookForm({ id }: BookFormProps) {
     });
   }, [bookResponse, isEditMode, reset]);
 
-  async function invalidateBookQueries(): Promise<void> {
-    await queryClient.invalidateQueries({
-      queryKey: getGetApiV1BooksQueryKey(),
-    });
-
-    if (isEditMode) {
-      await queryClient.invalidateQueries({
-        queryKey: getGetApiV1BooksIdQueryKey(bookId),
-      });
-    }
-  }
-
-  function applyDomainErrors(domainErrors: DomainError[]): void {
-    const fieldErrors = getFieldErrors(domainErrors, fieldErrorMap);
-
-    (Object.keys(fieldErrors) as Array<keyof CreateBookCommand>).forEach((fieldName) => {
-      const message = fieldErrors[fieldName];
-      if (message) {
-        setError(fieldName, {
-          type: "server",
-          message,
-        });
-      }
-    });
-  }
-
-  function handleMutationError(error: unknown): void {
-    const domainErrors = extractApiErrors(error);
-    setServerErrors(domainErrors);
-    applyDomainErrors(domainErrors);
-  }
-
-  const createMutation = usePostApiV1Books({
-    mutation: {
-      onSuccess: async (response) => {
-        if (response.status === 201) {
-          await invalidateBookQueries();
-          router.push("/book/list");
-        }
-      },
-      onError: handleMutationError,
-    },
-  });
-
-  const updateMutation = usePutApiV1BooksId({
-    mutation: {
-      onSuccess: async (response) => {
-        if (response.status === 204) {
-          await invalidateBookQueries();
-          router.push("/book/list");
-        }
-      },
-      onError: handleMutationError,
-    },
-  });
-
-  const isSaving = createMutation.isPending || updateMutation.isPending;
   const displayedServerErrors = bookError ? extractApiErrors(bookError) : serverErrors;
-
-  function onSubmit(formData: BookFormValues): void {
-    setServerErrors([]);
-
-    if (isEditMode) {
-      const updateCommand: UpdateBookCommand = {
-        id: bookId,
-        title: formData.title,
-        genre: formData.genre,
-      };
-
-      updateMutation.mutate({
-        id: bookId,
-        data: updateCommand,
-      });
-      return;
-    }
-
-    createMutation.mutate({ data: formData as CreateBookCommand });
-  }
 
   if (isFetchingBook) {
     return <div>{t("loading_book_data")}</div>;
@@ -169,7 +76,7 @@ export default function BookForm({ id }: BookFormProps) {
 
   return (
     <ComponentCard title={isEditMode ? t("edit_book") : t("add_new_book")}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(submit)} className="space-y-6">
         {displayedServerErrors.length > 0 ? (
           <div className="rounded-md bg-red-50 p-4" aria-live="assertive">
             <h3 className="text-sm font-medium text-red-800">{t("validation_errors")}</h3>

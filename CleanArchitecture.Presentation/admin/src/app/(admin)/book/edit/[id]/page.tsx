@@ -1,20 +1,24 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import BookForm from "@/components/book/BookForm";
+import type { Metadata } from "next";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import { useLanguage } from "@/context/LanguageContext";
+import BookForm from "@/components/book/BookForm";
 
-export default function EditBookPage() {
-  const params = useParams<{ id: string }>();
-  const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
-  const { t } = useLanguage();
+interface EditBookPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export const metadata: Metadata = {
+  title: "Edit Book | Clean Architecture Admin",
+  description: "Edit an existing book",
+};
+
+export default async function EditBookPage({ params }: EditBookPageProps) {
+  const { id } = await params;
 
   return (
     <div>
-      <PageBreadcrumb pageTitle={t("edit_book")} />
+      <PageBreadcrumb pageTitle="Edit Book" />
       <div className="space-y-6">
-        <BookForm id={bookId} />
+        <BookForm id={id} />
       </div>
     </div>
   );
