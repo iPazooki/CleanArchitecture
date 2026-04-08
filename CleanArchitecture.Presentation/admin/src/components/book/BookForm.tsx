@@ -103,7 +103,7 @@ export default function BookForm({ id }: BookFormProps) {
             {...register("title")}
           />
           {errors.title ? (
-            <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+            <p className="mt-1 text-sm text-red-600">{t(errors.title.message as any)}</p>
           ) : null}
         </div>
 
@@ -126,7 +126,7 @@ export default function BookForm({ id }: BookFormProps) {
             ))}
           </select>
           {errors.genre ? (
-            <p className="mt-1 text-sm text-red-600">{errors.genre.message}</p>
+            <p className="mt-1 text-sm text-red-600">{t(errors.genre.message as any)}</p>
           ) : null}
           <p className="mt-1 text-sm text-gray-500">
             {t("genre_help_text")}

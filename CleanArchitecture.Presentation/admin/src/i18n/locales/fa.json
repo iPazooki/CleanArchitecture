@@ -86,5 +86,13 @@
   "postal_code": "کد پستی",
   "tax_id": "شناسه مالیاتی",
   "edit_address": "ویرایش آدرس",
-  "united_kingdom": "انگلستان"
+  "united_kingdom": "انگلستان",
+  "customers_demographic_desc": "تعداد مشتریان بر اساس کشور",
+  "something_went_wrong": "مشکلی پیش آمد",
+  "try_again": "دوباره تلاش کنید",
+  "title_required": "عنوان الزامی است.",
+  "title_min_length": "عنوان باید حداقل ۳ کاراکتر باشد.",
+  "title_max_length": "عنوان نمی‌تواند بیشتر از ۲۰۰ کاراکتر باشد.",
+  "genre_required": "ژانر الزامی است.",
+  "genre_max_length": "ژانر نمی‌تواند بیشتر از ۵۰ کاراکتر باشد."
 }
