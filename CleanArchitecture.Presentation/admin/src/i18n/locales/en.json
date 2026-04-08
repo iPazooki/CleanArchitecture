@@ -94,5 +94,12 @@
   "title_min_length": "Title must be at least 3 characters long.",
   "title_max_length": "Title cannot exceed 200 characters.",
   "genre_required": "Genre is required.",
-  "genre_max_length": "Genre cannot exceed 50 characters."
+  "genre_max_length": "Genre cannot exceed 50 characters.",
+  "notification": "Notification",
+  "requests_permission_to_change": "requests permission to change",
+  "project_nganter_app": "Project - Nganter App",
+  "project": "Project",
+  "min_ago": "min ago",
+  "hr_ago": "hr ago",
+  "view_all_notifications": "View All Notifications"
 }

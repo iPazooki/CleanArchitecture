@@ -94,5 +94,12 @@
   "title_min_length": "عنوان باید حداقل ۳ کاراکتر باشد.",
   "title_max_length": "عنوان نمی‌تواند بیشتر از ۲۰۰ کاراکتر باشد.",
   "genre_required": "ژانر الزامی است.",
-  "genre_max_length": "ژانر نمی‌تواند بیشتر از ۵۰ کاراکتر باشد."
+  "genre_max_length": "ژانر نمی‌تواند بیشتر از ۵۰ کاراکتر باشد.",
+  "notification": "اعلان",
+  "requests_permission_to_change": "درخواست اجازه برای تغییر",
+  "project_nganter_app": "پروژه - Nganter App",
+  "project": "پروژه",
+  "min_ago": "دقیقه پیش",
+  "hr_ago": "ساعت پیش",
+  "view_all_notifications": "مشاهده همه اعلان‌ها"
 }

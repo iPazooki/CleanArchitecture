@@ -13,14 +13,14 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") {
-      return defaultLocale;
-    }
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
 
+  useEffect(() => {
     const savedLocale = localStorage.getItem("locale") as Locale;
-    return savedLocale && dictionaries[savedLocale] ? savedLocale : defaultLocale;
-  });
+    if (savedLocale && dictionaries[savedLocale]) {
+      setLocaleState(savedLocale);
+    }
+  }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);

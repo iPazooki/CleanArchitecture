@@ -94,5 +94,12 @@
   "title_min_length": "يجب أن يتكون العنوان من 3 أحرف على الأقل.",
   "title_max_length": "لا يمكن أن يتجاوز العنوان 200 حرف.",
   "genre_required": "النوع مطلوب.",
-  "genre_max_length": "لا يمكن أن يتجاوز النوع 50 حرفًا."
+  "genre_max_length": "لا يمكن أن يتجاوز النوع 50 حرفًا.",
+  "notification": "إشعار",
+  "requests_permission_to_change": "يطلب إذنًا للتغيير",
+  "project_nganter_app": "مشروع - Nganter App",
+  "project": "مشروع",
+  "min_ago": "منذ دقيقة",
+  "hr_ago": "منذ ساعة",
+  "view_all_notifications": "عرض كل الإشعارات"
 }
