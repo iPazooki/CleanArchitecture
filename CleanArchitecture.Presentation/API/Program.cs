@@ -13,6 +13,8 @@ builder.Services
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices(builder);
 
+builder.Services.AddLocalization();
+
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -35,6 +37,15 @@ app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
 
 app.UseResponseCompression();
+
+string[] supportedCultures = ["en", "fa", "ar"];
+
+app.UseRequestLocalization(options =>
+{
+    options.SetDefaultCulture(supportedCultures[0])
+           .AddSupportedCultures(supportedCultures)
+           .AddSupportedUICultures(supportedCultures);
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

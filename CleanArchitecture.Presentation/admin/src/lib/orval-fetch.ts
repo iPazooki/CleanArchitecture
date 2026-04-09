@@ -84,6 +84,13 @@ export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Pro
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
+  if (typeof window !== "undefined") {
+    const locale = localStorage.getItem("locale") || document.documentElement.lang;
+    if (locale) {
+      headers.set("Accept-Language", locale);
+    }
+  }
+
   const response = await fetch(resolveRequestUrl(url), {
     ...options,
     headers,
