@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Locale, defaultLocale, isRtl, dictionaries } from "@/i18n";
 
 type LanguageContextType = {
@@ -16,21 +16,23 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
 
   useEffect(() => {
-    // Try to load locale from localStorage on mount
     const savedLocale = localStorage.getItem("locale") as Locale;
     if (savedLocale && dictionaries[savedLocale]) {
       setLocaleState(savedLocale);
     }
   }, []);
 
-  const setLocale = (newLocale: Locale) => {
+  const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem("locale", newLocale);
-  };
+  }, []);
 
-  const t = (key: keyof typeof dictionaries["en"]) => {
-    return dictionaries[locale][key] || dictionaries[defaultLocale][key] || key;
-  };
+  const t = useCallback(
+    (key: keyof typeof dictionaries["en"]) => {
+      return dictionaries[locale][key] || dictionaries[defaultLocale][key] || key;
+    },
+    [locale],
+  );
 
   const rtl = isRtl(locale);
 
@@ -39,8 +41,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.lang = locale;
   }, [locale, rtl]);
 
+  const value = useMemo(
+    () => ({ locale, setLocale, t, isRtl: rtl }),
+    [locale, setLocale, t, rtl],
+  );
+
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t, isRtl: rtl }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

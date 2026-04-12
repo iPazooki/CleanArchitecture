@@ -1,4 +1,5 @@
 "use client";
+
 import React, {useEffect, useRef, useState, useMemo, useCallback} from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -48,7 +49,7 @@ const AppSidebar: React.FC = () => {
         {}
     );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    
+
     const isActive = useCallback((path: string) => path === pathname, [pathname]);
 
     type OpenSubmenu = {

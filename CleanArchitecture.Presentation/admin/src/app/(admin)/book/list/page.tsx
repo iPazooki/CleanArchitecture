@@ -1,4 +1,4 @@
-﻿import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
+﻿import { getAuthOptions } from "@/lib/auth/auth-options";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { hasRole } from "@/lib/auth/permissions";

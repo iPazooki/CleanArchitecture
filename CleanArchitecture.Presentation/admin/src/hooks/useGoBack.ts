@@ -1,15 +1,16 @@
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 const useGoBack = () => {
   const router = useRouter();
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     if (window.history.length > 1) {
-      router.back(); // Navigate to the previous route
+      router.back();
     } else {
-      router.push("/"); // Redirect to home if no history exists
+      router.push("/");
     }
-  };
+  }, [router]);
 
   return goBack;
 };

@@ -4,10 +4,12 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+  const { t } = useLanguage();
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -52,11 +54,11 @@ export default function NotificationDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute ltr:-right-[240px] rtl:-left-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:ltr:right-0 lg:rtl:left-0"
+        className="absolute ltr:-right-60 rtl:-left-60 mt-4.25 flex h-120 w-87.5 flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-90.25 lg:ltr:right-0 lg:rtl:left-0"
       >
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
           <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            Notification
+            {t("notification") as React.ReactNode}
           </h5>
           <button
             onClick={toggleDropdown}
@@ -101,16 +103,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Terry Franci
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>5 min ago</span>
+                  <span>5 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -137,16 +139,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Alena Franci
                   </span>
-                  <span> requests permission to change</span>
+                  <span> {t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>8 min ago</span>
+                  <span>8 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -174,16 +176,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Jocelyn Kenter
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>15 min ago</span>
+                  <span>15 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -211,16 +213,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Brandon Philips
                   </span>
-                  <span> requests permission to change</span>
+                  <span> {t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>1 hr ago</span>
+                  <span>1 {t("hr_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -247,16 +249,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Terry Franci
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>5 min ago</span>
+                  <span>5 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -283,16 +285,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Alena Franci
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>8 min ago</span>
+                  <span>8 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -319,16 +321,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Jocelyn Kenter
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>15 min ago</span>
+                  <span>15 {t("min_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -356,16 +358,16 @@ export default function NotificationDropdown() {
                   <span className="font-medium text-gray-800 dark:text-white/90">
                     Brandon Philips
                   </span>
-                  <span>requests permission to change</span>
+                  <span>{t("requests_permission_to_change") as React.ReactNode}</span>
                   <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
+                    {t("project_nganter_app") as React.ReactNode}
                   </span>
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
+                  <span>{t("project") as React.ReactNode}</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>1 hr ago</span>
+                  <span>1 {t("hr_ago") as React.ReactNode}</span>
                 </span>
               </span>
             </DropdownItem>
@@ -376,7 +378,7 @@ export default function NotificationDropdown() {
           href="/"
           className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
         >
-          View All Notifications
+          {t("view_all_notifications") as React.ReactNode}
         </Link>
       </Dropdown>
     </div>

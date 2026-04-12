@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { getSession, signIn } from "next-auth/react";
-import { getAuthOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthOptions } from "@/lib/auth/auth-options";
 import { ApiError } from "@/lib/utils/api-error";
 import { getEnvVars } from "@/config/env-vars";
 
@@ -82,6 +82,13 @@ export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Pro
 
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+
+  if (typeof window !== "undefined") {
+    const locale = localStorage.getItem("locale") || document.documentElement.lang;
+    if (locale) {
+      headers.set("Accept-Language", locale);
+    }
   }
 
   const response = await fetch(resolveRequestUrl(url), {

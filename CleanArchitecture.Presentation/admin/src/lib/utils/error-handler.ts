@@ -80,6 +80,14 @@ export function extractApiErrors(error: unknown): DomainError[] {
     }
 
     if (typeof error.data === "string" && error.data.length > 0) {
+      try {
+        const parsedData = JSON.parse(error.data);
+        if (isProblemDetails(parsedData)) {
+          return extractErrors(parsedData);
+        }
+      } catch (e) {
+        // Not a JSON string, fall through to return the raw string.
+      }
       return [
         {
           code: "RequestError",
