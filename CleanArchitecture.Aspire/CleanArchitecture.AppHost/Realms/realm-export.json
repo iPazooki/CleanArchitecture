@@ -338,6 +338,7 @@
       ],
       "scalar": [],
       "security-admin-console": [],
+      "mrpanel": [],
       "admin-cli": [],
       "account-console": [],
       "broker": [
@@ -472,9 +473,9 @@
       "clientRoles": {}
     },
     {
-      "id": "59b0a6c7-a51f-4d18-b7d7-c843b3359ad3",
+      "id": "c1883464-f9ee-4913-9b25-27abb2b1e151",
       "name": "viewer",
-      "description": "Viewer group",
+      "description": "",
       "path": "/viewer",
       "subGroups": [],
       "attributes": {},
@@ -749,6 +750,70 @@
       ]
     },
     {
+      "id": "5a7fcca8-a18e-49bc-922c-2ce238165b04",
+      "clientId": "mrpanel",
+      "name": "MRPanel Portal",
+      "description": "The MRPanel React application uses this client for authentication.",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "redirectUris": [
+        "http://localhost:65499/*"
+      ],
+      "webOrigins": [
+        "http://localhost:65499/"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "logout.confirmation.enabled": "false",
+        "client.secret.creation.time": "1777109271",
+        "standard.token.exchange.enabled": "false",
+        "post.logout.redirect.uris": "http://localhost:65499/*",
+        "frontchannel.logout.session.required": "true",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "pkce.code.challenge.method": "S256",
+        "dpop.bound.access.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "permissions",
+        "organization",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
       "id": "24e35e75-8c5b-4215-88c6-8717a886195b",
       "clientId": "realm-management",
       "name": "${client_realm-management}",
@@ -792,47 +857,43 @@
       ]
     },
     {
-      "id": "119604c4-2d90-4489-a85a-494e5f3e8f0e",
+      "id": "9cab6d69-4b0b-4375-b277-7388b071e86c",
       "clientId": "scalar",
-      "name": "Scalar Client",
-      "description": "Primary application client for managing user permissions.",
-      "rootUrl": "",
+      "name": "Scalar",
+      "description": "Scalar utilises this client for implicit authentication.",
+      "rootUrl": "https://localhost:7281/",
       "adminUrl": "",
       "baseUrl": "",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
       "redirectUris": [
-        "https://localhost:7281/scalar/*",
-        "http://localhost:65499/*"
+        "https://localhost:7281/scalar/"
       ],
       "webOrigins": [
-        "https://localhost:7281",
-        "http://localhost:65499"
+        "https://localhost:7281"
       ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "publicClient": false,
+      "publicClient": true,
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
         "realm_client": "false",
+        "logout.confirmation.enabled": "false",
         "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1773297829",
         "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
         "frontchannel.logout.session.required": "true",
-        "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "display.on.consent.screen": "false",
-        "pkce.code.challenge.method": "S256",
         "backchannel.logout.revoke.offline.tokens": "false",
         "dpop.bound.access.tokens": "false"
       },
@@ -2694,7 +2755,7 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "26.4.7",
+  "keycloakVersion": "26.5.7",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": false,
   "verifiableCredentialsEnabled": false,

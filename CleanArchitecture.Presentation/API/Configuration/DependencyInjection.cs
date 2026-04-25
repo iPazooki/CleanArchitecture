@@ -1,13 +1,13 @@
 ﻿using CleanArchitecture.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
+using Microsoft.Identity.Web;
 
 namespace CleanArchitecture.Api.Configuration;
 
 internal static class DependencyInjection
 {
-    const string TestingEnvironment = "Testing";
-
     public static void AddPresentationServices(this IServiceCollection services, WebApplicationBuilder builder)
     {
         services.AddEndpointsApiExplorer();
@@ -17,29 +17,40 @@ internal static class DependencyInjection
         services.AddProblemDetails();
 
         // Configure authentication based on environment
-        if (builder.Environment.IsEnvironment(TestingEnvironment))
+        if (builder.Environment.IsTesting())
         {
             // Use test authentication handler for integration tests
             services.AddAuthentication(Authentication.TestAuthHandler.AuthenticationScheme)
                 .AddScheme<AuthenticationSchemeOptions, Authentication.TestAuthHandler>(
                     Authentication.TestAuthHandler.AuthenticationScheme,
-                    options => { });
+                    _ => { });
         }
         else
         {
-            // Retrieve Keycloak configurations from builder.Configuration
-            string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
-                               ?? throw new InvalidOperationException("Keycloak ValidIssuers is not configured.");
+            string authProvider = builder.Configuration["Authentication:Provider"] ?? "Keycloak";
 
-            string realm = builder.Configuration["Keycloak:Realm"]
+            if (authProvider.Equals("Entra", StringComparison.OrdinalIgnoreCase))
+            {
+                // Add Microsoft Entra ID Authentication
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+            }
+            else
+            {
+                // Default to Keycloak authentication
+                string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
+                                      ?? throw new InvalidOperationException(
+                                          "Keycloak ValidIssuers is not configured.");
+
+                string realm = builder.Configuration["Keycloak:Realm"]
                                ?? throw new InvalidOperationException("Keycloak Realm is not configured.");
 
-            string[] audience = builder.Configuration["Keycloak:Audience"]?.Split(",")
-                                  ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
+                string[] audience = builder.Configuration["Keycloak:Audience"]?.Split(",")
+                                    ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
 
-            bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
+                bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
 
-            services.AddAuthentication()
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddKeycloakJwtBearer(
                         serviceName: "keycloak",
                         realm: realm,
@@ -49,8 +60,10 @@ internal static class DependencyInjection
                             options.TokenValidationParameters.ValidIssuers = [validIssuers];
                             options.RequireHttpsMetadata = requireHttpsMetadata ?? !builder.Environment.IsDevelopment();
                         });
+            }
         }
 
+        // Ensure the Default Scheme is used in Authorization
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(ViewerPolicy.Name, ViewerPolicy.ConfigurePolicy)
             .AddPolicy(EditorPolicy.Name, EditorPolicy.ConfigurePolicy)
@@ -65,67 +78,71 @@ internal static class DependencyInjection
             options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
         });
 
-        // Store these for use in OpenApi configuration
-        string? authorizationUrl = null;
-        string? tokenUrl = null;
-
-        if (!builder.Environment.IsEnvironment(TestingEnvironment))
+        if (builder.Environment.IsDevelopment())
         {
-            authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
-                           ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
+            // Store these for use in OpenApi configuration
+            string authorizationUrl;
+            string authProvider = builder.Configuration["Authentication:Provider"] ?? "Keycloak";
 
-            tokenUrl = builder.Configuration["Keycloak:TokenUrl"]
-                   ?? throw new InvalidOperationException("Keycloak TokenUrl is not configured.");
-        }
-
-        services.AddOpenApi("v1", options =>
-        {
-            options.AddDocumentTransformer((document, context, ct) =>
+            if (authProvider.Equals("Entra", StringComparison.OrdinalIgnoreCase))
             {
-                document.Info.Title = "Clean Architecture API";
-                document.Info.Version = "v1";
+                authorizationUrl = builder.Configuration["ScalarApi:AuthorizationUrl"]
+                                   ?? throw new InvalidOperationException("Scalar API AuthorizationUrl is not configured.");
+            }
+            else
+            {
+                // Default to Keycloak OpenApi settings
+                authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
+                                   ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
+            }
 
-                // Replace {version} placeholder with actual version in all paths
-                Dictionary<string, IOpenApiPathItem> updatedPaths = new();
-                foreach (KeyValuePair<string, IOpenApiPathItem> path in document.Paths)
+            services.AddOpenApi("v1", options =>
+            {
+                options.AddDocumentTransformer((document, _, _) =>
                 {
-                    string updatedPath = path.Key.Replace("{version}", "1", StringComparison.OrdinalIgnoreCase);
-                    updatedPaths[updatedPath] = path.Value;
-                }
-                document.Paths = new OpenApiPaths();
-                foreach (KeyValuePair<string, IOpenApiPathItem> path in updatedPaths)
-                {
-                    document.Paths.Add(path.Key, path.Value);
-                }
+                    string[] scopes = builder.Configuration["ScalarApi:Scopes"]?.Split(',') ?? [];
 
-                // Only add OAuth2 security scheme in non-Testing environments
-                if (authorizationUrl is not null && tokenUrl is not null)
-                {
-                    // Ensure Components and SecuritySchemes are initialized
+                    Dictionary<string, string> scopesDictionary = scopes.ToDictionary(scope => scope, scope => "API Access");
+
+                    document.Info.Title = "Clean Architecture API";
+                    document.Info.Version = "v1";
+
+                    // Replace {version} placeholder with actual version in all paths
+                    Dictionary<string, IOpenApiPathItem> updatedPaths = new();
+                    foreach (KeyValuePair<string, IOpenApiPathItem> path in document.Paths)
+                    {
+                        string updatedPath = path.Key.Replace("{version}", "1", StringComparison.OrdinalIgnoreCase);
+                        updatedPaths[updatedPath] = path.Value;
+                    }
+
+                    document.Paths = new OpenApiPaths();
+
+                    foreach (KeyValuePair<string, IOpenApiPathItem> path in updatedPaths)
+                    {
+                        document.Paths.Add(path.Key, path.Value);
+                    }
+
                     document.Components ??= new OpenApiComponents();
                     document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 
-                    document.Components.SecuritySchemes.Add("OAuth2", new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.OAuth2,
-                        Description = "OAuth2 authentication using Keycloak",
-                        Flows = new OpenApiOAuthFlows
+                    document.Components.SecuritySchemes.Add("OAuth2",
+                        new OpenApiSecurityScheme
                         {
-                            AuthorizationCode = new OpenApiOAuthFlow
+                            Type =  SecuritySchemeType.OAuth2,
+                            Description = "OAuth2 Implicit authentication",
+                            Flows = new OpenApiOAuthFlows
                             {
-                                AuthorizationUrl = new Uri(authorizationUrl),
-                                TokenUrl = new Uri(tokenUrl),
-                                Scopes = new Dictionary<string, string>
+                                Implicit = new OpenApiOAuthFlow
                                 {
-                                    { "permissions", "Request for roles" }
+                                    AuthorizationUrl = new Uri(authorizationUrl),
+                                    Scopes = scopesDictionary
                                 }
                             }
-                        }
-                    });
-                }
+                        });
 
-                return Task.CompletedTask;
+                    return Task.CompletedTask;
+                });
             });
-        });
+        }
     }
 }

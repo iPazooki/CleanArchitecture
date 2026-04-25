@@ -8,6 +8,7 @@
     <PackageReference Include="Asp.Versioning.Http" />
     <PackageReference Include="Aspire.Keycloak.Authentication" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Identity.Web" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>

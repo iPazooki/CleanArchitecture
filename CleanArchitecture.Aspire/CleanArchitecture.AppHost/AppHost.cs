@@ -116,7 +116,7 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
 
     // Keycloak on ACA, backed by Azure PostgreSQL via KC_DB environment variables
     IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
-        .WithEnvironment("KC_DB", "postgres") 
+        .WithEnvironment("KC_DB", "postgres")
         .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
         .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
         .WaitFor(keycloakDb);
@@ -127,8 +127,8 @@ static void ConfigureProductionEnvironment(IDistributedApplicationBuilder builde
     {
         context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.Resource.HostName;
         context.EnvironmentVariables["KC_DB_URL_PORT"] = "5432";
-        context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression; 
-        context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression; 
+        context.EnvironmentVariables["KC_DB_USERNAME"] = postgres.Resource.UserName!.ValueExpression;
+        context.EnvironmentVariables["KC_DB_PASSWORD"] = postgres.Resource.Password!.ValueExpression;
         context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host).ValueExpression;
         context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
         context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";

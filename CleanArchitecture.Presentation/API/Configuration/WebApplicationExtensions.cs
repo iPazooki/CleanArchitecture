@@ -12,48 +12,28 @@ internal static class WebApplicationExtensions
     {
         if (app.Environment.IsDevelopment())
         {
-            string? clientSecret = app.Configuration["ScalarApi:ClientSecret"];
-            string? clientId = app.Configuration["ScalarApi:ClientId"];
-            string[]? scopes = app.Configuration["ScalarApi:Scopes"]?.Split(',');
+            string clientId = app.Configuration["ScalarApi:ClientId"] ??
+                              throw new ArgumentException("Scalar API ClientId is not configured.");
 
-            if (string.IsNullOrEmpty(clientSecret))
-            {
-                app.Logger.LogError(
-                    "Scalar API client secret is not provided. " +
-                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:ClientSecret'. " +
-                    "Skipping Scalar API reference registration.");
-            }
-            else if (string.IsNullOrEmpty(clientId))
-            {
-                app.Logger.LogError(
-                    "Scalar API audience is not provided. " +
-                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:Audience'. " +
-                    "Skipping Scalar API reference registration.");
-            }
-            else if (scopes is null)
-            {
-                app.Logger.LogError(
-                    "Scalar API scopes are not provided. " +
-                    "It must be configured in Keycloak and stored in user secrets under 'ScalarApi:Scopes'. " +
-                    "Skipping Scalar API reference registration.");
-            }
-            else
-            {
-                app.MapOpenApi();
+            string[] scopes = app.Configuration["ScalarApi:Scopes"]?.Split(',') ??
+                              throw new ArgumentException("Scalar API Scopes is not configured.");
 
-                app.MapScalarApiReference(options => options
-                    .WithTitle("Clean Architecture API - v1")
-                    .WithOpenApiRoutePattern("/openapi/{documentName}.json")
-                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                    .AddPreferredSecuritySchemes("OAuth2")
-                    .AddAuthorizationCodeFlow("OAuth2", flow =>
-                    {
-                        flow.ClientId = clientId;
-                        flow.ClientSecret = clientSecret;
-                        flow.Pkce = Pkce.Sha256;
-                        flow.SelectedScopes = scopes;
-                    }));
-            }
+            string authorizationUrl = app.Configuration["ScalarApi:AuthorizationUrl"] ??
+                              throw new ArgumentException("Scalar API AuthorizationUrl is not configured.");
+
+            app.MapOpenApi();
+
+            app.MapScalarApiReference(options => options
+                .WithTitle("Clean Architecture API - v1")
+                .WithOpenApiRoutePattern("/openapi/{documentName}.json")
+                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                .AddPreferredSecuritySchemes("OAuth2")
+                .AddImplicitFlow("OAuth2", flow =>
+                {
+                    flow.AuthorizationUrl = authorizationUrl;
+                    flow.ClientId = clientId;
+                    flow.SelectedScopes = scopes;
+                }));
         }
 
         if (app.Environment.IsProduction())
