@@ -10,29 +10,25 @@ namespace CleanArchitecture.Api.Authentication;
 /// with the required roles for integration testing.
 /// Only used when ASPNETCORE_ENVIRONMENT is set to "Testing".
 /// </summary>
-internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+internal sealed class TestAuthHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string AuthenticationScheme = "TestScheme";
-
-    public TestAuthHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder)
-        : base(options, logger, encoder)
-    {
-    }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Create claims with all required roles for testing
         Claim[] claims =
         [
-            new Claim(ClaimTypes.Name, "TestUser"),
-            new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
-            new Claim(ClaimTypes.Role, "view"),
-            new Claim(ClaimTypes.Role, "create"),
-            new Claim(ClaimTypes.Role, "edit"),
-            new Claim(ClaimTypes.Role, "delete")
+            new(ClaimTypes.Name, "TestUser"),
+            new(ClaimTypes.NameIdentifier, "test-user-id"),
+            new(ClaimTypes.Role, "view"),
+            new(ClaimTypes.Role, "create"),
+            new(ClaimTypes.Role, "edit"),
+            new(ClaimTypes.Role, "delete")
         ];
 
         ClaimsIdentity identity = new(claims, AuthenticationScheme);

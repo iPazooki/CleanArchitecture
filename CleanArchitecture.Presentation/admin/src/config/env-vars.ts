@@ -20,18 +20,32 @@
  * </summary>
  */
 export interface EnvVars {
-  /** <summary>Base URL for the API the client talks to.</summary> */
-  API_BASE_URL: string;
-  /** <summary>Application URL used by NextAuth for callbacks.</summary> */
-  NEXTAUTH_URL: string;
-  /** <summary>Secret used by NextAuth to sign session tokens.</summary> */
-  NEXTAUTH_SECRET: string;
-  /** <summary>OpenID Connect issuer URL for Keycloak.</summary> */
-  KEYCLOAK_ISSUER: string;
-  /** <summary>OAuth client identifier registered in Keycloak.</summary> */
-  KEYCLOAK_CLIENT_ID: string;
-  /** <summary>OAuth client secret for Keycloak (sensitive).</summary> */
-  KEYCLOAK_CLIENT_SECRET: string;
+    /** <summary>Base URL for the API the client talks to.</summary> */
+    API_BASE_URL: string;
+    /** <summary>Application URL used by NextAuth for callbacks.</summary> */
+    NEXTAUTH_URL: string;
+    /** <summary>Secret used by NextAuth to sign session tokens.</summary> */
+    NEXTAUTH_SECRET: string;
+    /** <summary>Authentication provider to use.</summary> */
+    AUTH_PROVIDER: string;
+    /** <summary>OpenID Connect issuer URL for Keycloak.</summary> */
+    KEYCLOAK_ISSUER?: string;
+    /** <summary>OAuth client identifier registered in Keycloak.</summary> */
+    KEYCLOAK_CLIENT_ID?: string;
+    /** <summary>OAuth client secret for Keycloak (sensitive).</summary> */
+    KEYCLOAK_CLIENT_SECRET?: string;
+    /** <summary>OAuth scopes requested from Keycloak.</summary> */
+    KEYCLOAK_SCOPES?: string;
+    /** <summary>OAuth client identifier registered in Entra ID.</summary> */
+    ENTRA_CLIENT_ID?: string;
+    /** <summary>OAuth client secret for Entra ID (sensitive).</summary> */
+    ENTRA_CLIENT_SECRET?: string;
+    /** <summary>Tenant ID for Entra ID.</summary> */
+    ENTRA_TENANT_ID?: string;
+    /** <summary>OAuth scopes requested from Entra ID.</summary> */
+    ENTRA_SCOPES?: string;
+    /** <summary>OpenID Connect issuer URL for Entra ID. (OpenID Connect metadata document)</summary> */
+    ENTRA_OPENID_CONNECT?: string;
 }
 
 /**
@@ -51,43 +65,50 @@ export interface EnvVars {
  * </exception>
  */
 export function getEnvVars(): EnvVars {
-  const API_BASE_URL = process.env["API_BASE_URL"];
-  const NEXTAUTH_URL = process.env["NEXTAUTH_URL"];
-  const NEXTAUTH_SECRET = process.env["NEXTAUTH_SECRET"];
-  const KEYCLOAK_ISSUER = process.env["KEYCLOAK_ISSUER"];
-  const KEYCLOAK_CLIENT_ID = process.env["KEYCLOAK_CLIENT_ID"];
-  const KEYCLOAK_CLIENT_SECRET = process.env["KEYCLOAK_CLIENT_SECRET"];
+    const API_BASE_URL = process.env["API_BASE_URL"];
+    const NEXTAUTH_URL = process.env["NEXTAUTH_URL"];
+    const NEXTAUTH_SECRET = process.env["NEXTAUTH_SECRET"];
+    const AUTH_PROVIDER = process.env["AUTH_PROVIDER"];
+    const KEYCLOAK_ISSUER = process.env["KEYCLOAK_ISSUER"];
+    const KEYCLOAK_CLIENT_ID = process.env["KEYCLOAK_CLIENT_ID"];
+    const KEYCLOAK_CLIENT_SECRET = process.env["KEYCLOAK_CLIENT_SECRET"];
+    const KEYCLOAK_SCOPES = process.env["KEYCLOAK_SCOPES"];
+    const ENTRA_CLIENT_ID = process.env["ENTRA_CLIENT_ID"];
+    const ENTRA_CLIENT_SECRET = process.env["ENTRA_CLIENT_SECRET"];
+    const ENTRA_TENANT_ID = process.env["ENTRA_TENANT_ID"];
+    const ENTRA_SCOPES = process.env["ENTRA_SCOPES"];
+    const ENTRA_OPENID_CONNECT = process.env["ENTRA_OPENID_CONNECT"];
 
-  if (!API_BASE_URL) {
-    throw new Error("Missing required environment variable: API_BASE_URL");
-  }
 
-  if (!NEXTAUTH_URL) {
-    throw new Error("Missing required environment variable: NEXTAUTH_URL");
-  }
+    if (!API_BASE_URL) {
+        throw new Error("Missing required environment variable: API_BASE_URL");
+    }
 
-  if (!NEXTAUTH_SECRET) {
-    throw new Error("Missing required environment variable: NEXTAUTH_SECRET");
-  }
+    if (!NEXTAUTH_URL) {
+        throw new Error("Missing required environment variable: NEXTAUTH_URL");
+    }
 
-  if (!KEYCLOAK_ISSUER) {
-    throw new Error("Missing required environment variable: KEYCLOAK_ISSUER");
-  }
+    if (!NEXTAUTH_SECRET) {
+        throw new Error("Missing required environment variable: NEXTAUTH_SECRET");
+    }
 
-  if (!KEYCLOAK_CLIENT_ID) {
-    throw new Error("Missing required environment variable: KEYCLOAK_CLIENT_ID");
-  }
+    if (!AUTH_PROVIDER) {
+        throw new Error("Missing required environment variable: AUTH_PROVIDER");
+    }
 
-  if (!KEYCLOAK_CLIENT_SECRET) {
-    throw new Error("Missing required environment variable: KEYCLOAK_CLIENT_SECRET");
-  }
-
-  return {
-    API_BASE_URL,
-    NEXTAUTH_URL,
-    NEXTAUTH_SECRET,
-    KEYCLOAK_ISSUER,
-    KEYCLOAK_CLIENT_ID,
-    KEYCLOAK_CLIENT_SECRET
-  };
+    return {
+        API_BASE_URL,
+        NEXTAUTH_URL,
+        NEXTAUTH_SECRET,
+        AUTH_PROVIDER,
+        KEYCLOAK_ISSUER,
+        KEYCLOAK_CLIENT_ID,
+        KEYCLOAK_CLIENT_SECRET,
+        KEYCLOAK_SCOPES,
+        ENTRA_CLIENT_ID,
+        ENTRA_CLIENT_SECRET,
+        ENTRA_TENANT_ID,
+        ENTRA_SCOPES,
+        ENTRA_OPENID_CONNECT,
+    };
 }

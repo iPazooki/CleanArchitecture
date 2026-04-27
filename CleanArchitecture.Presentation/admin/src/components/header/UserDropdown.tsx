@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
@@ -38,13 +37,15 @@ export default function UserDropdown() {
 
       await signOut({
         redirect: false,
-        callbackUrl: "/signin",
+        callbackUrl: "/",
       });
 
-      window.location.assign(logoutUrl || "/signin");
+      setTimeout(() => {
+        window.location.assign(logoutUrl || "/");
+      }, 100);
     } catch {
       await signOut({
-        callbackUrl: "/signin",
+        callbackUrl: "/",
       });
     }
   }
