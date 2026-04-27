@@ -17,9 +17,9 @@ function resolveSafeRedirectUrl(logoutUrl: string | undefined): string {
 
   try {
     const parsedLogoutUrl = new URL(logoutUrl, window.location.origin);
-    const trustedHosts = new Set([window.location.hostname, "login.microsoftonline.com"]);
-    const isTrustedRedirect =
-      parsedLogoutUrl.protocol === "https:" && trustedHosts.has(parsedLogoutUrl.hostname);
+    const isSameOrigin = parsedLogoutUrl.origin === window.location.origin;
+    const isSecureExternalUrl = parsedLogoutUrl.protocol === "https:";
+    const isTrustedRedirect = isSameOrigin || isSecureExternalUrl;
 
     return isTrustedRedirect ? parsedLogoutUrl.toString() : "/";
   } catch {

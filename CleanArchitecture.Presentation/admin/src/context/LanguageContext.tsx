@@ -20,20 +20,20 @@ type LanguageProviderProps = {
   initialLocale?: Locale;
 };
 
-function readStoredLocale(): Locale | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const savedLocale = window.localStorage.getItem(localeStorageKey);
-  return isLocale(savedLocale) ? savedLocale : null;
-}
-
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   children,
   initialLocale = defaultLocale,
 }) => {
-  const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale() ?? initialLocale);
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+
+  useEffect(() => {
+    const persistedLocale = isLocale(window.localStorage.getItem(localeStorageKey))
+      ? locale
+      : initialLocale;
+
+    window.localStorage.setItem(localeStorageKey, persistedLocale);
+    document.cookie = `${localeCookieName}=${persistedLocale}; path=/; max-age=31536000; samesite=lax`;
+  }, [initialLocale, locale]);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
