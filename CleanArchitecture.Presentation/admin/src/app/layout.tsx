@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Outfit } from "next/font/google";
 import localFont from "next/font/local";
+import { cookies } from "next/headers";
+import { defaultLocale, isLocale, isRtl } from "@/i18n";
 import "./globals.css";
 import "flatpickr/dist/flatpickr.css";
 
@@ -38,17 +40,23 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+export default async function RootLayout({ children }: Readonly<RootLayoutProps>) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("admin-locale")?.value;
+  const initialLocale = isLocale(localeCookie) ? localeCookie : defaultLocale;
+  const htmlDirection = isRtl(initialLocale) ? "rtl" : "ltr";
+
   return (
     <html
-      lang="en"
+      lang={initialLocale}
+      dir={htmlDirection}
       suppressHydrationWarning
       className={`${outfit.variable} ${vazirmatn.variable}`}
     >
       <body className="antialiased dark:bg-gray-900">
         <AuthProvider>
           <QueryProvider>
-            <LanguageProvider>
+            <LanguageProvider initialLocale={initialLocale}>
               <ThemeProvider>
                 <SidebarProvider>{children}</SidebarProvider>
               </ThemeProvider>

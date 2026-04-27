@@ -1,10 +1,15 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import dynamic from "next/dynamic";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import { isApiError } from "@/lib/utils/api-error";
+
+const ReactQueryDevtools = dynamic(
+  () => import("@tanstack/react-query-devtools").then((module) => module.ReactQueryDevtools),
+  { ssr: false },
+);
 
 const queryStaleTime = 60_000;
 const queryGcTime = 5 * 60_000;

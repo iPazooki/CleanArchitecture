@@ -1,7 +1,10 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Locale, defaultLocale, isRtl, dictionaries } from "@/i18n";
+import { Locale, defaultLocale, isLocale, isRtl, dictionaries } from "@/i18n";
+
+const localeStorageKey = "locale";
+const localeCookieName = "admin-locale";
 
 type LanguageContextType = {
   locale: Locale;
@@ -12,19 +15,30 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+type LanguageProviderProps = {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+};
 
-  useEffect(() => {
-    const savedLocale = localStorage.getItem("locale") as Locale;
-    if (savedLocale && dictionaries[savedLocale]) {
-      setLocaleState(savedLocale);
-    }
-  }, []);
+function readStoredLocale(): Locale | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const savedLocale = window.localStorage.getItem(localeStorageKey);
+  return isLocale(savedLocale) ? savedLocale : null;
+}
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({
+  children,
+  initialLocale = defaultLocale,
+}) => {
+  const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale() ?? initialLocale);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem("locale", newLocale);
+    window.localStorage.setItem(localeStorageKey, newLocale);
+    document.cookie = `${localeCookieName}=${newLocale}; path=/; max-age=31536000; samesite=lax`;
   }, []);
 
   const t = useCallback(

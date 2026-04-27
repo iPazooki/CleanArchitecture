@@ -6,6 +6,27 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
 
+function resolveSafeRedirectUrl(logoutUrl: string | undefined): string {
+  if (!logoutUrl) {
+    return "/";
+  }
+
+  if (typeof window === "undefined") {
+    return "/";
+  }
+
+  try {
+    const parsedLogoutUrl = new URL(logoutUrl, window.location.origin);
+    const trustedHosts = new Set([window.location.hostname, "login.microsoftonline.com"]);
+    const isTrustedRedirect =
+      parsedLogoutUrl.protocol === "https:" && trustedHosts.has(parsedLogoutUrl.hostname);
+
+    return isTrustedRedirect ? parsedLogoutUrl.toString() : "/";
+  } catch {
+    return "/";
+  }
+}
+
 export default function UserDropdown() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +55,7 @@ export default function UserDropdown() {
       }
 
       const { logoutUrl } = (await response.json()) as { logoutUrl?: string };
+      const safeLogoutUrl = resolveSafeRedirectUrl(logoutUrl);
 
       await signOut({
         redirect: false,
@@ -41,7 +63,7 @@ export default function UserDropdown() {
       });
 
       setTimeout(() => {
-        window.location.assign(logoutUrl || "/");
+        window.location.assign(safeLogoutUrl);
       }, 100);
     } catch {
       await signOut({
