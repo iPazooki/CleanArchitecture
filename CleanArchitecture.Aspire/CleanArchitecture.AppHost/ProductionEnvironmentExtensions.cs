@@ -16,6 +16,10 @@ internal static class ProductionEnvironmentExtensions
 
         IResourceBuilder<AzureKeyVaultResource> keyVault = builder.AddAzureKeyVault("keyvault");
 
+        IResourceBuilder<ParameterResource> nextAuthSecret = builder.AddParameter("nextAuthSecret", secret: true);
+
+        keyVault.AddSecret("kv-nextAuthSecret", nextAuthSecret);
+
         IResourceBuilder<AzurePostgresFlexibleServerResource> postgres = builder.AddAzurePostgresFlexibleServer("postgres")
             .ConfigureInfrastructure(infra =>
             {
@@ -43,8 +47,6 @@ internal static class ProductionEnvironmentExtensions
             .WithReference(appDb)
             .WaitFor(appDb);
 
-        IResourceBuilder<ParameterResource> nextAuthSecret = builder.AddParameter("nextAuthSecret", secret: true);
-
         IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
             .WithReference(appDb)
             .WaitFor(appDb)
@@ -61,6 +63,7 @@ internal static class ProductionEnvironmentExtensions
             .WithPnpm()
             .WithReference(apiProject)
             .WaitFor(apiProject)
+            .WithReference(keyVault)
             .WithEnvironment("NODE_ENV", "production")
             .WithEnvironment("NEXTAUTH_SECRET", nextAuthSecret);
 
@@ -68,16 +71,17 @@ internal static class ProductionEnvironmentExtensions
 
         if (useKeycloak)
         {
-            ConfigureKeycloak(builder, postgres, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
+            ConfigureKeycloak(builder, keyVault, postgres, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
         }
         else
         {
-            ConfigureEntra(builder, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
+            ConfigureEntra(builder, keyVault, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
         }
     }
 
     private static void ConfigureKeycloak(
         IDistributedApplicationBuilder builder,
+        IResourceBuilder<AzureKeyVaultResource> keyVault,
         IResourceBuilder<AzurePostgresFlexibleServerResource> postgres,
         IResourceBuilder<ProjectResource> apiProject,
         IResourceBuilder<NodeAppResource> adminApp,
@@ -94,6 +98,10 @@ internal static class ProductionEnvironmentExtensions
 
         IResourceBuilder<ParameterResource> keycloakDbUsername = builder.AddParameter("keycloakDbUsername");
         IResourceBuilder<ParameterResource> keycloakDbPassword = builder.AddParameter("keycloakDbPassword", secret: true);
+
+        keyVault.AddSecret("kv-keycloakClientSecret", keycloakClientSecret);
+        keyVault.AddSecret("kv-keycloakAdminPassword", keycloakAdminPassword);
+        keyVault.AddSecret("kv-keycloakDbPassword", keycloakDbPassword);
 
         IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
             .WithEnvironment("KC_DB", "postgres")
@@ -150,6 +158,7 @@ internal static class ProductionEnvironmentExtensions
 
     private static void ConfigureEntra(
         IDistributedApplicationBuilder builder,
+        IResourceBuilder<AzureKeyVaultResource> keyVault,
         IResourceBuilder<ProjectResource> apiProject,
         IResourceBuilder<NodeAppResource> adminApp,
         EndpointReference apiInternalEndpoint,
@@ -164,6 +173,8 @@ internal static class ProductionEnvironmentExtensions
         IResourceBuilder<ParameterResource> entraAdminClientSecret = builder.AddParameter("EntraAdminClientSecret", secret: true);
         IResourceBuilder<ParameterResource> entraAdminScope = builder.AddParameter("EntraAdminScope");
         IResourceBuilder<ParameterResource> entraAdminOpenId = builder.AddParameter("EntraAdminOpenIdURL");
+
+        keyVault.AddSecret("kv-entraAdminClientSecret", entraAdminClientSecret);
 
 
         apiProject.WithEnvironment(context =>

@@ -1,4 +1,5 @@
 import type {NextAuthOptions} from "next-auth";
+import type {Provider} from "next-auth/providers/index";
 import KeycloakProvider from "next-auth/providers/keycloak";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import {getEnvVars} from "@/config/env-vars";
@@ -33,6 +34,7 @@ function extractRoles(accessToken: string): string[] {
 
 export function getAuthOptions(): NextAuthOptions {
     const {
+        AUTH_PROVIDER,
         KEYCLOAK_ISSUER,
         KEYCLOAK_CLIENT_ID,
         KEYCLOAK_CLIENT_SECRET,
@@ -45,21 +47,28 @@ export function getAuthOptions(): NextAuthOptions {
         ENTRA_OPENID_CONNECT,
     } = getEnvVars();
 
-    return {
-        providers: [
+    const providers: Provider[] = [];
+
+    if (AUTH_PROVIDER === "Keycloak" && KEYCLOAK_ISSUER && KEYCLOAK_CLIENT_ID && KEYCLOAK_CLIENT_SECRET) {
+        providers.push(
             KeycloakProvider({
-                clientId: KEYCLOAK_CLIENT_ID!,
-                clientSecret: KEYCLOAK_CLIENT_SECRET!,
-                issuer: KEYCLOAK_ISSUER!.replace(/\/+$/, ""),
+                clientId: KEYCLOAK_CLIENT_ID,
+                clientSecret: KEYCLOAK_CLIENT_SECRET,
+                issuer: KEYCLOAK_ISSUER.replace(/\/+$/, ""),
                 authorization: {
                     params: {
                         scope: KEYCLOAK_SCOPES,
                     },
                 },
-            }),
+            })
+        );
+    }
+
+    if (AUTH_PROVIDER === "Entra" && ENTRA_CLIENT_ID && ENTRA_CLIENT_SECRET && ENTRA_TENANT_ID) {
+        providers.push(
             AzureADProvider({
-                clientId: ENTRA_CLIENT_ID!,
-                clientSecret: ENTRA_CLIENT_SECRET!,
+                clientId: ENTRA_CLIENT_ID,
+                clientSecret: ENTRA_CLIENT_SECRET,
                 tenantId: ENTRA_TENANT_ID,
                 wellKnown: ENTRA_OPENID_CONNECT,
                 authorization: {
@@ -67,9 +76,13 @@ export function getAuthOptions(): NextAuthOptions {
                         scope: ENTRA_SCOPES,
                         prompt: "select_account",
                     },
-                }
-            }),
-        ],
+                },
+            })
+        );
+    }
+
+    return {
+        providers,
         pages: {
             signIn: "/signin",
         },

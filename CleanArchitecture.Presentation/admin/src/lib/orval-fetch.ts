@@ -101,7 +101,7 @@ export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Pro
   if (!response.ok) {
     if (response.status === 401 && typeof window !== "undefined") {
       const callbackUrl = `${window.location.pathname}${window.location.search}`;
-      void signIn("keycloak", { callbackUrl });
+      void signIn(undefined, { callbackUrl });
     }
 
     throw new ApiError(response.status, data, response.headers);
