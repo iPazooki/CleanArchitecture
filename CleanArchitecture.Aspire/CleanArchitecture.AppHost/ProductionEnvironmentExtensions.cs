@@ -1,0 +1,194 @@
+using Aspire.Hosting.Azure;
+using Aspire.Hosting.JavaScript;
+using Azure.Provisioning.PostgreSql;
+using Microsoft.Extensions.Configuration;
+using static CleanArchitecture.AppHost.EndpointHelpers;
+
+namespace CleanArchitecture.AppHost;
+
+internal static class ProductionEnvironmentExtensions
+{
+    internal static void ConfigureProductionEnvironment(this IDistributedApplicationBuilder builder)
+    {
+        bool useKeycloak = builder.Configuration.GetValue("UseKeycloak", false);
+
+        IResourceBuilder<AzureApplicationInsightsResource> applicationInsights = builder.AddAzureApplicationInsights("applicationInsights");
+
+        IResourceBuilder<AzureKeyVaultResource> keyVault = builder.AddAzureKeyVault("keyvault");
+
+        IResourceBuilder<AzurePostgresFlexibleServerResource> postgres = builder.AddAzurePostgresFlexibleServer("postgres")
+            .ConfigureInfrastructure(infra =>
+            {
+                PostgreSqlFlexibleServer server = infra.GetProvisionableResources().OfType<PostgreSqlFlexibleServer>().Single();
+                server.Sku = new PostgreSqlFlexibleServerSku
+                {
+                    Name = "Standard_B1ms",
+                    Tier = PostgreSqlFlexibleServerSkuTier.Burstable
+                };
+                server.HighAvailability = new PostgreSqlFlexibleServerHighAvailability
+                {
+                    Mode = PostgreSqlFlexibleServerHighAvailabilityMode.Disabled
+                };
+                server.Backup = new PostgreSqlFlexibleServerBackupProperties
+                {
+                    BackupRetentionDays = 7,
+                    GeoRedundantBackup = PostgreSqlFlexibleServerGeoRedundantBackupEnum.Disabled
+                };
+                server.StorageSizeInGB = 32;
+            });
+
+        IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "mrpaneldb");
+
+        IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
+            .WithReference(appDb)
+            .WaitFor(appDb);
+
+        IResourceBuilder<ParameterResource> nextAuthSecret = builder.AddParameter("nextAuthSecret", secret: true);
+
+        IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
+            .WithReference(appDb)
+            .WaitFor(appDb)
+            .WaitFor(migrator)
+            .WithReference(applicationInsights)
+            .WithReference(keyVault);
+
+        EndpointReference apiInternalEndpoint = apiProject.GetEndpoint("http");
+
+        IResourceBuilder<NodeAppResource> adminApp = builder.AddNodeApp(ResourceNames.Admin, AppHostConstants.AdminAppRelativePath, AppHostConstants.NextJsEntryPoint)
+            .WithHttpEndpoint(targetPort: AppHostConstants.AdminTargetPort)
+            .WithExternalHttpEndpoints()
+            .WithArgs("start")
+            .WithPnpm()
+            .WithReference(apiProject)
+            .WaitFor(apiProject)
+            .WithEnvironment("NODE_ENV", "production")
+            .WithEnvironment("NEXTAUTH_SECRET", nextAuthSecret);
+
+        EndpointReference adminPublicEndpoint = adminApp.GetEndpoint("http");
+
+        if (useKeycloak)
+        {
+            ConfigureKeycloak(builder, postgres, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
+        }
+        else
+        {
+            ConfigureEntra(builder, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
+        }
+    }
+
+    private static void ConfigureKeycloak(
+        IDistributedApplicationBuilder builder,
+        IResourceBuilder<AzurePostgresFlexibleServerResource> postgres,
+        IResourceBuilder<ProjectResource> apiProject,
+        IResourceBuilder<NodeAppResource> adminApp,
+        EndpointReference apiInternalEndpoint,
+        EndpointReference adminPublicEndpoint)
+    {
+        IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> keycloakDb = postgres.AddDatabase("keycloakResource", "keycloakdb");
+
+        IResourceBuilder<ParameterResource> keycloakClientId = builder.AddParameter("keycloakClientId");
+        IResourceBuilder<ParameterResource> keycloakClientSecret = builder.AddParameter("keycloakClientSecret", secret: true);
+        IResourceBuilder<ParameterResource> keycloakRealm = builder.AddParameter("keycloakRealm");
+        IResourceBuilder<ParameterResource> keycloakAdminUsername = builder.AddParameter("keycloakAdminUsername");
+        IResourceBuilder<ParameterResource> keycloakAdminPassword = builder.AddParameter("keycloakAdminPassword", secret: true);
+
+        IResourceBuilder<ParameterResource> keycloakDbUsername = builder.AddParameter("keycloakDbUsername");
+        IResourceBuilder<ParameterResource> keycloakDbPassword = builder.AddParameter("keycloakDbPassword", secret: true);
+
+        IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
+            .WithEnvironment("KC_DB", "postgres")
+            .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
+            .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
+            .WaitFor(keycloakDb);
+
+        EndpointReference keycloakPublicEndpoint = keycloak.GetEndpoint("http");
+
+        keycloak.WithEnvironment(context =>
+        {
+            context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Host).ValueExpression;
+            context.EnvironmentVariables["KC_DB_URL_PORT"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Port).ValueExpression;
+            context.EnvironmentVariables["KC_DB_USERNAME"] = keycloakDbUsername.Resource.ValueExpression;
+            context.EnvironmentVariables["KC_DB_PASSWORD"] = keycloakDbPassword.Resource.ValueExpression;
+            context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host).ValueExpression;
+            context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
+            context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";
+        });
+
+        apiProject.WithReference(keycloak).WaitFor(keycloak);
+
+        apiProject.WithEnvironment(context =>
+        {
+            string publicAuthUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
+            string realm = keycloakRealm.Resource.ValueExpression;
+            string audience = keycloakClientId.Resource.ValueExpression;
+            string publicIssuer = $"{publicAuthUrl}/realms/{realm}";
+
+            context.EnvironmentVariables["Authentication__Provider"] = "Keycloak";
+            context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{publicIssuer}/protocol/openid-connect/auth";
+            context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{publicIssuer}/protocol/openid-connect/token";
+            context.EnvironmentVariables["Keycloak__ValidIssuers"] = publicIssuer;
+            context.EnvironmentVariables["Keycloak__RequireHttpsMetadata"] = "false";
+            context.EnvironmentVariables["Keycloak__Realm"] = realm;
+            context.EnvironmentVariables["Keycloak__Audience"] = audience;
+            context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
+        });
+
+        adminApp.WithEnvironment(context =>
+        {
+            string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
+            string apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
+            string keycloakIssuer = $"{BuildExternalHttpsUrl(keycloakPublicEndpoint)}/realms/{keycloakRealm.Resource.ValueExpression}";
+
+            context.EnvironmentVariables["AUTH_PROVIDER"] = "Keycloak";
+            context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
+            context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_ID"] = keycloakClientId;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_SECRET"] = keycloakClientSecret;
+            context.EnvironmentVariables["KEYCLOAK_ISSUER"] = keycloakIssuer;
+        });
+    }
+
+    private static void ConfigureEntra(
+        IDistributedApplicationBuilder builder,
+        IResourceBuilder<ProjectResource> apiProject,
+        IResourceBuilder<NodeAppResource> adminApp,
+        EndpointReference apiInternalEndpoint,
+        EndpointReference adminPublicEndpoint)
+    {
+        IResourceBuilder<ParameterResource> entraApiDomain = builder.AddParameter("EntraAPIPrimaryDomain");
+        IResourceBuilder<ParameterResource> entraApiClientId = builder.AddParameter("EntraAPIClientId");
+
+        IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("EntraTenantId");
+
+        IResourceBuilder<ParameterResource> entraAdminClientId = builder.AddParameter("EntraAdminClientId");
+        IResourceBuilder<ParameterResource> entraAdminClientSecret = builder.AddParameter("EntraAdminClientSecret", secret: true);
+        IResourceBuilder<ParameterResource> entraAdminScope = builder.AddParameter("EntraAdminScope");
+        IResourceBuilder<ParameterResource> entraAdminOpenId = builder.AddParameter("EntraAdminOpenIdURL");
+
+
+        apiProject.WithEnvironment(context =>
+        {
+            context.EnvironmentVariables["Authentication__Provider"] = "Entra";
+            context.EnvironmentVariables["AzureAd__Domain"] = entraApiDomain.Resource.ValueExpression;
+            context.EnvironmentVariables["AzureAd__TenantId"] = entraTenantId.Resource.ValueExpression;
+            context.EnvironmentVariables["AzureAd__ClientId"] = entraApiClientId.Resource.ValueExpression;
+            context.EnvironmentVariables["AzureAd__Audience"] = entraApiClientId.Resource.ValueExpression;
+            context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
+        });
+
+        adminApp.WithEnvironment(context =>
+        {
+            string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
+            string apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
+
+            context.EnvironmentVariables["AUTH_PROVIDER"] = "Entra";
+            context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
+            context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
+            context.EnvironmentVariables["ENTRA_CLIENT_ID"] = entraAdminClientId.Resource.ValueExpression;
+            context.EnvironmentVariables["ENTRA_CLIENT_SECRET"] = entraAdminClientSecret.Resource.ValueExpression;
+            context.EnvironmentVariables["ENTRA_TENANT_ID"] = entraTenantId.Resource.ValueExpression;
+            context.EnvironmentVariables["ENTRA_SCOPES"] = entraAdminScope.Resource.ValueExpression;
+            context.EnvironmentVariables["ENTRA_OPENID_CONNECT"] = entraAdminOpenId.Resource.ValueExpression;
+        });
+    }
+}
