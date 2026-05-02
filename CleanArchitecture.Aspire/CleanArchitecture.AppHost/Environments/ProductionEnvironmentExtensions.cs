@@ -4,7 +4,7 @@ using Azure.Provisioning.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using static CleanArchitecture.AppHost.EndpointHelpers;
 
-namespace CleanArchitecture.AppHost;
+namespace CleanArchitecture.AppHost.Environments;
 
 internal static class ProductionEnvironmentExtensions
 {
@@ -164,8 +164,10 @@ internal static class ProductionEnvironmentExtensions
         EndpointReference apiInternalEndpoint,
         EndpointReference adminPublicEndpoint)
     {
+        IResourceBuilder<ParameterResource> entraApiInstance = builder.AddParameter("EntraAPIInstance");
         IResourceBuilder<ParameterResource> entraApiDomain = builder.AddParameter("EntraAPIPrimaryDomain");
         IResourceBuilder<ParameterResource> entraApiClientId = builder.AddParameter("EntraAPIClientId");
+        IResourceBuilder<ParameterResource> entraApiAudienceId = builder.AddParameter("EntraAPIAudienceId");
 
         IResourceBuilder<ParameterResource> entraTenantId = builder.AddParameter("EntraTenantId");
 
@@ -180,10 +182,11 @@ internal static class ProductionEnvironmentExtensions
         apiProject.WithEnvironment(context =>
         {
             context.EnvironmentVariables["Authentication__Provider"] = "Entra";
+            context.EnvironmentVariables["AzureAd__Instance"] = entraApiInstance.Resource.ValueExpression;
             context.EnvironmentVariables["AzureAd__Domain"] = entraApiDomain.Resource.ValueExpression;
             context.EnvironmentVariables["AzureAd__TenantId"] = entraTenantId.Resource.ValueExpression;
             context.EnvironmentVariables["AzureAd__ClientId"] = entraApiClientId.Resource.ValueExpression;
-            context.EnvironmentVariables["AzureAd__Audience"] = entraApiClientId.Resource.ValueExpression;
+            context.EnvironmentVariables["AzureAd__Audience"] = entraApiAudienceId.Resource.ValueExpression;
             context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
         });
 

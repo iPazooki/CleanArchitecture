@@ -94,6 +94,7 @@ export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Pro
   const response = await fetch(resolveRequestUrl(url), {
     ...options,
     headers,
+    signal: options.signal ?? AbortSignal.timeout(10_000),
   });
 
   const data = await parseResponseBody(response);

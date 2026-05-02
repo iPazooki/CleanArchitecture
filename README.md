@@ -1,228 +1,237 @@
-﻿![GitHub](https://img.shields.io/github/license/ipazooki/CleanArchitecture)
+![GitHub](https://img.shields.io/github/license/ipazooki/CleanArchitecture)
 ![GitHub contributors](https://img.shields.io/github/contributors/ipazooki/CleanArchitecture)
 [![.NET Aspire CI](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml/badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml)
 
-## Clean Architecture
+# 🧱 Clean Architecture
 
-A lightweight **.NET 10** based **Clean Architecture** template leveraging **Minimal API** and **.NET Aspire**. This repository helps you quickly set up a maintainable project structure that separates core business rules from infrastructure and presentation concerns while taking advantage of Aspire's cloud-native tooling.
+A production-ready **.NET 10 + Next.js 16** Clean Architecture template, orchestrated by **.NET Aspire** and ready to deploy to Azure with `azd`. It ships with a Minimal API, an admin dashboard, dual authentication providers, and PostgreSQL — all wired up out of the box.
 
-## Why This Template?
+---
 
-- **Faster Development**: Pre-configured with essential design patterns like **CQRS** (Commands/Queries), value objects, and layered architecture.
-- **Domain-Driven Design**: Organize your core business logic with Entities, Value Objects, Specifications, and Domain Services.
-- **Cloud-Ready with .NET Aspire**: Uses an Aspire AppHost to orchestrate services, dependencies, health checks, and observability.
-- **Postgres by Default**: Uses **PostgreSQL** as the primary relational database (via EF Core) for local development and deployment.
-- **Simple API**: Minimal API endpoints keep things lightweight and easy to extend.
-- **Extensible**: Easily add new modules, microservices, or features without breaking existing code.
-- **Scalable**: Clear separation of concerns keeps your code well-organized as your app grows.
-- **Robust Testing**: Includes example unit tests (using xUnit and Moq) and integration tests.
-- **Polly Integration**: Resilient API calls with built-in retries, circuit breaker patterns, and fallbacks.
+## ✨ Highlights
 
+- 🎯 **Clean Architecture** — strict layer boundaries enforced by architecture tests
+- ⚡ **.NET 10 Minimal API** — versioned endpoints, output caching, `Result<T>` pattern
+- 🧩 **CQRS** via the [Mediator](https://github.com/martinothamar/Mediator) source generator (no MediatR runtime cost)
+- 🌐 **Next.js 16 Admin Panel** — App Router BFF with i18n (en / fa / ar + RTL)
+- 🔐 **Pluggable Authentication** — switch between **Keycloak** and **Microsoft Entra ID** via config
+- 📜 **Scalar API Reference** — interactive OpenAPI UI with implicit OAuth flow (no client secret needed)
+- 🛠️ **Orval-generated API client** — typed React hooks regenerated from the OpenAPI spec
+- 🐘 **PostgreSQL** via EF Core 10 with auto-applied migrations
+- ☁️ **.NET Aspire** — orchestrates all services locally and provisions Azure infrastructure
+- 🧪 **Robust Testing** — Domain unit tests, architecture tests, and Aspire-based integration tests
+- 🛡️ **Polly** — retries, circuit breakers, fallbacks for outbound calls
 
-## Project Structure
+---
 
-1. **Domain Layer**
-   - Entities, value objects, and domain services.
-2. **Application Layer**
-   - Interfaces, DTOs, commands, queries, and validators.
-3. **Infrastructure Layer**
-   - Persistence, database repositories, and external service integrations.
-4. **Infrastructure.Persistence Layer**
-   - EF Core `DbContext`, Postgres configuration, and migrations.
-5. **Presentation Layer**
-   - Minimal API endpoints, middleware, and request/response handling.
-6. **Aspire AppHost**
-   - `.NET Aspire` AppHost project that wires up the API, Postgres, and shared service defaults.
+## 🏗️ Architecture
 
+```
+Domain ← Application ← Infrastructure / Infrastructure.Persistence ← Presentation
+```
 
-## Getting Started
+| Layer | Responsibility |
+|---|---|
+| **Domain** | Entities, Value Objects, Specifications, Domain Events |
+| **Application** | CQRS commands/queries, validators, `Result<T>` |
+| **Infrastructure** | External integrations (email, etc.) with Polly resilience |
+| **Infrastructure.Persistence** | EF Core `DbContext`, Postgres, migrations, interceptors |
+| **Presentation/API** | Minimal API, versioned at `/api/v1/...`, Scalar UI |
+| **Presentation/admin** | Next.js admin dashboard (BFF + NextAuth.js) |
+| **Aspire AppHost** | Orchestrates the full stack and Azure deployment |
 
-The following prerequisites are required to build and run the solution:
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [.NET Aspire workload](https://learn.microsoft.com/dotnet/aspire/get-started/installation) (for local AppHost support)
-- Docker (for running Postgres when orchestrated by Aspire)
+---
 
-1. Clone the repository to your local machine.
-    - `git clone https://github.com/iPazooki/CleanArchitecture.git`
-    - `git clone git@github.com:iPazooki/CleanArchitecture.git`
-2. Navigate to the project directory.
-3. Restore dependencies using:
-    - `dotnet restore`
+## ✅ Prerequisites
 
-### Running with .NET Aspire (recommended)
+- 📦 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- 🐳 Docker Desktop (for Postgres, Keycloak, PgAdmin containers)
+- 🟢 [Node.js 20+](https://nodejs.org/) and [pnpm](https://pnpm.io/installation)
+- 🌩️ (Optional) [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) + [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) for cloud deployment
 
-The solution is configured to run using `.NET Aspire` via the AppHost project.
+---
 
-1. From the solution root, run the AppHost project:
-   - `dotnet run --project CleanArchitecture.Aspire/CleanArchitecture.AppHost/CleanArchitecture.AppHost.csproj`
-2. Aspire will:
-   - Start the `CleanArchitecture.Presentation` minimal API.
-   - Provision and start a Postgres container/instance (as configured in the AppHost).
-   - Apply service defaults (health checks, telemetry, etc.).
-3. Once running, navigate to the API Swagger UI (the port may vary depending on Aspire configuration). By default this is similar to:
-   - `https://localhost:7281/swagger/index.html`
+## 🚀 Quick Start
 
-### Running the API Project Directly (without Aspire)
+```bash
+# 1. Clone
+git clone https://github.com/iPazooki/CleanArchitecture.git
+cd CleanArchitecture
 
-If you prefer to run only the API (and manage Postgres yourself):
+# 2. Restore .NET dependencies
+dotnet restore
 
-1. Ensure you have a running Postgres instance and that the connection string in `CleanArchitecture.Presentation/API/appsettings.json` points to it.
-2. Build and run the application:
-    - `dotnet build`
-    - `dotnet run --project CleanArchitecture.Presentation`
-3. Visit the Swagger UI (by default):
-    - `https://localhost:7281/swagger/index.html`
+# 3. Install admin panel dependencies
+cd CleanArchitecture.Presentation/admin && pnpm install && cd ../..
 
-## Deployment to Azure with `azd`
+# 4. Run the full stack with Aspire
+dotnet run --project CleanArchitecture.Aspire/CleanArchitecture.AppHost/CleanArchitecture.AppHost.csproj
+```
 
-The Aspire AppHost is configured for Azure deployment through `azd`.
+Aspire will spin up everything you need:
 
-### Prerequisites
+| Service | What it does |
+|---|---|
+| 🔵 **API** | .NET Minimal API |
+| 🟣 **Admin** | Next.js dashboard |
+| 🐘 **Postgres** + **PgAdmin** | Database & UI |
+| 🔑 **Keycloak** | Local identity provider (realm auto-imported) |
 
-- Azure CLI
-- Azure Developer CLI (`azd`)
-- .NET Aspire workload
+The Aspire dashboard prints the URLs for every resource (API, Scalar UI, admin, Keycloak, PgAdmin).
+
+---
+
+## 🔐 Authentication
+
+The app supports **two providers** and switches between them via configuration.
+
+| Environment | Default Provider | Why |
+|---|---|---|
+| 🛠️ Development | **Keycloak** | Runs as a local container, realm auto-imported, no cloud setup needed |
+| ☁️ Production | **Microsoft Entra ID** | Managed identity, no secrets to rotate for the API |
+
+### Switching providers
+
+In `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings.*.json`:
+
+```jsonc
+{
+  "UseKeycloak": true   // false → Entra
+}
+```
+
+The AppHost wires the right environment variables (`Authentication__Provider`, issuer URLs, audiences, NextAuth client config) into the API and admin projects automatically.
+
+> 📘 Scalar uses the **OAuth 2.0 implicit flow**, so no client secret is needed for the API reference UI. Just sign in from the Scalar page.
+
+---
+
+## 📜 API Reference (Scalar)
+
+Once running, open the **Scalar** UI from the Aspire dashboard's API resource. It renders the OpenAPI spec at `/openapi/v1.json` and lets you authenticate and call endpoints interactively.
+
+---
+
+## 🖥️ Admin Panel
+
+The admin dashboard lives in `CleanArchitecture.Presentation/admin` (Next.js 16, App Router, Tailwind, NextAuth.js, TanStack Query).
+
+```bash
+cd CleanArchitecture.Presentation/admin
+pnpm dev        # dev server (Aspire normally runs this for you)
+pnpm build      # production build
+pnpm lint       # ESLint with --max-warnings=0
+pnpm generate   # regenerate the typed API client from the live OpenAPI spec
+```
+
+### 🤖 Orval — generated API client
+
+The React Query hooks and TypeScript DTOs under `src/lib/api/` are **generated by Orval** from the API's OpenAPI document. **Never edit them by hand.** After changing an endpoint or DTO, run:
+
+```bash
+pnpm generate
+```
+
+(Make sure the API is running on `http://localhost:5049` so Orval can fetch the spec.)
+
+---
+
+## 🗄️ Database
+
+- **Engine**: PostgreSQL
+- **ORM**: EF Core 10 (`Npgsql.EntityFrameworkCore.PostgreSQL`)
+- **Migrations**: live in `CleanArchitecture.Infrastructure.Persistence`
+- **Auto-apply**: the dedicated `CleanArchitecture.DbMigrator` project runs migrations at startup before the API boots
+
+### Add a migration
+
+```bash
+dotnet ef migrations add <MigrationName> \
+  --project CleanArchitecture.Infrastructure.Persistence \
+  --startup-project CleanArchitecture.Presentation/API
+```
+
+> 💡 An `ApplicationDbContextFactory` provides a design-time connection string so EF tools work without Aspire running.
+
+---
+
+## ☁️ Deploy to Azure with `azd`
+
+The Aspire AppHost provisions everything for you:
+
+- 🚢 **Azure Container Apps** — API, admin, (optionally Keycloak)
+- 🐘 **Azure Database for PostgreSQL Flexible Server**
+- 🔒 **Azure Key Vault** — all secrets stored here automatically
+- 📊 **Azure Application Insights**
 
 ### Deploy
-
-From the solution root, run:
 
 ```bash
 azd up
 ```
 
-During deployment, `azd` will provision the Azure resources defined by `CleanArchitecture.Aspire/CleanArchitecture.AppHost/AppHost.cs`, including:
-
-- Azure Container Apps for the API, admin app, and Keycloak
-- Azure Database for PostgreSQL Flexible Server
-- Azure Key Vault
-- Azure Application Insights
-
 ### Parameters requested by `azd`
 
-`azd up` should prompt only for values that cannot be derived automatically:
+`azd` only prompts for values it cannot derive automatically. Public URLs (`adminPublicUrl`, `apiPublicUrl`, `authPublicUrl`) are derived from Container Apps endpoints — you don't need to enter them.
 
-```plain text
+#### Always required
+
+```text
 nextAuthSecret
+```
+
+#### When using Microsoft Entra ID (default for production)
+
+```text
+EntraAPIInstance
+EntraAPIPrimaryDomain
+EntraAPIClientId
+EntraAPIAudienceId
+EntraTenantId
+EntraAdminClientId
+EntraAdminClientSecret
+EntraAdminScope
+EntraAdminOpenIdURL
+```
+
+#### When using Keycloak (`UseKeycloak = true`)
+
+```text
 keycloakClientId
 keycloakClientSecret
 keycloakRealm
 keycloakAdminUsername
 keycloakAdminPassword
+keycloakDbUsername
+keycloakDbPassword
 ```
 
-### Public URLs
+> 🔐 All secret parameters (`*Secret`, `*Password`, `nextAuthSecret`) are written to **Azure Key Vault** automatically — they never live in plain text in your container apps.
 
-The following public application URLs are now derived automatically from the Azure Container Apps external endpoints during manifest generation and deployment:
+---
 
-- `adminPublicUrl`
-- `apiPublicUrl`
-- `authPublicUrl`
-
-You should no longer need to enter those values manually during `azd up`.
-
-If you later want to use custom domains instead of the default Azure Container Apps hostnames, update the production environment configuration in `CleanArchitecture.Aspire/CleanArchitecture.AppHost/AppHost.cs` and your Azure Container Apps ingress/domain settings accordingly.
-
-
-## Authentication
-
-This project integrates with Keycloak for authentication. Before running the API with secured endpoints you must provide a client secret for the `scalar` client in Keycloak and store it in the project's user secrets.
-
-Important: for Visual Studio users you can set secrets via the __Manage User Secrets__ UI. The instructions below assume the client in Keycloak is named `scalar`.
-
-### Steps to create and configure a new Client Secret
-
-1. Open your Keycloak admin panel (the instance URL configured for your environment) and select `clean-api` realm.
-2. Go to the `Clients` section and select the `scalar` client.
-3. Open the `Credentials` (or `Client Secrets`) tab for that client.
-4. Create/regenerate a new client secret and copy the secret value.
-
-### Store the secret in Visual Studio (recommended)
-
-1. In Visual Studio, right-click the `CleanArchitecture.Api` project and select __Manage User Secrets__.
-2. In the JSON editor that opens, add an entry for the client secret. Example structure:
-``
-{
-  "ScalarApi:ClientSecret": "YourClientSecret"
-}
-``
-
-### Store the secret in the file system (optionally)
-
-1. Use the `dotnet user-secrets` CLI tool to set the secret from the terminal/command prompt:
+## 🧪 Testing
 
 ```bash
-dotnet user-secrets set "ScalarApi:ClientSecret" "<your-client-secret-here>" --project CleanArchitecture.Api
+dotnet test --configuration Release
 ```
 
-## Admin Portal Configuration
+- 🧬 **Domain unit tests** — `Tests/Domain.UnitTests`
+- 🏛️ **Architecture tests** — enforce layer dependencies
+- 🔄 **Integration tests** — use `DistributedApplicationTestingBuilder` against a real Aspire fixture
 
-The project includes an admin dashboard located in `CleanArchitecture.Presentation/admin`. To run the admin portal, you need to configure the environment variables in a `.env.local` file.
+The Testing environment uses an ephemeral Postgres and a `TestAuthHandler` that grants all roles, so no Keycloak or Entra setup is required.
 
-1. Navigate to the admin directory:
-   ```bash
-   cd CleanArchitecture.Presentation/admin
-   ```
-2. Create or update the `.env.local` file with the following configurations:
+---
 
-```plain text
-API_BASE_URL=http://localhost:5049/
+## 🤝 Contributing
 
-NEXTAUTH_URL=http://localhost:65499
-NEXTAUTH_SECRET=<random string>
+Pull requests are welcome! For major changes, please open an [issue](https://github.com/iPazooki/CleanArchitecture/issues) first to discuss what you'd like to change.
 
-KEYCLOAK_CLIENT_ID=scalar
-KEYCLOAK_CLIENT_SECRET=<client secret>
-KEYCLOAK_ISSUER=http://localhost:8080/realms/clean-api
-```
+⭐ If you find this template useful, please **star the repo** — it really helps!
 
-### Where to find these values:
+---
 
-- **API_BASE_URL**: The base URL where your CleanArchitecture API is running.
-- **NEXTAUTH_URL**: The URL of your admin portal (used for authentication callbacks).
-- **NEXTAUTH_SECRET**: A random secret string used to hash tokens. You can generate one using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
-- **KEYCLOAK_CLIENT_ID**: The client ID configured in Keycloak (e.g., `scalar`).
-- **KEYCLOAK_CLIENT_SECRET**: The client secret from your Keycloak client's **Credentials** tab.
-- **KEYCLOAK_ISSUER**: The issuer URL of your Keycloak realm (e.g., `http://localhost:8080/realms/clean-api`).
+## 📄 License
 
-## Database Configuration
-
-- **Database**: PostgreSQL
-- **EF Core Provider**: `Npgsql.EntityFrameworkCore.PostgreSQL`
-- **Configuration**: Connection strings are defined in `CleanArchitecture.Presentation/API/appsettings.json` and can be overridden in environment-specific files like `CleanArchitecture.Presentation/API/appsettings.Development.json` or via Aspire resource configuration in `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings*.json`.
-
-
-## Database Migrations
-
-Migrations are managed using Entity Framework Core and are stored in the `CleanArchitecture.Infrastructure.Persistence` project.
-
-### Design-Time Migrations
-
-Because .NET Aspire injects connection strings at runtime, the standard EF Core tools cannot find a database connection during design-time. To solve this, the project includes an `ApplicationDbContextFactory` which provides a dummy connection string for the tools.
-
-To add a new migration, run the following command from the solution root:
-
-```bash
-dotnet ef migrations add <MigrationName> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
-```
-
-### Applying Migrations
-
-#### Development and Testing
-In non-production environments, migrations are automatically applied during application startup using `context.Database.MigrateAsync()` in `CleanArchitecture.Presentation/API/Configuration/WebApplicationExtensions.cs`.
-
-#### Manual Update
-If you need to manually update the database:
-
-```bash
-dotnet ef database update --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation/API
-```
-
-Ensure a PostgreSQL instance is reachable if you are running this manually outside of the Aspire orchestrator.
-
-
-## Contributing
-Pull requests are welcome! For major changes, please open an [issue](https://github.com/iPazooki/CleanArchitecture/issues) first to discuss proposed modifications. We appreciate your support and feedback. Don’t forget to **star** the project if you find it helpful.
-
-## License
-This project is licensed under the [MIT](LICENSE) license. Feel free to use it as a foundation for your own projects!
+[MIT](LICENSE) — use it freely as a foundation for your own projects.

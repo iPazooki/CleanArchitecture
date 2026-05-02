@@ -1,4 +1,5 @@
 using CleanArchitecture.AppHost;
+using CleanArchitecture.AppHost.Environments;
 using Microsoft.Extensions.Hosting;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);

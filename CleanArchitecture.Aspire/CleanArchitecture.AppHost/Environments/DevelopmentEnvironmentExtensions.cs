@@ -1,4 +1,4 @@
-namespace CleanArchitecture.AppHost;
+namespace CleanArchitecture.AppHost.Environments;
 
 internal static class DevelopmentEnvironmentExtensions
 {

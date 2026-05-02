@@ -9,6 +9,7 @@ export const dictionaries = {
 };
 
 export type Locale = keyof typeof dictionaries;
+export type TranslationKey = keyof typeof dictionaries['en'];
 export const supportedLocales = Object.keys(dictionaries) as Locale[];
 
 export const defaultLocale: Locale = 'en';

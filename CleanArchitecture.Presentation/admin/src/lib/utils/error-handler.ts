@@ -85,8 +85,8 @@ export function extractApiErrors(error: unknown): DomainError[] {
         if (isProblemDetails(parsedData)) {
           return extractErrors(parsedData);
         }
-      } catch (e) {
-        // Not a JSON string, fall through to return the raw string.
+      } catch {
+        // Not JSON — fall through to return the raw string.
       }
       return [
         {

@@ -4,7 +4,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Locale } from "@/i18n";
 
 export const LanguageSwitcher = () => {
-  const { locale, setLocale, t } = useLanguage();
+  const { locale, setLocale } = useLanguage();
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLocale(e.target.value as Locale);

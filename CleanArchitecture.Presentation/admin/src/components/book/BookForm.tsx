@@ -14,6 +14,7 @@ import Button from "../ui/button/Button";
 import { bookSchema, type BookFormValues } from "@/lib/validations/book";
 import { genreOptions } from "@/lib/books/genre";
 import { useLanguage } from "@/context/LanguageContext";
+import type { TranslationKey } from "@/i18n";
 
 interface BookFormProps {
   id?: string;
@@ -103,7 +104,7 @@ export default function BookForm({ id }: BookFormProps) {
             {...register("title")}
           />
           {errors.title ? (
-            <p className="mt-1 text-sm text-red-600">{t(errors.title.message as any)}</p>
+            <p className="mt-1 text-sm text-red-600">{t(errors.title.message as TranslationKey)}</p>
           ) : null}
         </div>
 
@@ -126,7 +127,7 @@ export default function BookForm({ id }: BookFormProps) {
             ))}
           </select>
           {errors.genre ? (
-            <p className="mt-1 text-sm text-red-600">{t(errors.genre.message as any)}</p>
+            <p className="mt-1 text-sm text-red-600">{t(errors.genre.message as TranslationKey)}</p>
           ) : null}
           <p className="mt-1 text-sm text-gray-500">
             {t("genre_help_text")}

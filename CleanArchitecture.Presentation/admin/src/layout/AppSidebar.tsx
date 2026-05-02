@@ -1,11 +1,12 @@
 "use client";
 
-import React, {useEffect, useRef, useState, useMemo, useCallback} from "react";
+import React, {useLayoutEffect, useRef, useState, useMemo, useCallback} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
 import {useSidebar} from "@/context/SidebarContext";
 import { useLanguage } from "@/context/LanguageContext";
+import type { TranslationKey } from "@/i18n";
 import {
     ChevronDownIcon,
     GridIcon,
@@ -66,16 +67,10 @@ const AppSidebar: React.FC = () => {
     });
 
     const routeMatchedSubmenu: OpenSubmenu = useMemo(() => {
-        for (const [index, nav] of navItems.entries()) {
-            if (nav.subItems?.some((subItem) => subItem.path === pathname)) {
-                return {
-                    type: "main",
-                    index,
-                };
-            }
-        }
-
-        return null;
+        const index = navItems.findIndex(
+            (nav) => nav.subItems?.some((subItem) => subItem.path === pathname)
+        );
+        return index !== -1 ? { type: "main", index } : null;
     }, [pathname]);
 
     const openSubmenu = useMemo(() => {
@@ -84,21 +79,16 @@ const AppSidebar: React.FC = () => {
             : routeMatchedSubmenu;
     }, [manualSubmenuState, pathname, routeMatchedSubmenu]);
 
-    useEffect(() => {
-        // Set the height of the submenu items when the submenu is opened
-        if (openSubmenu !== null) {
-            const key = `${openSubmenu.type}-${openSubmenu.index}`;
-            if (subMenuRefs.current[key]) {
-                const newHeight = subMenuRefs.current[key]?.scrollHeight || 0;
-                setSubMenuHeight((prevHeights) => {
-                    if (prevHeights[key] === newHeight) return prevHeights;
-                    return {
-                        ...prevHeights,
-                        [key]: newHeight,
-                    };
-                });
-            }
-        }
+    useLayoutEffect(() => {
+        if (openSubmenu === null) return;
+        const key = `${openSubmenu.type}-${openSubmenu.index}`;
+        const el = subMenuRefs.current[key];
+        if (!el) return;
+        const newHeight = el.scrollHeight;
+        setSubMenuHeight((prevHeights) => {
+            if (prevHeights[key] === newHeight) return prevHeights;
+            return { ...prevHeights, [key]: newHeight };
+        });
     }, [openSubmenu]);
 
     const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
@@ -156,7 +146,7 @@ const AppSidebar: React.FC = () => {
                 {nav.icon}
               </span>
                             {(isExpanded || isHovered || isMobileOpen) && (
-                                <span className={`menu-item-text`}>{t(nav.name as any) !== nav.name ? t(nav.name as any) : nav.name}</span>
+                                <span className={`menu-item-text`}>{t(nav.name as TranslationKey) !== nav.name ? t(nav.name as TranslationKey) : nav.name}</span>
                             )}
                             {(isExpanded || isHovered || isMobileOpen) && (
                                 <ChevronDownIcon
@@ -187,7 +177,7 @@ const AppSidebar: React.FC = () => {
                   {nav.icon}
                 </span>
                                 {(isExpanded || isHovered || isMobileOpen) && (
-                                    <span className={`menu-item-text`}>{t(nav.name as any) !== nav.name ? t(nav.name as any) : nav.name}</span>
+                                    <span className={`menu-item-text`}>{t(nav.name as TranslationKey) !== nav.name ? t(nav.name as TranslationKey) : nav.name}</span>
                                 )}
                             </Link>
                         )
@@ -216,7 +206,7 @@ const AppSidebar: React.FC = () => {
                                                     : "menu-dropdown-item-inactive"
                                             }`}
                                         >
-                                            {t(subItem.name as any) !== subItem.name ? t(subItem.name as any) : subItem.name}
+                                            {t(subItem.name as TranslationKey) !== subItem.name ? t(subItem.name as TranslationKey) : subItem.name}
                                             <span className="flex items-center gap-1 rtl:mr-auto ltr:ml-auto">
                         {subItem.new && (
                             <span
