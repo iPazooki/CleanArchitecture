@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "atlassian@claude-plugins-official": true
+  }
+}
