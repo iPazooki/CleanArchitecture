@@ -1,5 +1,6 @@
 using Aspire.Hosting.Azure;
 using Aspire.Hosting.JavaScript;
+using Azure.Provisioning.AppContainers;
 using Azure.Provisioning.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using static CleanArchitecture.AppHost.EndpointHelpers;
@@ -8,9 +9,14 @@ namespace CleanArchitecture.AppHost.Environments;
 
 internal static class ProductionEnvironmentExtensions
 {
+    private const string ContainerAppEnvironmentName = "cae";
+    private const int HttpScaleConcurrentRequests = 50;
+
     internal static void ConfigureProductionEnvironment(this IDistributedApplicationBuilder builder)
     {
         bool useKeycloak = builder.Configuration.GetValue("UseKeycloak", false);
+
+        builder.AddAzureContainerAppEnvironment(ContainerAppEnvironmentName);
 
         IResourceBuilder<AzureApplicationInsightsResource> applicationInsights = builder.AddAzureApplicationInsights("applicationInsights");
 
@@ -43,16 +49,31 @@ internal static class ProductionEnvironmentExtensions
 
         IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "mrpaneldb");
 
+#pragma warning disable ASPIREAZURE002 // PublishAsAzureContainerAppJob is evaluation-only in 13.2.4
         IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
             .WithReference(appDb)
-            .WaitFor(appDb);
+            .WaitFor(appDb)
+            .PublishAsAzureContainerAppJob((_, job) =>
+            {
+                job.Configuration.TriggerType = ContainerAppJobTriggerType.Manual;
+                job.Configuration.ReplicaRetryLimit = 3;
+                job.Configuration.ReplicaTimeout = 600;
+                ApplyJobResources(job, cpu: 0.25, memory: "0.5Gi");
+            });
+#pragma warning restore ASPIREAZURE002
 
         IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
             .WithReference(appDb)
             .WaitFor(appDb)
             .WaitFor(migrator)
             .WithReference(applicationInsights)
-            .WithReference(keyVault);
+            .WithReference(keyVault)
+            .PublishAsAzureContainerApp((_, app) =>
+            {
+                app.Configuration.Ingress.External = false;
+                ConfigureScaleToZero(app, maxReplicas: 2);
+                ApplyContainerResources(app, cpu: 0.5, memory: "1.0Gi");
+            });
 
         EndpointReference apiInternalEndpoint = apiProject.GetEndpoint("http");
 
@@ -65,7 +86,13 @@ internal static class ProductionEnvironmentExtensions
             .WaitFor(apiProject)
             .WithReference(keyVault)
             .WithEnvironment("NODE_ENV", "production")
-            .WithEnvironment("NEXTAUTH_SECRET", nextAuthSecret);
+            .WithEnvironment("NEXTAUTH_SECRET", nextAuthSecret)
+            .PublishAsDockerFile()
+            .PublishAsAzureContainerApp((_, app) =>
+            {
+                ConfigureScaleToZero(app, maxReplicas: 2);
+                ApplyContainerResources(app, cpu: 0.5, memory: "1.0Gi");
+            });
 
         EndpointReference adminPublicEndpoint = adminApp.GetEndpoint("http");
 
@@ -107,7 +134,13 @@ internal static class ProductionEnvironmentExtensions
             .WithEnvironment("KC_DB", "postgres")
             .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
             .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
-            .WaitFor(keycloakDb);
+            .WaitFor(keycloakDb)
+            .PublishAsAzureContainerApp((_, app) =>
+            {
+                app.Template.Scale.MinReplicas = 1;
+                app.Template.Scale.MaxReplicas = 2;
+                ApplyContainerResources(app, cpu: 0.5, memory: "1.0Gi");
+            });
 
         EndpointReference keycloakPublicEndpoint = keycloak.GetEndpoint("http");
 
@@ -150,8 +183,8 @@ internal static class ProductionEnvironmentExtensions
             context.EnvironmentVariables["AUTH_PROVIDER"] = "Keycloak";
             context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
             context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
-            context.EnvironmentVariables["KEYCLOAK_CLIENT_ID"] = keycloakClientId;
-            context.EnvironmentVariables["KEYCLOAK_CLIENT_SECRET"] = keycloakClientSecret;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_ID"] = keycloakClientId.Resource.ValueExpression;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_SECRET"] = keycloakClientSecret.Resource.ValueExpression;
             context.EnvironmentVariables["KEYCLOAK_ISSUER"] = keycloakIssuer;
         });
     }
@@ -204,5 +237,34 @@ internal static class ProductionEnvironmentExtensions
             context.EnvironmentVariables["ENTRA_SCOPES"] = entraAdminScope.Resource.ValueExpression;
             context.EnvironmentVariables["ENTRA_OPENID_CONNECT"] = entraAdminOpenId.Resource.ValueExpression;
         });
+    }
+
+    private static void ConfigureScaleToZero(ContainerApp app, int maxReplicas)
+    {
+        app.Template.Scale.MinReplicas = 0;
+        app.Template.Scale.MaxReplicas = maxReplicas;
+        app.Template.Scale.Rules.Add(new ContainerAppScaleRule
+        {
+            Name = "http",
+            Http = new ContainerAppHttpScaleRule
+            {
+                Metadata =
+                {
+                    ["concurrentRequests"] = HttpScaleConcurrentRequests.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                }
+            }
+        });
+    }
+
+    private static void ApplyContainerResources(ContainerApp app, double cpu, string memory)
+    {
+        ContainerAppContainer primary = app.Template.Containers[0].Value!;
+        primary.Resources = new AppContainerResources { Cpu = cpu, Memory = memory };
+    }
+
+    private static void ApplyJobResources(ContainerAppJob job, double cpu, string memory)
+    {
+        ContainerAppContainer primary = job.Template.Containers[0].Value!;
+        primary.Resources = new AppContainerResources { Cpu = cpu, Memory = memory };
     }
 }
