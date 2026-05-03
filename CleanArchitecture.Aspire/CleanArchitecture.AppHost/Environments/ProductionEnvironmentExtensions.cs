@@ -50,7 +50,7 @@ internal static class ProductionEnvironmentExtensions
         IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "mrpaneldb");
 
 #pragma warning disable ASPIREAZURE002 // PublishAsAzureContainerAppJob is evaluation-only in 13.2.4
-        IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
+        builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
             .WithReference(appDb)
             .WaitFor(appDb)
             .PublishAsAzureContainerAppJob((_, job) =>
@@ -65,7 +65,6 @@ internal static class ProductionEnvironmentExtensions
         IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
             .WithReference(appDb)
             .WaitFor(appDb)
-            .WaitFor(migrator)
             .WithReference(applicationInsights)
             .WithReference(keyVault)
             .PublishAsAzureContainerApp((_, app) =>
