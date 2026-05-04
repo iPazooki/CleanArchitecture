@@ -9,7 +9,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 /// </summary>
 /// <param name="context">The application database context.</param>
 /// <param name="logger">The logger instance.</param>
-public sealed partial class ApplicationUnitOfWork(ApplicationDbContext context, IBookRepository bookRepository, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
+public sealed partial class ApplicationUnitOfWork(ApplicationDbContext context, ILogger<ApplicationUnitOfWork> logger) : IApplicationUnitOfWork
 {
     /// <summary>
     /// Saves the changes asynchronously.

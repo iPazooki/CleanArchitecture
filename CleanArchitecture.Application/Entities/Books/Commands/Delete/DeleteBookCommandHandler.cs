@@ -7,7 +7,7 @@ internal class DeleteBookRequestHandler(IApplicationUnitOfWork applicationUnitOf
 {
     protected override async Task<Result> HandleRequest(DeleteBookCommand request, CancellationToken cancellationToken)
     {
-        Book? book = await applicationUnitOfWork.Books.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 
         if (book is null)
         {

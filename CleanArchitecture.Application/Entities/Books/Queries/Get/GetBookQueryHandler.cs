@@ -8,7 +8,8 @@ internal class GetBookQueryHandler(IApplicationUnitOfWork applicationUnitOfWork,
     protected override async Task<Result<BookResponse>> HandleRequest(GetBookQuery request, CancellationToken cancellationToken)
     {
         Book? book = await applicationUnitOfWork.Books
-            .GetByIdAsync(request.Id, cancellationToken)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.Id == request.Id, cancellationToken)
             .ConfigureAwait(false);
 
         return book is null

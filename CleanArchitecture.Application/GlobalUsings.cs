@@ -4,6 +4,7 @@ global using FluentValidation;
 global using System.Globalization;
 global using FluentValidation.Results;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.EntityFrameworkCore;
 global using CleanArchitecture.Domain.Entities;
 global using CleanArchitecture.Application.Errors;
 global using CleanArchitecture.Application.Common;

@@ -7,7 +7,7 @@ internal class UpdateBookRequestHandler(IApplicationUnitOfWork applicationUnitOf
 {
     protected override async Task<Result> HandleRequest(UpdateBookCommand request, CancellationToken cancellationToken)
     {
-        Book? book = await applicationUnitOfWork.Books.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 
         if (book is null)
         {

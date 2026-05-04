@@ -23,7 +23,7 @@ internal class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOf
             return Result<Guid>.Failure(book.Errors.ToArray());
         }
 
-        await applicationUnitOfWork.Books.AddAsync(book.Value!, cancellationToken).ConfigureAwait(false);
+        await applicationUnitOfWork.Books.AddAsync(book!, cancellationToken).ConfigureAwait(false);
 
         Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

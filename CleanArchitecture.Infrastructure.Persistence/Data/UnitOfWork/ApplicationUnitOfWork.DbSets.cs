@@ -2,5 +2,5 @@
 
 public sealed partial class ApplicationUnitOfWork
 {
-    public IBookRepository Books => bookRepository;
+    public DbSet<Book> Books => context.Set<Book>();
 }
