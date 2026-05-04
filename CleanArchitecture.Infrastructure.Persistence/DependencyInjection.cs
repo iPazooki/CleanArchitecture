@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using CleanArchitecture.Infrastructure.Persistence.Data;
 using CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 using CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
+using CleanArchitecture.Infrastructure.Persistence.Data.Repositories;
 
 namespace CleanArchitecture.Infrastructure.Persistence;
 
@@ -36,6 +37,7 @@ public static class DependencyInjection
                 builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
         });
 
+        services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
 
         services.AddSingleton(TimeProvider.System);

@@ -15,12 +15,9 @@ public interface IUnitOfWork
 }
 
 /// <summary>
-/// Represents an application-specific unit of work that includes specific DbSets.
+/// Represents an application-specific unit of work that includes entity repositories.
 /// </summary>
 public interface IApplicationUnitOfWork : IUnitOfWork
 {
-    /// <summary>
-    /// Gets the DbSet for <see cref="Book"/> entities.
-    /// </summary>
-    public DbSet<Book> Books { get; }
+    public IBookRepository Books { get; }
 }

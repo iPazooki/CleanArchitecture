@@ -11,18 +11,16 @@ internal class GetBooksQueryHandler(IApplicationUnitOfWork applicationUnitOfWork
         int pageSize = Math.Clamp(request.PageSize, 1, MaxPageSize);
 
         int totalCount = await applicationUnitOfWork.Books
-            .AsNoTracking()
             .CountAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        List<BookResponse> items = await applicationUnitOfWork.Books
-            .AsNoTracking()
-            .OrderBy(b => b.Title)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(book => new BookResponse(book.Id, book.Title, book.Genre))
-            .ToListAsync(cancellationToken)
+        IReadOnlyList<Book> books = await applicationUnitOfWork.Books
+            .GetPagedAsync((page - 1) * pageSize, pageSize, cancellationToken)
             .ConfigureAwait(false);
+
+        List<BookResponse> items = books
+            .Select(book => new BookResponse(book.Id, book.Title, book.Genre))
+            .ToList();
 
         PaginatedResponse<BookResponse> response = new(items, page, pageSize, totalCount);
 
