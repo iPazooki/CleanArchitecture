@@ -10,6 +10,23 @@ public class ArchitectureTests
     private const string InfrastructureAssemblyName = "CleanArchitecture.Infrastructure";
     private const string InfrastructurePersistenceAssemblyName = "CleanArchitecture.Infrastructure.Persistence";
 
+    // External assembly prefixes that must never appear in the inner layers.
+    // These represent persistence, web-framework, and database concerns that
+    // belong exclusively in Infrastructure/Persistence or Presentation.
+    private static readonly string[] DomainForbiddenExternalPrefixes =
+    [
+        "Microsoft.EntityFrameworkCore",
+        "Npgsql",
+        "Microsoft.AspNetCore",
+        "FluentValidation",
+    ];
+
+    private static readonly string[] ApplicationForbiddenExternalPrefixes =
+    [
+        "Npgsql",
+        "Microsoft.AspNetCore",
+    ];
+
     [Fact]
     public void DomainShouldNotHaveAnyDependencies()
     {
@@ -30,6 +47,24 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void DomainShouldNotReferenceExternalInfrastructurePackages()
+    {
+        Assembly domainAssembly = Assembly.Load(DomainAssemblyName);
+        AssemblyName[] references = domainAssembly.GetReferencedAssemblies();
+
+        foreach (AssemblyName reference in references)
+        {
+            string name = reference.Name ?? string.Empty;
+            foreach (string prefix in DomainForbiddenExternalPrefixes)
+            {
+                Assert.False(
+                    name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase),
+                    $"Domain must not reference '{name}' (forbidden prefix '{prefix}'). Move it to Infrastructure or Persistence.");
+            }
+        }
+    }
+
+    [Fact]
     public void ApplicationShouldOnlyDependOnDomain()
     {
         // Arrange
@@ -43,10 +78,29 @@ public class ArchitectureTests
         {
             string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(InfrastructureAssemblyName, referencedAssemblyName);
+            Assert.NotEqual(InfrastructurePersistenceAssemblyName, referencedAssemblyName);
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
         }
 
         Assert.Contains(references, r => r.Name == DomainAssemblyName);
+    }
+
+    [Fact]
+    public void ApplicationShouldNotReferenceExternalInfrastructurePackages()
+    {
+        Assembly applicationAssembly = Assembly.Load(ApplicationAssemblyName);
+        AssemblyName[] references = applicationAssembly.GetReferencedAssemblies();
+
+        foreach (AssemblyName reference in references)
+        {
+            string name = reference.Name ?? string.Empty;
+            foreach (string prefix in ApplicationForbiddenExternalPrefixes)
+            {
+                Assert.False(
+                    name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase),
+                    $"Application must not reference '{name}' (forbidden prefix '{prefix}'). Move it to Infrastructure or Persistence.");
+            }
+        }
     }
 
     [Fact]
@@ -63,6 +117,7 @@ public class ArchitectureTests
         {
             string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
+            Assert.NotEqual(InfrastructurePersistenceAssemblyName, referencedAssemblyName);
         }
 
         Assert.Contains(references, r => r.Name == ApplicationAssemblyName);
@@ -82,6 +137,7 @@ public class ArchitectureTests
         {
             string? referencedAssemblyName = reference.Name;
             Assert.NotEqual(PresentationAssemblyName, referencedAssemblyName);
+            Assert.NotEqual(InfrastructureAssemblyName, referencedAssemblyName);
         }
 
         Assert.Contains(references, r => r.Name == DomainAssemblyName);
