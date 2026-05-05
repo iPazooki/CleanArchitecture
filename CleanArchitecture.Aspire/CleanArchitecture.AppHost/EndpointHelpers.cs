@@ -2,13 +2,13 @@ namespace CleanArchitecture.AppHost;
 
 internal static class EndpointHelpers
 {
-    internal static string BuildExternalHttpsUrl(EndpointReference endpoint)
+    internal static ReferenceExpression BuildExternalHttpsUrl(EndpointReference endpoint)
     {
-        return $"https://{endpoint.Property(EndpointProperty.Host).ValueExpression}";
+        return ReferenceExpression.Create($"https://{endpoint.Property(EndpointProperty.Host)}");
     }
 
-    internal static string BuildInternalHttpUrl(EndpointReference endpoint)
+    internal static ReferenceExpression BuildInternalHttpUrl(EndpointReference endpoint)
     {
-        return $"http://{endpoint.Property(EndpointProperty.Host).ValueExpression}:{endpoint.Property(EndpointProperty.Port).ValueExpression}";
+        return ReferenceExpression.Create($"http://{endpoint.Property(EndpointProperty.Host)}");
     }
 }

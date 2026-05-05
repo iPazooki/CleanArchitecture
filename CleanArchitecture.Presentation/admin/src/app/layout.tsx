@@ -5,18 +5,11 @@ import QueryProvider from "@/context/QueryContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-import { Outfit } from "next/font/google";
 import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import { defaultLocale, isLocale, isRtl } from "@/i18n";
 import "./globals.css";
 import "flatpickr/dist/flatpickr.css";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--next-font-outfit",
-  display: "swap",
-});
 
 const vazirmatn = localFont({
   src: "../../node_modules/vazirmatn/fonts/webfonts/Vazirmatn[wght].woff2",
@@ -51,7 +44,7 @@ export default async function RootLayout({ children }: Readonly<RootLayoutProps>
       lang={initialLocale}
       dir={htmlDirection}
       suppressHydrationWarning
-      className={`${outfit.variable} ${vazirmatn.variable}`}
+      className={vazirmatn.variable}
     >
       <body className="antialiased dark:bg-gray-900">
         <AuthProvider>

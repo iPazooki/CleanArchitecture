@@ -145,11 +145,11 @@ internal static class ProductionEnvironmentExtensions
 
         keycloak.WithEnvironment(context =>
         {
-            context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Host).ValueExpression;
-            context.EnvironmentVariables["KC_DB_URL_PORT"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Port).ValueExpression;
-            context.EnvironmentVariables["KC_DB_USERNAME"] = keycloakDbUsername.Resource.ValueExpression;
-            context.EnvironmentVariables["KC_DB_PASSWORD"] = keycloakDbPassword.Resource.ValueExpression;
-            context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host).ValueExpression;
+            context.EnvironmentVariables["KC_DB_URL_HOST"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Host);
+            context.EnvironmentVariables["KC_DB_URL_PORT"] = postgres.GetEndpoint("tcp").Property(EndpointProperty.Port);
+            context.EnvironmentVariables["KC_DB_USERNAME"] = keycloakDbUsername.Resource;
+            context.EnvironmentVariables["KC_DB_PASSWORD"] = keycloakDbPassword.Resource;
+            context.EnvironmentVariables["KC_HOSTNAME"] = keycloakPublicEndpoint.Property(EndpointProperty.Host);
             context.EnvironmentVariables["KC_PROXY_HEADERS"] = "xforwarded";
             context.EnvironmentVariables["KC_HTTP_ENABLED"] = "true";
         });
@@ -158,32 +158,30 @@ internal static class ProductionEnvironmentExtensions
 
         apiProject.WithEnvironment(context =>
         {
-            string publicAuthUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
-            string realm = keycloakRealm.Resource.ValueExpression;
-            string audience = keycloakClientId.Resource.ValueExpression;
-            string publicIssuer = $"{publicAuthUrl}/realms/{realm}";
+            ReferenceExpression publicAuthUrl = BuildExternalHttpsUrl(keycloakPublicEndpoint);
+            ReferenceExpression publicIssuer = ReferenceExpression.Create($"{publicAuthUrl}/realms/{keycloakRealm.Resource}");
 
             context.EnvironmentVariables["Authentication__Provider"] = "Keycloak";
-            context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = $"{publicIssuer}/protocol/openid-connect/auth";
-            context.EnvironmentVariables["Keycloak__TokenUrl"] = $"{publicIssuer}/protocol/openid-connect/token";
+            context.EnvironmentVariables["Keycloak__AuthorizationUrl"] = ReferenceExpression.Create($"{publicIssuer}/protocol/openid-connect/auth");
+            context.EnvironmentVariables["Keycloak__TokenUrl"] = ReferenceExpression.Create($"{publicIssuer}/protocol/openid-connect/token");
             context.EnvironmentVariables["Keycloak__ValidIssuers"] = publicIssuer;
             context.EnvironmentVariables["Keycloak__RequireHttpsMetadata"] = "false";
-            context.EnvironmentVariables["Keycloak__Realm"] = realm;
-            context.EnvironmentVariables["Keycloak__Audience"] = audience;
+            context.EnvironmentVariables["Keycloak__Realm"] = keycloakRealm.Resource;
+            context.EnvironmentVariables["Keycloak__Audience"] = keycloakClientId.Resource;
             context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
         });
 
         adminApp.WithEnvironment(context =>
         {
-            string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
-            string apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
-            string keycloakIssuer = $"{BuildExternalHttpsUrl(keycloakPublicEndpoint)}/realms/{keycloakRealm.Resource.ValueExpression}";
+            ReferenceExpression adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
+            ReferenceExpression apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
+            ReferenceExpression keycloakIssuer = ReferenceExpression.Create($"{BuildExternalHttpsUrl(keycloakPublicEndpoint)}/realms/{keycloakRealm.Resource}");
 
             context.EnvironmentVariables["AUTH_PROVIDER"] = "Keycloak";
             context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
             context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
-            context.EnvironmentVariables["KEYCLOAK_CLIENT_ID"] = keycloakClientId.Resource.ValueExpression;
-            context.EnvironmentVariables["KEYCLOAK_CLIENT_SECRET"] = keycloakClientSecret.Resource.ValueExpression;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_ID"] = keycloakClientId.Resource;
+            context.EnvironmentVariables["KEYCLOAK_CLIENT_SECRET"] = keycloakClientSecret.Resource;
             context.EnvironmentVariables["KEYCLOAK_ISSUER"] = keycloakIssuer;
         });
     }
@@ -214,27 +212,27 @@ internal static class ProductionEnvironmentExtensions
         apiProject.WithEnvironment(context =>
         {
             context.EnvironmentVariables["Authentication__Provider"] = "Entra";
-            context.EnvironmentVariables["AzureAd__Instance"] = entraApiInstance.Resource.ValueExpression;
-            context.EnvironmentVariables["AzureAd__Domain"] = entraApiDomain.Resource.ValueExpression;
-            context.EnvironmentVariables["AzureAd__TenantId"] = entraTenantId.Resource.ValueExpression;
-            context.EnvironmentVariables["AzureAd__ClientId"] = entraApiClientId.Resource.ValueExpression;
-            context.EnvironmentVariables["AzureAd__Audience"] = entraApiAudienceId.Resource.ValueExpression;
+            context.EnvironmentVariables["AzureAd__Instance"] = entraApiInstance.Resource;
+            context.EnvironmentVariables["AzureAd__Domain"] = entraApiDomain.Resource;
+            context.EnvironmentVariables["AzureAd__TenantId"] = entraTenantId.Resource;
+            context.EnvironmentVariables["AzureAd__ClientId"] = entraApiClientId.Resource;
+            context.EnvironmentVariables["AzureAd__Audience"] = entraApiAudienceId.Resource;
             context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Production";
         });
 
         adminApp.WithEnvironment(context =>
         {
-            string adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
-            string apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
+            ReferenceExpression adminUrl = BuildExternalHttpsUrl(adminPublicEndpoint);
+            ReferenceExpression apiUrl = BuildInternalHttpUrl(apiInternalEndpoint);
 
             context.EnvironmentVariables["AUTH_PROVIDER"] = "Entra";
             context.EnvironmentVariables["NEXTAUTH_URL"] = adminUrl;
             context.EnvironmentVariables["API_BASE_URL"] = apiUrl;
-            context.EnvironmentVariables["ENTRA_CLIENT_ID"] = entraAdminClientId.Resource.ValueExpression;
-            context.EnvironmentVariables["ENTRA_CLIENT_SECRET"] = entraAdminClientSecret.Resource.ValueExpression;
-            context.EnvironmentVariables["ENTRA_TENANT_ID"] = entraTenantId.Resource.ValueExpression;
-            context.EnvironmentVariables["ENTRA_SCOPES"] = entraAdminScope.Resource.ValueExpression;
-            context.EnvironmentVariables["ENTRA_OPENID_CONNECT"] = entraAdminOpenId.Resource.ValueExpression;
+            context.EnvironmentVariables["ENTRA_CLIENT_ID"] = entraAdminClientId.Resource;
+            context.EnvironmentVariables["ENTRA_CLIENT_SECRET"] = entraAdminClientSecret.Resource;
+            context.EnvironmentVariables["ENTRA_TENANT_ID"] = entraTenantId.Resource;
+            context.EnvironmentVariables["ENTRA_SCOPES"] = entraAdminScope.Resource;
+            context.EnvironmentVariables["ENTRA_OPENID_CONNECT"] = entraAdminOpenId.Resource;
         });
     }
 
