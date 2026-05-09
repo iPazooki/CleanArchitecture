@@ -35,11 +35,5 @@ internal static class WebApplicationExtensions
                     flow.SelectedScopes = scopes;
                 }));
         }
-
-        if (app.Environment.IsProduction())
-        {
-            app.UseHsts();
-            app.UseHttpsRedirection();
-        }
     }
 }

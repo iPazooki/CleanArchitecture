@@ -28,6 +28,18 @@ public static class DependencyInjection
                 "Connection string 'postgresDatabaseResource' not found. " +
                 "Use ApplicationDbContextFactory for design-time operations.");
 
+        var csBuilder = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);
+
+        bool isRemoteHost = !string.IsNullOrEmpty(csBuilder.Host)
+                            && !csBuilder.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                            && csBuilder.Host != "127.0.0.1";
+
+        if (isRemoteHost)
+        {
+            csBuilder.SslMode = Npgsql.SslMode.Require;
+            connectionString = csBuilder.ConnectionString;
+        }
+
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
