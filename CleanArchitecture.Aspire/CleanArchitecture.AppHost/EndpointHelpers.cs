@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CleanArchitecture.AppHost;
 
+[SuppressMessage("Minor Vulnerability", "S5332:Clear-text protocols should not be used")]
 internal static class EndpointHelpers
 {
     internal static ReferenceExpression BuildExternalHttpsUrl(EndpointReference endpoint)
