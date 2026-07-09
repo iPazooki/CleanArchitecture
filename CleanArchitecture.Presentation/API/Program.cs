@@ -9,7 +9,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services
     .AddApplicationServices()
-    .AddInfrastructureServices()
+    .AddInfrastructureServices(builder.Configuration)
     .AddInfrastructurePersistenceServices(builder.Configuration)
     .AddPresentationServices(builder);
 

@@ -15,6 +15,7 @@ internal static class ProductionEnvironmentExtensions
     internal static void ConfigureProductionEnvironment(this IDistributedApplicationBuilder builder)
     {
         bool useKeycloak = builder.Configuration.GetValue("UseKeycloak", false);
+        bool useBrevo = builder.Configuration.GetValue("UseBrevo", false);
 
         builder.AddAzureContainerAppEnvironment(ContainerAppEnvironmentName);
 
@@ -111,6 +112,32 @@ internal static class ProductionEnvironmentExtensions
         {
             ConfigureEntra(builder, keyVault, apiProject, adminApp, apiInternalEndpoint, adminPublicEndpoint);
         }
+
+        if (useBrevo)
+        {
+            ConfigureBrevo(builder, keyVault, apiProject);
+        }
+    }
+
+    /// <summary>
+    /// Wires the Brevo transactional email provider. Opt-in via the <c>UseBrevo</c> setting:
+    /// without it the API falls back to a null email provider rather than demanding an API key.
+    /// </summary>
+    private static void ConfigureBrevo(
+        IDistributedApplicationBuilder builder,
+        IResourceBuilder<AzureKeyVaultResource> keyVault,
+        IResourceBuilder<ProjectResource> apiProject)
+    {
+        IResourceBuilder<ParameterResource> brevoApiKey = builder.AddParameter("brevoApiKey", secret: true);
+        IResourceBuilder<ParameterResource> brevoSenderName = builder.AddParameter("brevoSenderName");
+        IResourceBuilder<ParameterResource> brevoSenderEmail = builder.AddParameter("brevoSenderEmail");
+
+        keyVault.AddSecret("kv-brevoApiKey", brevoApiKey);
+
+        apiProject
+            .WithEnvironment("Brevo__ApiKey", brevoApiKey)
+            .WithEnvironment("Brevo__SenderName", brevoSenderName)
+            .WithEnvironment("Brevo__SenderEmail", brevoSenderEmail);
     }
 
     private static void ConfigureKeycloak(

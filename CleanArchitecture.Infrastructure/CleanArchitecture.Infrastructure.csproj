@@ -1,14 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-  </PropertyGroup>
+  <!--
+    Microsoft.AspNetCore.Authorization (used by Security/) ships in the ASP.NET Core
+    shared framework, so a FrameworkReference is preferred over a PackageReference.
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CleanArchitecture.Application\CleanArchitecture.Application.csproj" />
   </ItemGroup>
 
+  <!-- Polly is referenced for ExecutionRejectedException, thrown at us by the resilience
+       pipeline that ServiceDefaults attaches to every HttpClient. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Polly" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using CleanArchitecture.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -20,16 +21,14 @@ internal sealed class TestAuthHandler(
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Create claims with all required roles for testing
-        Claim[] claims =
+        // Grant every role, so the principal also satisfies the policies that require all of them.
+        List<Claim> claims =
         [
             new(ClaimTypes.Name, "TestUser"),
-            new(ClaimTypes.NameIdentifier, "test-user-id"),
-            new(ClaimTypes.Role, "view"),
-            new(ClaimTypes.Role, "create"),
-            new(ClaimTypes.Role, "edit"),
-            new(ClaimTypes.Role, "delete")
+            new(ClaimTypes.NameIdentifier, "test-user-id")
         ];
+
+        claims.AddRange(Roles.All.Select(role => new Claim(ClaimTypes.Role, role)));
 
         ClaimsIdentity identity = new(claims, AuthenticationScheme);
         ClaimsPrincipal principal = new(identity);

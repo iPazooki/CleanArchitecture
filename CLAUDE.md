@@ -61,7 +61,7 @@ Domain ← Application ← Infrastructure / Infrastructure.Persistence ← Prese
 
 - **Domain** — Entities inherit from `Entity` → `AggregateRoot` (or auditable variants). No external dependencies. Domain events and Value Objects live here.
 - **Application** — CQRS via the Mediator **source generator** (not MediatR). Commands/queries return `Result<T>`. Handlers extend `BaseRequestHandler<TRequest, TResponse>`. FluentValidation validators are auto-registered as behaviors.
-- **Infrastructure** — External service integrations (email, etc.) with Polly resilience policies.
+- **Infrastructure** — External service integrations and authorization policies. `IEmailService` is implemented by `BrevoEmailService`, a typed `HttpClient` over the Brevo transactional API that returns `Result` instead of throwing; it falls back to `NullEmailService` when `Brevo:ApiKey` is unset (as in Testing). Polly resilience — retry, circuit breaker, timeout — is supplied by ServiceDefaults' `ConfigureHttpClientDefaults`, so clients here deliberately add no handler of their own. Authorization policies live in `Security/`, are registered by `AddInfrastructureServices`, and are referenced from endpoints via `PolicyNames`.
 - **Infrastructure.Persistence** — EF Core 10 + PostgreSQL. `ApplicationDbContext` uses two SaveChanges interceptors: `AuditableEntityInterceptor` and `DispatchDomainEventsInterceptor`. Migrations live here; the `CleanArchitecture.DbMigrator` project applies them at startup before the API starts.
 - **Presentation/API** — .NET Minimal API, versioned at `/api/v1/...`. Endpoints translate `Result<T>` to HTTP via `ResultExtensions`. Output caching uses tag-based invalidation (e.g., the `"books"` tag).
 - **Presentation/admin** — Next.js 16 App Router BFF. Authentication via NextAuth.js ↔ Keycloak OIDC. API client is **orval-generated** from the OpenAPI spec; never edit files under `src/lib/api/` manually. TanStack Query manages server state (60s stale time). i18n supports `en`, `fa`, `ar` with RTL layout.
@@ -83,3 +83,4 @@ Integration tests use `DistributedApplicationTestingBuilder` and share the Aspir
 - Use `ISpecification<T>` for reusable query predicates in the Domain layer.
 - Package versions are centrally managed in `Directory.Packages.props`; add new dependencies there, not directly in `.csproj` files.
 - Frontend API calls go through the orval-generated client. Run `pnpm generate` after any OpenAPI spec change.
+- The Brevo API key is a secret. Locally: `dotnet user-secrets set "Brevo:ApiKey" <key> --project CleanArchitecture.Presentation/API`. In production it flows from the Aspire `brevoApiKey` parameter into Key Vault, and only when `UseBrevo` is enabled.

@@ -1,5 +1,4 @@
-﻿using CleanArchitecture.Infrastructure.Security;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
 using Microsoft.Identity.Web;
@@ -63,11 +62,9 @@ internal static class DependencyInjection
             }
         }
 
-        // Ensure the Default Scheme is used in Authorization
-        builder.Services.AddAuthorizationBuilder()
-            .AddPolicy(ViewerPolicy.Name, ViewerPolicy.ConfigurePolicy)
-            .AddPolicy(EditorPolicy.Name, EditorPolicy.ConfigurePolicy)
-            .AddPolicy(AdminPolicy.Name, AdminPolicy.ConfigurePolicy);
+        // Authorization policies are registered by AddInfrastructureServices. They name no
+        // authentication scheme, so each request is evaluated against the default scheme
+        // configured above, regardless of registration order.
 
         // Add API Versioning - URL segment only
         services.AddApiVersioning(options =>

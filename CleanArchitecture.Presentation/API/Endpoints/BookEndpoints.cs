@@ -19,7 +19,7 @@ internal static class BookEndpoints
             .Produces<Result<Guid>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
-            .RequireAuthorization(EditorPolicy.Name);
+            .RequireAuthorization(PolicyNames.Editor);
 
         books.MapPut("/{id:guid}", UpdateBook)
             .WithSummary("Updates an existing book")
@@ -28,7 +28,7 @@ internal static class BookEndpoints
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
-            .RequireAuthorization(EditorPolicy.Name);
+            .RequireAuthorization(PolicyNames.Editor);
 
         books.MapDelete("/{id:guid}", DeleteBook)
             .WithSummary("Deletes an existing book")
@@ -36,21 +36,21 @@ internal static class BookEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization(AdminPolicy.Name);
+            .RequireAuthorization(PolicyNames.Admin);
 
         books.MapGet("/{id:guid}", GetBook)
             .WithSummary("Gets a book by ID")
             .WithDescription("Gets a book with the specified ID.")
             .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization(ViewerPolicy.Name)
+            .RequireAuthorization(PolicyNames.Viewer)
             .CacheOutput("GetBook");
 
         books.MapGet("/", GetBooks)
             .WithSummary("Gets all books")
             .WithDescription("Gets books with pagination support")
             .Produces<Result<PaginatedResponse<BookResponse>>>(StatusCodes.Status200OK)
-            .RequireAuthorization(ViewerPolicy.Name)
+            .RequireAuthorization(PolicyNames.Viewer)
             .CacheOutput("GetBooks");
     }
 

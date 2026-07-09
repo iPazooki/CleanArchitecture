@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using CleanArchitecture.Infrastructure.Email;
+using CleanArchitecture.Infrastructure.Security;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitecture.Infrastructure;
 
@@ -8,15 +11,21 @@ namespace CleanArchitecture.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds infrastructure services to the specified IServiceCollection.
+    /// Adds infrastructure services — authorization policies and the email provider —
+    /// to the specified <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <param name="services">The IServiceCollection to add services to.</param>
-    /// <returns>The IServiceCollection with the added services.</returns>
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection with the added services.</returns>
+    public static IServiceCollection AddInfrastructureServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        // Adds the EmailService to the service collection with a scoped lifetime.
-        services.AddScoped<IEmailService, EmailServiceProvider.EmailService>();
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
-        return services;
+        return services
+            .AddSecurityServices()
+            .AddEmailServices(configuration);
     }
 }
