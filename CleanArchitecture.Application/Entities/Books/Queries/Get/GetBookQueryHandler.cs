@@ -2,18 +2,20 @@ using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
-internal class GetBookQueryHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<GetBookQuery>> validators)
-    : BaseRequestHandler<GetBookQuery, BookResponse>(validators)
+internal sealed class GetBookQueryHandler(IApplicationUnitOfWork applicationUnitOfWork)
+    : IRequestHandler<GetBookQuery, Result<BookResponse>>
 {
-    protected override async Task<Result<BookResponse>> HandleRequest(GetBookQuery request, CancellationToken cancellationToken)
+    public async ValueTask<Result<BookResponse>> Handle(GetBookQuery request, CancellationToken cancellationToken)
     {
-        Book? book = await applicationUnitOfWork.Books
+        BookResponse? book = await applicationUnitOfWork.Books
             .AsNoTracking()
-            .FirstOrDefaultAsync(b => b.Id == request.Id, cancellationToken)
+            .Where(b => b.Id == request.Id)
+            .Select(BookMappings.Projection)
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
         return book is null
             ? Result<BookResponse>.Failure(BookErrors.BookNotFound)
-            : Result<BookResponse>.Success(book.ToResponse());
+            : Result<BookResponse>.Success(book);
     }
 }

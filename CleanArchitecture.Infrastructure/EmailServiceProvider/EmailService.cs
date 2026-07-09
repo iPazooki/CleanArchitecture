@@ -11,8 +11,9 @@ public class EmailService : IEmailService
     /// <param name="receiver">The email address of the receiver.</param>
     /// <param name="subject">The subject of the email.</param>
     /// <param name="body">The body content of the email.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result"/> indicating the success or failure of the operation.</returns>
-    public Task<Result> SendAsync(string receiver, string subject, string body)
+    public Task<Result> SendAsync(string receiver, string subject, string body, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

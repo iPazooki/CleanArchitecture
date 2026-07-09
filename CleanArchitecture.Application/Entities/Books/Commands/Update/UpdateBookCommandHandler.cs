@@ -1,11 +1,11 @@
-﻿using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
-internal class UpdateBookRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<UpdateBookCommand>> validators)
-    : BaseRequestHandler<UpdateBookCommand>(validators)
+internal sealed class UpdateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
+    : IRequestHandler<UpdateBookCommand, Result>
 {
-    protected override async Task<Result> HandleRequest(UpdateBookCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
     {
         Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 

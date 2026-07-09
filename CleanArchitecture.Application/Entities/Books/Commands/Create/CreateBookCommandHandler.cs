@@ -1,13 +1,13 @@
-﻿using System.Text;
+using System.Text;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
-internal class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<CreateBookCommand>> validators)
-    : BaseRequestHandler<CreateBookCommand, Guid>(validators)
+internal sealed class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
+    : IRequestHandler<CreateBookCommand, Result<Guid>>
 {
     private static readonly CompositeFormat _errorMessage = CompositeFormat.Parse(GeneralErrors.GeneralCreateErrorMessage);
 
-    protected override async Task<Result<Guid>> HandleRequest(CreateBookCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result<Guid>> Handle(CreateBookCommand request, CancellationToken cancellationToken)
     {
         Result<Genre> genreResult = Genre.FromCode(request.Genre);
 
@@ -23,7 +23,7 @@ internal class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOf
             return Result<Guid>.Failure(book.Errors.ToArray());
         }
 
-        await applicationUnitOfWork.Books.AddAsync(book!, cancellationToken).ConfigureAwait(false);
+        await applicationUnitOfWork.Books.AddAsync(book.Value!, cancellationToken).ConfigureAwait(false);
 
         Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

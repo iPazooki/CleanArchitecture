@@ -1,11 +1,11 @@
-﻿using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Delete;
 
-internal class DeleteBookRequestHandler(IApplicationUnitOfWork applicationUnitOfWork, IEnumerable<IValidator<DeleteBookCommand>> validators)
-    : BaseRequestHandler<DeleteBookCommand>(validators)
+internal sealed class DeleteBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
+    : IRequestHandler<DeleteBookCommand, Result>
 {
-    protected override async Task<Result> HandleRequest(DeleteBookCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
     {
         Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 

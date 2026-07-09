@@ -24,8 +24,11 @@ public static class DependencyInjection
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.GenerateTypesAsInternal = true;
-            options.Assemblies = [typeof(CreateBookCommandHandler), typeof(Book)];
-            options.PipelineBehaviors = [typeof(LoggingBehaviour<,>)];
+            options.Assemblies = [typeof(CreateBookCommandHandler)];
+
+            // Order matters: the first behavior is the outermost. Logging wraps validation so that
+            // validation failures are still logged as failed requests.
+            options.PipelineBehaviors = [typeof(LoggingBehaviour<,>), typeof(ValidationBehaviour<,>)];
         });
 
         return services;

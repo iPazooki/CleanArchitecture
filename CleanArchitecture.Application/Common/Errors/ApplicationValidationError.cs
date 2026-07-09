@@ -1,7 +1,7 @@
 ﻿namespace CleanArchitecture.Application.Common.Errors;
 
 /// <summary>
-/// Represents an exception that occurs when one or more validation failures have occurred.
+/// Groups one or more validation failures by property name, for surfacing as a problem-details response.
 /// </summary>
 public sealed class ApplicationValidationError
 {

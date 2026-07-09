@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Validations.Book;
-
-namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
+﻿namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
 /// <summary>
 /// Validator for the CreateBookCommand.
@@ -12,13 +10,7 @@ public class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
     /// </summary>
     public CreateBookCommandValidator()
     {
-        RuleFor(v => v.Title)
-            .NotEmpty().WithMessage(BookErrors.TitleIsRequired.Message)
-            .MinimumLength(BookRules.TitleMinLength).WithMessage(BookErrors.TitleIsTooShort.Message)
-            .MaximumLength(BookRules.TitleMaxLength).WithMessage(BookErrors.TitleTooLong.Message);
-
-        RuleFor(v => v.Genre)
-            .NotEmpty().WithMessage(BookErrors.GenreIsRequired.Message)
-            .Length(BookRules.GenreMinLength, BookRules.GenreMaxLength).WithMessage(BookErrors.GenreIsInvalidLength.Message);
+        RuleFor(v => v.Title).ValidBookTitle();
+        RuleFor(v => v.Genre).ValidBookGenre();
     }
 }
