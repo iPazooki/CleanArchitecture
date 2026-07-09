@@ -9,9 +9,9 @@ export type GetApiV1BooksParams = {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
-page?: number | string;
+Page?: number | string;
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
-pageSize?: number | string;
+PageSize?: number | string;
 };

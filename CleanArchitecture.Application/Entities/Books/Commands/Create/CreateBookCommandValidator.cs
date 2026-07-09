@@ -3,7 +3,7 @@
 /// <summary>
 /// Validator for the CreateBookCommand.
 /// </summary>
-public class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
+internal sealed class CreateBookCommandValidator : AbstractValidator<CreateBookCommand>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateBookCommandValidator"/> class.

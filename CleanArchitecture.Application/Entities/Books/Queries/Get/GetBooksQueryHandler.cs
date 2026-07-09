@@ -1,18 +1,21 @@
 namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
-internal sealed class GetBooksQueryHandler(IApplicationUnitOfWork applicationUnitOfWork)
+internal sealed class GetBooksQueryHandler(IApplicationDbContext dbContext)
     : IRequestHandler<GetBooksQuery, Result<PaginatedResponse<BookResponse>>>
 {
     public async ValueTask<Result<PaginatedResponse<BookResponse>>> Handle(GetBooksQuery request, CancellationToken cancellationToken)
     {
-        int totalCount = await applicationUnitOfWork.Books
+        int totalCount = await dbContext.Books
             .AsNoTracking()
             .CountAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        List<BookResponse> items = await applicationUnitOfWork.Books
+        // Title alone is not a total order, so books sharing a title could repeat or vanish
+        // across page boundaries. Id breaks the tie and makes paging deterministic.
+        List<BookResponse> items = await dbContext.Books
             .AsNoTracking()
             .OrderBy(book => book.Title)
+            .ThenBy(book => book.Id)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(BookMappings.Projection)

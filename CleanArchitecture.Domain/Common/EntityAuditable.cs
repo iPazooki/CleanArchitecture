@@ -6,12 +6,20 @@
 public abstract class EntityAuditable : Entity
 {
     /// <summary>
-    /// Gets or sets the date and time when the entity was created.
+    /// Gets the date and time when the entity was created.
     /// </summary>
-    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
+    /// <remarks>
+    /// Written by the persistence layer's auditing interceptor through EF Core's change
+    /// tracker, so no caller can rewrite the audit trail.
+    /// </remarks>
+    public DateTimeOffset CreatedDate { get; private set; } = DateTimeOffset.UtcNow;
 
     /// <summary>
-    /// Gets or sets the date and time when the entity was last updated.
+    /// Gets the date and time when the entity was last updated.
     /// </summary>
-    public DateTimeOffset UpdatedDate { get; set; } = DateTimeOffset.UtcNow;
+    /// <remarks>
+    /// Written by the persistence layer's auditing interceptor through EF Core's change
+    /// tracker, so no caller can rewrite the audit trail.
+    /// </remarks>
+    public DateTimeOffset UpdatedDate { get; private set; } = DateTimeOffset.UtcNow;
 }

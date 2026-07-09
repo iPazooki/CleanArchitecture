@@ -4,9 +4,9 @@
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
+  <!-- No messaging, persistence or web dependency here by design; enforced by Architecture.UnitTests. -->
   <ItemGroup>
     <PackageReference Include="DomainValidation.NET" />
-    <PackageReference Include="Mediator.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>

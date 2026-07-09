@@ -1,5 +1,5 @@
-using CleanArchitecture.Domain.Events.Book;
-using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Events;
+using CleanArchitecture.Domain.Validations;
 
 namespace CleanArchitecture.Domain.Entities;
 

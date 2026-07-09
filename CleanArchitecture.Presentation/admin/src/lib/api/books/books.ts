@@ -24,12 +24,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BookResponse,
   CreateBookCommand,
   GetApiV1BooksParams,
+  PaginatedResponseOfBookResponse,
   ProblemDetails,
-  ResultOfBookResponse,
-  ResultOfGuid,
-  ResultOfPaginatedResponseOfBookResponse,
   UpdateBookCommand
 } from '.././model';
 
@@ -45,7 +44,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * @summary Creates a new book
  */
 export type postApiV1BooksResponse201 = {
-  data: ResultOfGuid
+  data: string
   status: 201
 }
 
@@ -140,16 +139,23 @@ export const usePostApiV1Books = <TError = ProblemDetails,
  * @summary Gets all books
  */
 export type getApiV1BooksResponse200 = {
-  data: ResultOfPaginatedResponseOfBookResponse
+  data: PaginatedResponseOfBookResponse
   status: 200
+}
+
+export type getApiV1BooksResponse422 = {
+  data: ProblemDetails
+  status: 422
 }
 
 export type getApiV1BooksResponseSuccess = (getApiV1BooksResponse200) & {
   headers: Headers;
 };
-;
+export type getApiV1BooksResponseError = (getApiV1BooksResponse422) & {
+  headers: Headers;
+};
 
-export type getApiV1BooksResponse = (getApiV1BooksResponseSuccess)
+export type getApiV1BooksResponse = (getApiV1BooksResponseSuccess | getApiV1BooksResponseError)
 
 export const getGetApiV1BooksUrl = (params?: GetApiV1BooksParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -188,7 +194,7 @@ export const getGetApiV1BooksQueryKey = (params?: GetApiV1BooksParams,) => {
     }
 
     
-export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
+export const getGetApiV1BooksQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -207,10 +213,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetApiV1BooksQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Books>>>
-export type GetApiV1BooksQueryError = unknown
+export type GetApiV1BooksQueryError = ProblemDetails
 
 
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
  params: undefined |  GetApiV1BooksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
@@ -220,7 +226,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
       >, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
  params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1Books>>,
@@ -230,7 +236,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
       >, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
  params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -238,7 +244,7 @@ export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books
  * @summary Gets all books
  */
 
-export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = unknown>(
+export function useGetApiV1Books<TData = Awaited<ReturnType<typeof getApiV1Books>>, TError = ProblemDetails>(
  params?: GetApiV1BooksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Books>>, TError, TData>>, request?: SecondParameter<typeof orvalFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -453,7 +459,7 @@ export const useDeleteApiV1BooksId = <TError = ProblemDetails,
  * @summary Gets a book by ID
  */
 export type getApiV1BooksIdResponse200 = {
-  data: ResultOfBookResponse
+  data: BookResponse
   status: 200
 }
 

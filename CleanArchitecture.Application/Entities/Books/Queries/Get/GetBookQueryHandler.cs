@@ -1,13 +1,13 @@
-using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations;
 
 namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 
-internal sealed class GetBookQueryHandler(IApplicationUnitOfWork applicationUnitOfWork)
+internal sealed class GetBookQueryHandler(IApplicationDbContext dbContext)
     : IRequestHandler<GetBookQuery, Result<BookResponse>>
 {
     public async ValueTask<Result<BookResponse>> Handle(GetBookQuery request, CancellationToken cancellationToken)
     {
-        BookResponse? book = await applicationUnitOfWork.Books
+        BookResponse? book = await dbContext.Books
             .AsNoTracking()
             .Where(b => b.Id == request.Id)
             .Select(BookMappings.Projection)

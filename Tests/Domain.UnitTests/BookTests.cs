@@ -1,7 +1,7 @@
-﻿using Moq;
-using Mediator;
+﻿using CleanArchitecture.Domain.Common;
 using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Events;
+using CleanArchitecture.Domain.Validations;
 
 namespace Domain.UnitTests;
 
@@ -114,27 +114,26 @@ public class BookTests
     }
 
     [Fact]
-    public void Book_DomainEvents_ShouldBeManagedCorrectly()
+    public void Book_Create_ShouldRaiseBookAddedEvent()
+    {
+        // Arrange & Act
+        Result<Book> result = Book.Create("Test Title", Genre.Fiction);
+        Book book = result.Value!;
+
+        // Assert
+        IDomainEvent domainEvent = Assert.Single(book.DomainEvents);
+        BookAddedEvent bookAdded = Assert.IsType<BookAddedEvent>(domainEvent);
+        Assert.Equal(book.Id, bookAdded.BookId);
+    }
+
+    [Fact]
+    public void Book_ClearDomainEvents_ShouldDropRecordedEvents()
     {
         // Arrange
         Result<Book> result = Book.Create("Test Title", Genre.Fiction);
-        Book? book = result.Value;
-        INotification domainEvent = new Mock<INotification>().Object;
+        Book book = result.Value!;
 
         // Act
-        book!.AddDomainEvent(domainEvent);
-
-        // Assert
-        Assert.Contains(domainEvent, book.DomainEvents);
-
-        // Act
-        book.RemoveDomainEvent(domainEvent);
-
-        // Assert
-        Assert.DoesNotContain(domainEvent, book.DomainEvents);
-
-        // Act
-        book.AddDomainEvent(domainEvent);
         book.ClearDomainEvents();
 
         // Assert

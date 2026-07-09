@@ -2,48 +2,89 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace CleanArchitecture.Api.Configuration;
 
-internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHostEnvironment environment) : IExceptionHandler
+/// <summary>
+/// Turns an unhandled exception into a ProblemDetails response.
+/// </summary>
+/// <remarks>
+/// Responses are written through <see cref="IProblemDetailsService"/> so they pick up the
+/// registered customisations — notably the <c>traceId</c> that ties a response back to its trace.
+/// </remarks>
+internal sealed class GlobalExceptionHandler(
+    IProblemDetailsService problemDetailsService,
+    ILogger<GlobalExceptionHandler> logger,
+    IHostEnvironment environment) : IExceptionHandler
 {
+    private const string ForbiddenType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.4";
+    private const string ServerErrorType = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1";
+
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(exception);
         ArgumentNullException.ThrowIfNull(httpContext);
 
+        // 403, not 401: the caller was authenticated, they simply are not allowed to do this.
+        // A 401 would ask them to present credentials they have already presented.
         if (exception is UnauthorizedAccessException)
         {
-            await HandleUnauthorizedAccessException(httpContext, cancellationToken).ConfigureAwait(false);
-            return true;
+            return await WriteAsync(
+                httpContext,
+                exception: null,
+                StatusCodes.Status403Forbidden,
+                "Forbidden",
+                ForbiddenType).ConfigureAwait(false);
         }
 
-        logger.LogError(exception, "An error occurred while processing the request {DateTime} {Path}", DateTimeOffset.UtcNow, httpContext.Request.Path);
+        logger.UnhandledException(httpContext.Request.Path, exception);
 
-        ProblemDetails problemDetails = new()
-        {
-            Status = StatusCodes.Status500InternalServerError,
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
-            Title = "An error occurred while processing your request.",
-            Detail = environment.IsDevelopment() ? exception.Message : null
-        };
-
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        return true;
+        return await WriteAsync(
+            httpContext,
+            exception,
+            StatusCodes.Status500InternalServerError,
+            "An error occurred while processing your request.",
+            ServerErrorType).ConfigureAwait(false);
     }
 
-    private static async Task HandleUnauthorizedAccessException(HttpContext httpContext, CancellationToken cancellationToken)
+    private async ValueTask<bool> WriteAsync(
+        HttpContext httpContext,
+        Exception? exception,
+        int statusCode,
+        string title,
+        string type)
     {
-        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response
-            .WriteAsJsonAsync(
-                new ProblemDetails
-                {
-                    Status = StatusCodes.Status401Unauthorized,
-                    Title = "Unauthorized Access",
-                    Type = "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1"
-                }, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
+            Exception = exception,
+            ProblemDetails = new ProblemDetails
+            {
+                Status = statusCode,
+                Title = title,
+                Type = type,
+
+                // Exception text belongs in the logs. It only reaches a client in Development.
+                Detail = environment.IsDevelopment() ? exception?.Message : null
+            }
+        }).ConfigureAwait(false);
     }
+}
+
+/// <summary>
+/// Source-generated log messages for the exception handler.
+/// </summary>
+/// <remarks>
+/// <c>ILogger</c> is fully qualified: this project globally imports Serilog, which declares
+/// a type of the same name.
+/// </remarks>
+internal static partial class ExceptionLog
+{
+    [LoggerMessage(
+        EventId = 4000,
+        Level = LogLevel.Error,
+        Message = "An unhandled exception occurred while processing {Path}.")]
+    public static partial void UnhandledException(
+        this Microsoft.Extensions.Logging.ILogger logger,
+        string path,
+        Exception exception);
 }

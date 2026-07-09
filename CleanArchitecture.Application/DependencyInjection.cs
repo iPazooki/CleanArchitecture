@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using CleanArchitecture.Application.Common.Behaviours;
+﻿using CleanArchitecture.Application.Common.Behaviours;
 using CleanArchitecture.Application.Entities.Books.Commands.Create;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,8 +16,11 @@ public static class DependencyInjection
     /// <returns>The IServiceCollection with the added services.</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Adds validators from the executing assembly to the service collection.
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        // Validators are internal to keep them out of this assembly's public surface, so
+        // FluentValidation needs includeInternalTypes to discover them.
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         services.AddMediator(options =>
         {

@@ -4,42 +4,49 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 
 /// <summary>
-/// Dispatches domain events after changes have been saved to the database.
-/// Only the async path is overridden; the UoW exclusively uses <see cref="DbContext.SaveChangesAsync"/>.
+/// Dispatches recorded domain events immediately before changes are committed.
 /// </summary>
-public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesInterceptor
+/// <remarks>
+/// Dispatching before the commit — rather than after it — puts the handlers inside the same
+/// transaction: a handler that throws rolls the write back, and a handler that writes to the
+/// context has its changes committed atomically with the change that triggered it. Dispatching
+/// from <c>SavedChangesAsync</c> would report a handler failure to the caller as a failed save
+/// even though the data had already been made durable.
+/// </remarks>
+internal sealed class DispatchDomainEventsInterceptor(IDomainEventDispatcher dispatcher) : SaveChangesInterceptor
 {
-    public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = new())
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = new())
     {
         ArgumentNullException.ThrowIfNull(eventData);
 
-        await DispatchDomainEventsAsync(eventData.Context).ConfigureAwait(false);
+        await DispatchDomainEventsAsync(eventData.Context, cancellationToken).ConfigureAwait(false);
 
-        return await base.SavedChangesAsync(eventData, result, cancellationToken).ConfigureAwait(false);
+        return await base.SavingChangesAsync(eventData, result, cancellationToken).ConfigureAwait(false);
     }
 
-    private async ValueTask DispatchDomainEventsAsync(DbContext? context)
+    private async ValueTask DispatchDomainEventsAsync(DbContext? context, CancellationToken cancellationToken)
     {
         if (context is null)
         {
             return;
         }
 
-        List<AggregateRoot> entities = context.ChangeTracker
+        List<AggregateRoot> aggregates = context.ChangeTracker
             .Entries<AggregateRoot>()
-            .Where(e => e.Entity.DomainEvents.Count != 0)
-            .Select(e => e.Entity)
+            .Where(entry => entry.Entity.DomainEvents.Count != 0)
+            .Select(entry => entry.Entity)
             .ToList();
 
-        List<INotification> domainEvents = entities
-            .SelectMany(e => e.DomainEvents)
+        List<IDomainEvent> domainEvents = aggregates
+            .SelectMany(aggregate => aggregate.DomainEvents)
             .ToList();
 
-        entities.ForEach(e => e.ClearDomainEvents());
+        // Cleared before dispatch so a handler that saves again cannot re-publish the same events.
+        aggregates.ForEach(aggregate => aggregate.ClearDomainEvents());
 
-        foreach (INotification domainEvent in domainEvents)
-        {
-            await mediator.Publish(domainEvent).ConfigureAwait(false);
-        }
+        await dispatcher.DispatchAsync(domainEvents, cancellationToken).ConfigureAwait(false);
     }
 }

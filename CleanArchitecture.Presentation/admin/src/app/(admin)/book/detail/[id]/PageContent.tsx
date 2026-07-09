@@ -39,7 +39,7 @@ export default function PageContent({ id }: PageContentProps) {
     );
   }
 
-  const book = response?.status === 200 && response.data.isSuccess ? response.data.value : null;
+  const book = response?.status === 200 ? response.data : null;
   if (!book) {
     return <div>{t("book_not_found")}</div>;
   }

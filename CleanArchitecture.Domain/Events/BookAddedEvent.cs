@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Domain.Events.Book;
+namespace CleanArchitecture.Domain.Events;
 
 /// <summary>
 /// Domain event raised when a new book is added to the catalog.
@@ -6,4 +6,4 @@ namespace CleanArchitecture.Domain.Events.Book;
 /// keeping the event an immutable, self-contained record of what happened.
 /// </summary>
 /// <param name="BookId">The identifier of the book that was added.</param>
-public sealed record BookAddedEvent(Guid BookId) : INotification;
+public sealed record BookAddedEvent(Guid BookId) : IDomainEvent;

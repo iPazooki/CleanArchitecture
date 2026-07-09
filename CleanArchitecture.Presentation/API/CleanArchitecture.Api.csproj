@@ -12,7 +12,6 @@
     <PackageReference Include="Microsoft.OpenApi" />
     <PackageReference Include="Microsoft.Identity.Web" />
     <PackageReference Include="OpenTelemetry.Api" />
-    <PackageReference Include="Polly" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 

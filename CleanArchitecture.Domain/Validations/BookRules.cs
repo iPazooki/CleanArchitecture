@@ -1,4 +1,4 @@
-namespace CleanArchitecture.Domain.Validations.Book;
+namespace CleanArchitecture.Domain.Validations;
 
 /// <summary>
 /// Defines shared validation rules for books. These constants are the single source

@@ -3,7 +3,7 @@ namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 /// <summary>
 /// Validator for the <see cref="GetBooksQuery"/> paging parameters.
 /// </summary>
-public class GetBooksQueryValidator : AbstractValidator<GetBooksQuery>
+internal sealed class GetBooksQueryValidator : AbstractValidator<GetBooksQuery>
 {
     /// <summary>The maximum number of items that may be requested in a single page.</summary>
     public const int MaxPageSize = 100;

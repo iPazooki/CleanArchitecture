@@ -26,10 +26,14 @@ internal sealed class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IVali
         ValidationResult[] results = await Task.WhenAll(
             validators.Select(validator => validator.ValidateAsync(message, cancellationToken))).ConfigureAwait(false);
 
+        // Carry a DomainError, not a bare Error: it preserves ErrorType.Validation, which is what
+        // lets the Presentation layer answer 422 instead of falling through to a generic 400.
         Error[] errors = results
             .Where(result => !result.IsValid)
             .SelectMany(result => result.Errors)
-            .Select(failure => new Error(failure.ErrorMessage))
+            .Select(failure => (Error)DomainError.Validation(
+                string.IsNullOrEmpty(failure.PropertyName) ? "Validation" : failure.PropertyName,
+                failure.ErrorMessage))
             .ToArray();
 
         return errors.Length == 0

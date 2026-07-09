@@ -1,12 +1,8 @@
-using System.Text;
-
 namespace CleanArchitecture.Application.Entities.Books.Commands.Create;
 
-internal sealed class CreateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
+internal sealed class CreateBookCommandHandler(IApplicationDbContext dbContext)
     : IRequestHandler<CreateBookCommand, Result<Guid>>
 {
-    private static readonly CompositeFormat _errorMessage = CompositeFormat.Parse(GeneralErrors.GeneralCreateErrorMessage);
-
     public async ValueTask<Result<Guid>> Handle(CreateBookCommand request, CancellationToken cancellationToken)
     {
         Result<Genre> genreResult = Genre.FromCode(request.Genre);
@@ -23,12 +19,12 @@ internal sealed class CreateBookCommandHandler(IApplicationUnitOfWork applicatio
             return Result<Guid>.Failure(book.Errors.ToArray());
         }
 
-        await applicationUnitOfWork.Books.AddAsync(book.Value!, cancellationToken).ConfigureAwait(false);
+        await dbContext.Books.AddAsync(book.Value!, cancellationToken).ConfigureAwait(false);
 
-        Result result = await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        Result result = await dbContext.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
             ? Result<Guid>.Success(book.Value!.Id)
-            : Result<Guid>.Failure(string.Format(CultureInfo.InvariantCulture, _errorMessage, nameof(Book)));
+            : Result<Guid>.Failure(result.Errors.ToArray());
     }
 }

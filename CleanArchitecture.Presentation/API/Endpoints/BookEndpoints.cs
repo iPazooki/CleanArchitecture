@@ -1,8 +1,6 @@
-using CleanArchitecture.Api.Configuration;
 using CleanArchitecture.Api.Extensions;
 using CleanArchitecture.Application.Common;
 using CleanArchitecture.Infrastructure.Security;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace CleanArchitecture.Api.Endpoints;
 
@@ -16,7 +14,7 @@ internal static class BookEndpoints
         books.MapPost("/", CreateBook)
             .WithSummary("Creates a new book")
             .WithDescription("Creates a new book with the specified title and genre.")
-            .Produces<Result<Guid>>(StatusCodes.Status201Created)
+            .Produces<Guid>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
             .RequireAuthorization(PolicyNames.Editor);
@@ -41,68 +39,52 @@ internal static class BookEndpoints
         books.MapGet("/{id:guid}", GetBook)
             .WithSummary("Gets a book by ID")
             .WithDescription("Gets a book with the specified ID.")
-            .Produces<Result<BookResponse>>(StatusCodes.Status200OK)
+            .Produces<BookResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization(PolicyNames.Viewer)
-            .CacheOutput("GetBook");
+            .RequireAuthorization(PolicyNames.Viewer);
 
         books.MapGet("/", GetBooks)
             .WithSummary("Gets all books")
             .WithDescription("Gets books with pagination support")
-            .Produces<Result<PaginatedResponse<BookResponse>>>(StatusCodes.Status200OK)
-            .RequireAuthorization(PolicyNames.Viewer)
-            .CacheOutput("GetBooks");
+            .Produces<PaginatedResponse<BookResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .RequireAuthorization(PolicyNames.Viewer);
     }
 
-    private static async Task<IResult> GetBook(ISender sender, Guid id)
+    private static async Task<IResult> GetBook(ISender sender, Guid id, CancellationToken cancellationToken)
     {
-        Result<BookResponse> result = await sender.Send(new GetBookQuery(id)).ConfigureAwait(false);
+        Result<BookResponse> result = await sender.Send(new GetBookQuery(id), cancellationToken).ConfigureAwait(false);
 
         return result.ToProblemDetails();
     }
 
-    private static async Task<IResult> GetBooks(ISender sender, int page = 1, int pageSize = 10)
+    private static async Task<IResult> GetBooks([AsParameters] GetBooksQuery query, ISender sender, CancellationToken cancellationToken)
     {
-        Result<PaginatedResponse<BookResponse>> result = await sender.Send(new GetBooksQuery(page, pageSize)).ConfigureAwait(false);
+        Result<PaginatedResponse<BookResponse>> result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
 
         return result.ToProblemDetails();
     }
 
-    private static async Task<IResult> DeleteBook(ISender sender, IOutputCacheStore cacheStore, Guid id, CancellationToken cancellationToken)
+    private static async Task<IResult> DeleteBook(ISender sender, Guid id, CancellationToken cancellationToken)
     {
-        DeleteBookCommand command = new(id);
-        Result result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
-
-        if (result.IsSuccess)
-        {
-            await cacheStore.EvictByTagAsync("books", cancellationToken).ConfigureAwait(false);
-        }
+        Result result = await sender.Send(new DeleteBookCommand(id), cancellationToken).ConfigureAwait(false);
 
         return result.ToNoContentResponse();
     }
 
-    private static async Task<IResult> UpdateBook(ISender sender, IOutputCacheStore cacheStore, Guid id, [FromBody] UpdateBookCommand command, CancellationToken cancellationToken)
+    private static async Task<IResult> UpdateBook(ISender sender, Guid id, [FromBody] UpdateBookCommand command, CancellationToken cancellationToken)
     {
-        // Ensure the ID from the route is used
+        // The route id wins over whatever the body claims.
         UpdateBookCommand updatedCommand = command with { Id = id };
-        Result result = await sender.SendWithRetryAsync(updatedCommand).ConfigureAwait(false);
 
-        if (result.IsSuccess)
-        {
-            await cacheStore.EvictByTagAsync("books", cancellationToken).ConfigureAwait(false);
-        }
+        Result result = await sender.Send(updatedCommand, cancellationToken).ConfigureAwait(false);
 
         return result.ToNoContentResponse();
     }
 
-    private static async Task<IResult> CreateBook(ISender sender, IOutputCacheStore cacheStore, CreateBookCommand command, CancellationToken cancellationToken)
+    private static async Task<IResult> CreateBook(ISender sender, CreateBookCommand command, CancellationToken cancellationToken)
     {
-        Result<Guid> result = await sender.SendWithRetryAsync(command).ConfigureAwait(false);
-
-        if (result.IsSuccess)
-        {
-            await cacheStore.EvictByTagAsync("books", cancellationToken).ConfigureAwait(false);
-        }
+        Result<Guid> result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
         return result.ToCreatedResponse(id => new Uri($"/api/v1/books/{id}", UriKind.Relative));
     }

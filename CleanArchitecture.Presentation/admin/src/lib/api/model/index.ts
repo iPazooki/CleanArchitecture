@@ -7,11 +7,7 @@
 
 export * from './bookResponse';
 export * from './createBookCommand';
-export * from './error';
 export * from './getApiV1BooksParams';
 export * from './paginatedResponseOfBookResponse';
 export * from './problemDetails';
-export * from './resultOfBookResponse';
-export * from './resultOfGuid';
-export * from './resultOfPaginatedResponseOfBookResponse';
 export * from './updateBookCommand';

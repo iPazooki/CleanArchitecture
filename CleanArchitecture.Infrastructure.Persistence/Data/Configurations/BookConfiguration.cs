@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Validations.Book;
+﻿using CleanArchitecture.Domain.Validations;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
@@ -15,13 +15,23 @@ internal sealed class BookConfiguration : BaseAggregateRootAuditableConfiguratio
     {
         base.Configure(builder);
 
+        // Named explicitly. EF would otherwise derive it from the IApplicationDbContext.Books
+        // DbSet property, silently renaming the existing table.
+        builder.ToTable("Book");
+
         // Keeps the column length in sync with the domain invariant (single source of truth).
         builder.Property(b => b.Title)
             .HasMaxLength(BookRules.TitleMaxLength)
             .IsRequired();
 
-        // Configures the Genre property as an owned entity.
-        builder.OwnsOne(b => b.Genre);
+        // Genre is an owned value object. Left unconfigured, its code maps to an unbounded,
+        // nullable text column, which contradicts the domain invariant.
+        builder.OwnsOne(b => b.Genre, genre => genre
+            .Property(g => g.Code)
+            .HasMaxLength(BookRules.GenreMaxLength)
+            .IsRequired());
+
+        builder.Navigation(b => b.Genre).IsRequired();
 
         builder.HasIndex(b => b.Title);
     }

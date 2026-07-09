@@ -5,7 +5,7 @@ namespace CleanArchitecture.Application.Entities.Books.Queries.Get;
 /// <summary>
 /// Validator for the <see cref="GetBookQuery"/>.
 /// </summary>
-public class GetBookQueryValidator : AbstractValidator<GetBookQuery>
+internal sealed class GetBookQueryValidator : AbstractValidator<GetBookQuery>
 {
     private static readonly CompositeFormat _requiredField = CompositeFormat.Parse(GeneralErrors.RequiredFieldErrorMessage);
 

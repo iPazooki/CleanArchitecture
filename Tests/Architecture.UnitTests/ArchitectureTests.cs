@@ -19,6 +19,10 @@ public class ArchitectureTests
         "Npgsql",
         "Microsoft.AspNetCore",
         "FluentValidation",
+
+        // Domain events implement the Domain's own IDomainEvent. The Application layer adapts
+        // them to notifications, so no messaging library may leak in here.
+        "Mediator",
     ];
 
     private static readonly string[] ApplicationForbiddenExternalPrefixes =

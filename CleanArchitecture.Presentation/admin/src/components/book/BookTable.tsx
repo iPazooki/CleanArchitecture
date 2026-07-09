@@ -29,10 +29,8 @@ export default function BookTable() {
   const { t } = useLanguage();
 
   const books =
-    response?.status === 200 &&
-    response.data.isSuccess &&
-    Array.isArray(response.data.value?.items)
-      ? response.data.value.items
+    response?.status === 200 && Array.isArray(response.data.items)
+      ? response.data.items
       : [];
 
   function handleDeleteClick(book: BookResponse): void {

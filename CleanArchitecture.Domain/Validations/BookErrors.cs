@@ -1,10 +1,16 @@
 ﻿using CleanArchitecture.Domain.Common;
 
-namespace CleanArchitecture.Domain.Validations.Book;
+namespace CleanArchitecture.Domain.Validations;
 
 /// <summary>
 /// Contains all domain errors related to the Book aggregate.
 /// </summary>
+/// <remarks>
+/// These are expression-bodied properties, not <c>static readonly</c> fields, on purpose:
+/// each access re-reads the RESX through the ambient <see cref="System.Globalization.CultureInfo"/>,
+/// which is what lets <c>UseRequestLocalization</c> return messages in the caller's language.
+/// Caching them would freeze every message in the culture that happened to start the host.
+/// </remarks>
 public static class BookErrors
 {
     public static DomainError TitleIsRequired => DomainError.Validation(

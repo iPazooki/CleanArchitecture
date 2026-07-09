@@ -1,13 +1,13 @@
-using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands.Update;
 
-internal sealed class UpdateBookCommandHandler(IApplicationUnitOfWork applicationUnitOfWork)
+internal sealed class UpdateBookCommandHandler(IApplicationDbContext dbContext)
     : IRequestHandler<UpdateBookCommand, Result>
 {
     public async ValueTask<Result> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
     {
-        Book? book = await applicationUnitOfWork.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
+        Book? book = await dbContext.Books.FindAsync(keyValues: [request.Id], cancellationToken).ConfigureAwait(false);
 
         if (book is null)
         {
@@ -15,6 +15,7 @@ internal sealed class UpdateBookCommandHandler(IApplicationUnitOfWork applicatio
         }
 
         Result<Genre> genreResult = Genre.FromCode(request.Genre);
+
         if (!genreResult.IsSuccess)
         {
             return Result.Failure(genreResult.Errors.ToArray());
@@ -27,6 +28,6 @@ internal sealed class UpdateBookCommandHandler(IApplicationUnitOfWork applicatio
             return updateResult;
         }
 
-        return await applicationUnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return await dbContext.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using CleanArchitecture.Infrastructure.Persistence.Data;
-using CleanArchitecture.Infrastructure.Persistence.Data.UnitOfWork;
 using CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 
 namespace CleanArchitecture.Infrastructure.Persistence;
@@ -48,9 +48,11 @@ public static class DependencyInjection
                 builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
         });
 
-        services.AddScoped<IApplicationUnitOfWork, ApplicationUnitOfWork>();
+        // ApplicationDbContext implements IApplicationDbContext, so both resolve to the same
+        // scoped instance and the Application layer never sees the concrete type.
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
-        services.AddSingleton(TimeProvider.System);
+        services.TryAddSingleton(TimeProvider.System);
 
         return services;
     }

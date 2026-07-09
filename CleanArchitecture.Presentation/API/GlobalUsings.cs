@@ -1,4 +1,3 @@
-global using Polly;
 global using Serilog;
 global using Mediator;
 global using DomainValidation;
@@ -10,4 +9,3 @@ global using CleanArchitecture.Application.Entities.Books.Queries.Get;
 global using CleanArchitecture.Application.Entities.Books.Commands.Create;
 global using CleanArchitecture.Application.Entities.Books.Commands.Delete;
 global using CleanArchitecture.Application.Entities.Books.Commands.Update;
-global using Microsoft.EntityFrameworkCore;

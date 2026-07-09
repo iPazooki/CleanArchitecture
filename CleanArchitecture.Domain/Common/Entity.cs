@@ -8,16 +8,22 @@ namespace CleanArchitecture.Domain.Common;
 public abstract class Entity : IEquatable<Entity>
 #pragma warning restore S4035
 {
-    public Guid Id { get; } = Guid.NewGuid();
+    // Version 7 GUIDs are time-ordered, so key inserts append to the index rather than
+    // scattering across it the way random version 4 GUIDs do.
+    public Guid Id { get; } = Guid.CreateVersion7();
 
-    private readonly List<INotification> _domainEvents = [];
+    private readonly List<IDomainEvent> _domainEvents = [];
 
-    public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    public void AddDomainEvent(INotification domainEvent) => _domainEvents.Add(domainEvent);
+    /// <summary>
+    /// Records a domain event. Only the aggregate itself may raise events about its own state.
+    /// </summary>
+    protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
-    public void RemoveDomainEvent(INotification domainEvent) => _domainEvents.Remove(domainEvent);
-
+    /// <summary>
+    /// Drops the recorded events once they have been dispatched.
+    /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
 
     public bool Equals(Entity? other)

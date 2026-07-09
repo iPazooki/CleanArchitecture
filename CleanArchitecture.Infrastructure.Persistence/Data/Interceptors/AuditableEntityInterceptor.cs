@@ -5,11 +5,10 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 
 /// <summary>
-/// Interceptor for handling auditable entities during save changes operations.
-/// Sets audit timestamps before the save operation.
+/// Stamps auditable entities with creation and update timestamps before changes are saved.
 /// </summary>
 /// <param name="timeProvider">The provider for getting the current time.</param>
-public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
+internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
     /// <summary>
     /// Called before changes are saved to the database synchronously.
@@ -46,6 +45,10 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
             return;
         }
 
+        // Read the clock once: every entity committed in the same transaction should carry the
+        // same timestamp, not one each depending on how long the loop took.
+        DateTimeOffset utcNow = timeProvider.GetUtcNow();
+
         foreach (EntityEntry<EntityAuditable> entry in context.ChangeTracker.Entries<EntityAuditable>())
         {
             if (entry.State is not (EntityState.Added or EntityState.Modified) && !HasChangedOwnedEntities(entry))
@@ -53,14 +56,14 @@ public class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChanges
                 continue;
             }
 
-            DateTimeOffset utcNow = timeProvider.GetUtcNow();
-
+            // Written through the change tracker because the domain exposes these as private-set:
+            // auditing is the persistence layer's job, not something a caller can forge.
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedDate = utcNow;
+                entry.Property(auditable => auditable.CreatedDate).CurrentValue = utcNow;
             }
 
-            entry.Entity.UpdatedDate = utcNow;
+            entry.Property(auditable => auditable.UpdatedDate).CurrentValue = utcNow;
         }
     }
 

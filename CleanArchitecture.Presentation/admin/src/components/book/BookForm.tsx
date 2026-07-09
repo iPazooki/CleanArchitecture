@@ -54,18 +54,13 @@ export default function BookForm({ id }: BookFormProps) {
   });
 
   useEffect(() => {
-    if (
-      !isEditMode ||
-      bookResponse?.status !== 200 ||
-      !bookResponse.data.isSuccess ||
-      !bookResponse.data.value
-    ) {
+    if (!isEditMode || bookResponse?.status !== 200) {
       return;
     }
 
     reset({
-      title: bookResponse.data.value.title,
-      genre: bookResponse.data.value.genre,
+      title: bookResponse.data.title,
+      genre: bookResponse.data.genre,
     });
   }, [bookResponse, isEditMode, reset]);
 

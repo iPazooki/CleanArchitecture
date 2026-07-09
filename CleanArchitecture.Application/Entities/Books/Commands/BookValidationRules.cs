@@ -1,4 +1,4 @@
-using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations;
 
 namespace CleanArchitecture.Application.Entities.Books.Commands;
 
