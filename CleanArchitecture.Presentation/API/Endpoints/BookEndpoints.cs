@@ -36,7 +36,7 @@ internal static class BookEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization(EditorPolicy.Name);
+            .RequireAuthorization(AdminPolicy.Name);
 
         books.MapGet("/{id:guid}", GetBook)
             .WithSummary("Gets a book by ID")

@@ -12,12 +12,29 @@ function createKeycloakLogoutUrl(issuer: string): URL {
   return new URL(`${normalizedIssuer}/protocol/openid-connect/logout`);
 }
 
-function createEntraLogoutUrl(tenantId: string): URL {
-  return new URL(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/logout`);
+function createEntraLogoutUrl(tenantId: string, openIdConnectUrl?: string): URL {
+  let domain = "login.microsoftonline.com";
+  
+  if (openIdConnectUrl) {
+    try {
+      const url = new URL(openIdConnectUrl);
+      domain = url.hostname;
+    } catch {
+      // Fallback to default domain on parsing errors
+    }
+  }
+  return new URL(`https://${domain}/${tenantId}/oauth2/v2.0/logout`);
 }
 
 export async function GET(request: NextRequest) {
-  const { NEXTAUTH_URL, KEYCLOAK_ISSUER, ENTRA_TENANT_ID, AUTH_PROVIDER, NEXTAUTH_SECRET } = getEnvVars();
+  const {
+    NEXTAUTH_URL,
+    KEYCLOAK_ISSUER,
+    ENTRA_TENANT_ID,
+    AUTH_PROVIDER,
+    NEXTAUTH_SECRET,
+    ENTRA_OPENID_CONNECT,
+  } = getEnvVars();
   const signInUrl = new URL("/signin", getBaseUrl(request, NEXTAUTH_URL));
 
   const token = await getToken({
@@ -32,7 +49,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ logoutUrl: signInUrl.toString() });
     }
 
-    const logoutUrl = createEntraLogoutUrl(ENTRA_TENANT_ID);
+    const logoutUrl = createEntraLogoutUrl(ENTRA_TENANT_ID, ENTRA_OPENID_CONNECT);
     logoutUrl.searchParams.set("post_logout_redirect_uri", signInUrl.toString());
 
     if (typeof token?.idToken === "string" && token.idToken.length > 0) {
