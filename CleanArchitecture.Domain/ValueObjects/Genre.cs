@@ -1,44 +1,27 @@
-﻿using CleanArchitecture.Domain.Validations.Book;
+using CleanArchitecture.Domain.Validations.Book;
 
 namespace CleanArchitecture.Domain.ValueObjects;
 
 /// <summary>
-/// Represents a genre with a code.
+/// Represents a book genre identified by a canonical code.
 /// </summary>
-/// <param name="Code">The code of the genre.</param>
+/// <param name="Code">The canonical code of the genre.</param>
 public sealed record Genre(string Code)
 {
     /// <summary>
-    /// Creates a Genre instance from a code.
+    /// The Fiction genre.
     /// </summary>
-    /// <param name="code">The code of the genre.</param>
-    /// <returns>A Result containing the Genre or a validation error.</returns>
-    public static Result<Genre> FromCode(string code)
-    {
-        Genre genre = new(code);
-
-        if (!SupportedGenres.Contains(genre))
-        {
-            return Result<Genre>.Failure(BookErrors.InvalidGenre);
-        }
-
-        return Result<Genre>.Success(genre);
-    }
+    public static Genre Fiction { get; } = new("F");
 
     /// <summary>
-    /// Represents the Fiction genre.
+    /// The Non-Fiction genre.
     /// </summary>
-    public static Genre Fiction => new("F");
+    public static Genre NonFiction { get; } = new("NF");
 
     /// <summary>
-    /// Represents the Non-Fiction genre.
+    /// The Mystery genre.
     /// </summary>
-    public static Genre NonFiction => new("NF");
-
-    /// <summary>
-    /// Represents the Mystery genre.
-    /// </summary>
-    public static Genre Mystery => new("M");
+    public static Genre Mystery { get; } = new("M");
 
     /// <summary>
     /// Gets the supported genres as a frozen set for O(1) lookup.
@@ -51,19 +34,22 @@ public sealed record Genre(string Code)
     }.ToFrozenSet();
 
     /// <summary>
-    /// Implicitly converts a Genre to a string.
+    /// Creates a <see cref="Genre"/> from a code, validating that it is supported.
     /// </summary>
-    /// <param name="genre">The Genre to convert.</param>
-    public static implicit operator string(Genre genre)
+    /// <param name="code">The genre code (surrounding whitespace is ignored).</param>
+    /// <returns>A <see cref="Result{T}"/> containing the genre or a validation error.</returns>
+    public static Result<Genre> FromCode(string? code)
     {
-        ArgumentNullException.ThrowIfNull(genre);
+        Genre genre = new((code ?? string.Empty).Trim());
 
-        return genre.ToString();
+        return SupportedGenres.Contains(genre)
+            ? Result<Genre>.Success(genre)
+            : Result<Genre>.Failure(BookErrors.InvalidGenre);
     }
 
     /// <summary>
-    /// Returns the string representation of the Genre.
+    /// Returns the canonical code of the genre.
     /// </summary>
-    /// <returns>The code of the genre.</returns>
+    /// <returns>The genre code.</returns>
     public override string ToString() => Code;
 }

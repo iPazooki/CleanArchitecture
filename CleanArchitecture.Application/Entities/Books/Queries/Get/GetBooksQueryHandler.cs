@@ -20,7 +20,7 @@ internal class GetBooksQueryHandler(IApplicationUnitOfWork applicationUnitOfWork
             .OrderBy(b => b.Title)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(book => new BookResponse(book.Id, book.Title, book.Genre))
+            .Select(book => new BookResponse(book.Id, book.Title, book.Genre.Code))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 

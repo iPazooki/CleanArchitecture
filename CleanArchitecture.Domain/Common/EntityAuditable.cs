@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a base class for auditable entities, inheriting from <see cref="Entity"/>.
 /// </summary>
-public class EntityAuditable : Entity
+public abstract class EntityAuditable : Entity
 {
     /// <summary>
     /// Gets or sets the date and time when the entity was created.

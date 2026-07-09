@@ -4,7 +4,8 @@ using CleanArchitecture.Domain.Validations.Book;
 namespace CleanArchitecture.Domain.Entities;
 
 /// <summary>
-/// Represents a book entity as an immutable aggregate root following DDD principles.
+/// Represents a book aggregate root. State is mutated only through validated domain
+/// behavior (<see cref="Create"/> and <see cref="Update"/>), following DDD principles.
 /// </summary>
 public sealed class Book : AggregateRootAuditable
 {
@@ -36,6 +37,8 @@ public sealed class Book : AggregateRootAuditable
     /// <returns>A Result containing the Book or validation errors.</returns>
     public static Result<Book> Create(string title, Genre genre)
     {
+        ArgumentNullException.ThrowIfNull(genre);
+
         Result titleValidationResult = ValidateTitle(title);
 
         if (!titleValidationResult.IsSuccess)
@@ -45,26 +48,9 @@ public sealed class Book : AggregateRootAuditable
 
         Book book = new(title, genre);
 
-        book.AddDomainEvent(new BookAddedEvent(book));
+        book.AddDomainEvent(new BookAddedEvent(book.Id));
 
         return Result<Book>.Success(book);
-    }
-
-    /// <summary>
-    /// Updates the title of the book with domain validation.
-    /// </summary>
-    /// <param name="newTitle">The new title.</param>
-    /// <returns>A Result indicating success or validation errors.</returns>
-    public Result UpdateTitle(string newTitle)
-    {
-        Result titleValidationResult = ValidateTitle(newTitle);
-        if (!titleValidationResult.IsSuccess)
-        {
-            return titleValidationResult;
-        }
-
-        Title = newTitle;
-        return Result.Success();
     }
 
     /// <summary>
@@ -89,20 +75,16 @@ public sealed class Book : AggregateRootAuditable
         return Result.Success();
     }
 
-    /// <summary>
-    /// Updates the genre of the book.
-    /// </summary>
-    /// <param name="newGenre">The new genre.</param>
-    public void UpdateGenre(Genre newGenre)
-    {
-        Genre = newGenre;
-    }
-
     private static Result ValidateTitle(string title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
             return Result.Failure(BookErrors.TitleIsRequired);
+        }
+
+        if (title.Length < BookRules.TitleMinLength)
+        {
+            return Result.Failure(BookErrors.TitleIsTooShort);
         }
 
         if (title.Length > BookRules.TitleMaxLength)

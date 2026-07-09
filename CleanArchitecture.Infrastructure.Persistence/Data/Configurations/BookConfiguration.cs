@@ -1,4 +1,6 @@
-﻿namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
+﻿using CleanArchitecture.Domain.Validations.Book;
+
+namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
 /// <summary>
 /// Configures the Book entity.
@@ -13,9 +15,9 @@ internal sealed class BookConfiguration : BaseAggregateRootAuditableConfiguratio
     {
         base.Configure(builder);
 
-        // Configures the Title property with a maximum length of 200 and makes it required.
+        // Keeps the column length in sync with the domain invariant (single source of truth).
         builder.Property(b => b.Title)
-            .HasMaxLength(200)
+            .HasMaxLength(BookRules.TitleMaxLength)
             .IsRequired();
 
         // Configures the Genre property as an owned entity.

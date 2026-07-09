@@ -14,6 +14,6 @@ public static class BookExtensions
     {
         ArgumentNullException.ThrowIfNull(book);
 
-        return new BookResponse(book.Id, book.Title, book.Genre);
+        return new BookResponse(book.Id, book.Title, book.Genre.Code);
     }
 }

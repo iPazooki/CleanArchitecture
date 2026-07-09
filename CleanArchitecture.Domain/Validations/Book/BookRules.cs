@@ -1,27 +1,28 @@
 namespace CleanArchitecture.Domain.Validations.Book;
 
 /// <summary>
-/// Defines shared validation rules for books.
+/// Defines shared validation rules for books. These constants are the single source
+/// of truth for the Book aggregate invariants and the Application-layer validators.
 /// </summary>
 public static class BookRules
 {
     /// <summary>
-    /// Gets the minimum allowed title length.
+    /// The minimum allowed title length.
     /// </summary>
     public const int TitleMinLength = 3;
 
     /// <summary>
-    /// Gets the maximum allowed title length.
+    /// The maximum allowed title length.
     /// </summary>
     public const int TitleMaxLength = 200;
 
     /// <summary>
-    /// Gets the minimum allowed genre length.
+    /// The minimum allowed genre code length.
     /// </summary>
     public const int GenreMinLength = 1;
 
     /// <summary>
-    /// Gets the maximum allowed genre length.
+    /// The maximum allowed genre code length.
     /// </summary>
     public const int GenreMaxLength = 2;
 }

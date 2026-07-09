@@ -1,15 +1,15 @@
 namespace CleanArchitecture.Domain.Common;
 
 /// <summary>
-/// Represents a domain error with code, message, and type information.
+/// Represents a domain error with a code, message, and classifying type.
 /// </summary>
 /// <param name="Code">The unique error code.</param>
 /// <param name="Message">The human-readable error message.</param>
-/// <param name="Type">The type of error (Validation, NotFound, Conflict, Failure).</param>
+/// <param name="Type">The classification of the error (see <see cref="ErrorType"/>).</param>
 public sealed record DomainError(string Code, string Message, ErrorType Type = ErrorType.Failure)
 {
     /// <summary>
-    /// Represents a successful result with no error.
+    /// Represents the absence of an error.
     /// </summary>
     public static readonly DomainError None = new(string.Empty, string.Empty, ErrorType.None);
 
@@ -38,38 +38,7 @@ public sealed record DomainError(string Code, string Message, ErrorType Type = E
         new(code, message, ErrorType.Failure);
 
     /// <summary>
-    /// Implicit conversion from DomainError to DomainValidation.Error.
+    /// Implicit conversion from <see cref="DomainError"/> to <see cref="Error"/>.
     /// </summary>
     public static implicit operator Error(DomainError error) => new(Message: error.Message, Code: error.Code);
-}
-
-/// <summary>
-/// Defines the types of errors that can occur.
-/// </summary>
-public enum ErrorType
-{
-    /// <summary>
-    /// No error.
-    /// </summary>
-    None = 0,
-
-    /// <summary>
-    /// Validation error (HTTP 422).
-    /// </summary>
-    Validation = 1,
-
-    /// <summary>
-    /// Resource not found (HTTP 404).
-    /// </summary>
-    NotFound = 2,
-
-    /// <summary>
-    /// Conflict error (HTTP 409).
-    /// </summary>
-    Conflict = 3,
-
-    /// <summary>
-    /// General failure (HTTP 400 or 500).
-    /// </summary>
-    Failure = 4
 }
