@@ -14,7 +14,6 @@ apply: always
 - Run all tests: `dotnet test --configuration Release`
 - Run one test project: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release`
 - Run a single test class or method: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release --filter "FullyQualifiedName~Domain.UnitTests.BookTests"`
-- Run only the integration suite: `dotnet test Tests\CleanArchitecture.IntegrationTests\CleanArchitecture.IntegrationTests.csproj --configuration Release --filter "FullyQualifiedName~CleanArchitecture.IntegrationTests.BookIntegrationTests"`
 - Run the full local stack through Aspire: `dotnet run --project CleanArchitecture.Aspire\CleanArchitecture.AppHost\CleanArchitecture.AppHost.csproj`
 - Run only the API: `dotnet run --project CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj`
 - Add a migration: `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation\API`
@@ -30,11 +29,11 @@ apply: always
 
 ## High-level architecture
 
-- `CleanArchitecture.sln` is split into Core (`CleanArchitecture.Domain`, `CleanArchitecture.Application`), Infrastructure (`CleanArchitecture.Infrastructure`, `CleanArchitecture.Infrastructure.Persistence`), Presentation (`CleanArchitecture.Presentation\API`, `CleanArchitecture.Presentation\admin`), Aspire (`CleanArchitecture.AppHost`, `CleanArchitecture.ServiceDefaults`), and four test projects.
+- `CleanArchitecture.sln` is split into Core (`CleanArchitecture.Domain`, `CleanArchitecture.Application`), Infrastructure (`CleanArchitecture.Infrastructure`, `CleanArchitecture.Infrastructure.Persistence`), Presentation (`CleanArchitecture.Presentation\API`, `CleanArchitecture.Presentation\admin`), Aspire (`CleanArchitecture.AppHost`, `CleanArchitecture.ServiceDefaults`), and three test projects.
 - `CleanArchitecture.Presentation\API\Program.cs` is the backend composition root. It adds Aspire service defaults first, then wires the Application, Infrastructure, Infrastructure.Persistence, and Presentation layers through their `Add*Services()` extension methods.
 - The API is a versioned Minimal API. Endpoints are grouped under `/api/v{version:apiVersion}` and then mapped by feature extension classes such as `BookEndpoints`.
 - `CleanArchitecture.Infrastructure.Persistence` owns EF Core concerns: `ApplicationDbContext`, entity configurations, migrations, SaveChanges interceptors (`AuditableEntityInterceptor` for timestamps, `DispatchDomainEventsInterceptor` for publishing domain events after save), and the unit-of-work implementation.
-- `CleanArchitecture.Aspire\CleanArchitecture.AppHost\AppHost.cs` is the real local-dev entry point. It has three environment modes: **Development** starts Postgres + PgAdmin, Keycloak with realm import, the API, and the Next.js admin app. **Testing** starts only the API and an ephemeral Postgres database (no Keycloak; `TestAuthHandler` grants all roles). **Production** targets Azure Container Apps, PostgreSQL Flexible Server, Key Vault, and Application Insights.
+- `CleanArchitecture.Aspire\CleanArchitecture.AppHost\AppHost.cs` is the real local-dev entry point. It has two environment modes: **Development** starts Postgres + PgAdmin, Keycloak with realm import, the API, and the Next.js admin app. **Production** targets Azure Container Apps, PostgreSQL Flexible Server, Key Vault, and Application Insights.
 - `CleanArchitecture.Aspire\CleanArchitecture.ServiceDefaults\Extensions.cs` adds the shared cross-cutting runtime behavior: Serilog, OpenTelemetry, service discovery, resilience handlers, and health endpoints.
 - `CleanArchitecture.Presentation\admin` is a Next.js 16 App Router admin app acting as a **Backend for Frontend (BFF)**. Only the frontend and Keycloak admin UI are publicly exposed; the .NET API remains private. The admin uses NextAuth with Keycloak, TanStack Query for server state, and orval-generated API clients/Zod schemas under `src\lib\api` and `src\lib\api\zod`.
 
@@ -62,7 +61,7 @@ apply: always
 - Authorization uses named policies: `ViewerPolicy`, `EditorPolicy`, `AdminPolicy`. Permission roles from Keycloak: `view`, `create`, `edit`, `delete`.
 
 ### Authentication
-- Authentication is environment-sensitive. Normal environments use Keycloak JWT bearer auth via `AddKeycloakJwtBearer`; the `Testing` environment swaps in `TestAuthHandler`, which grants the integration test client all required roles.
+- Authentication is chosen by the `Authentication:Provider` config value, not by environment: `Entra` uses `AddMicrosoftIdentityWebApi`, anything else falls back to Keycloak JWT bearer auth via `AddKeycloakJwtBearer`. Every environment authenticates for real; there is no bypass handler.
 - OpenAPI and Scalar are only mapped in Development when the backend user secret `ScalarApi:ClientSecret` is set. This matters for `pnpm generate`, because `orval.config.ts` reads `http://localhost:5049/openapi/v1.json`.
 
 ### Database and migrations
@@ -70,9 +69,9 @@ apply: always
 - Entity configurations use `IEntityTypeConfiguration<T>` in `Infrastructure.Persistence`, auto-discovered via `ApplyConfigurationsFromAssembly`.
 
 ### Testing patterns
-- Integration tests use `DistributedApplicationTestingBuilder` to spin up the full Aspire stack with `--environment=Testing`. Tests share a fixture via `[Collection("DistributedApplication collection")]` and create `HttpClient` per class via `App.CreateHttpClient("cleanarchitecture-api")`.
-- Unit tests use xUnit + Moq. Domain and Application behavior are tested in `Tests\Domain.UnitTests` and `Tests\Application.UnitTests`.
-- CI workflow (`.github\workflows\dotnet.yml`) builds with `--configuration Release`, runs all tests, and sets `ASPIRE_HOSTING_TESTING_DISABLE_DASHBOARD=true`.
+- All tests run in-process with xUnit (`xunit.v3`). Nothing starts the Aspire host or a container, so `dotnet test` needs no Docker daemon.
+- Domain and Application behavior are tested in `Tests\Domain.UnitTests` and `Tests\Application.UnitTests`; `Tests\Architecture.UnitTests` enforces the layer dependencies.
+- CI workflow (`.github\workflows\dotnet.yml`) builds with `--configuration Release` and runs all tests.
 
 ### Admin app (Next.js)
 - Use `pnpm` exclusively. The repo commits `pnpm-lock.yaml` and the AppHost starts the frontend with `.WithPnpm()`.

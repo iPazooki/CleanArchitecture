@@ -19,7 +19,7 @@ A production-ready **.NET 10 + Next.js 16** Clean Architecture template, orchest
 - 🛠️ **Orval-generated API client** — typed React hooks regenerated from the OpenAPI spec
 - 🐘 **PostgreSQL** via EF Core 10 with auto-applied migrations
 - ☁️ **.NET Aspire** — orchestrates all services locally and provisions Azure infrastructure
-- 🧪 **Robust Testing** — Domain unit tests, architecture tests, and Aspire-based integration tests
+- 🧪 **Robust Testing** — Domain unit tests and architecture tests
 - 🛡️ **Polly** — retries, circuit breakers, fallbacks for outbound calls
 
 ---
@@ -211,9 +211,8 @@ dotnet test --configuration Release
 
 - 🧬 **Domain unit tests** — `Tests/Domain.UnitTests`
 - 🏛️ **Architecture tests** — enforce layer dependencies
-- 🔄 **Integration tests** — use `DistributedApplicationTestingBuilder` against a real Aspire fixture
 
-The Testing environment uses an ephemeral Postgres and a `TestAuthHandler` that grants all roles, so no Keycloak or Entra setup is required.
+Every test runs in-process, so `dotnet test` needs no Docker daemon and no running services.
 
 ---
 

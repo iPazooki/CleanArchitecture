@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
 using Microsoft.Identity.Web;
 
@@ -15,51 +14,39 @@ internal static class DependencyInjection
 
         services.AddProblemDetails();
 
-        // Configure authentication based on environment
-        if (builder.Environment.IsTesting())
+        string authProvider = builder.Configuration["Authentication:Provider"] ?? "Keycloak";
+
+        if (authProvider.Equals("Entra", StringComparison.OrdinalIgnoreCase))
         {
-            // Use test authentication handler for integration tests
-            services.AddAuthentication(Authentication.TestAuthHandler.AuthenticationScheme)
-                .AddScheme<AuthenticationSchemeOptions, Authentication.TestAuthHandler>(
-                    Authentication.TestAuthHandler.AuthenticationScheme,
-                    _ => { });
+            // Add Microsoft Entra ID Authentication
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
         }
         else
         {
-            string authProvider = builder.Configuration["Authentication:Provider"] ?? "Keycloak";
+            // Default to Keycloak authentication
+            string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
+                                  ?? throw new InvalidOperationException(
+                                      "Keycloak ValidIssuers is not configured.");
 
-            if (authProvider.Equals("Entra", StringComparison.OrdinalIgnoreCase))
-            {
-                // Add Microsoft Entra ID Authentication
-                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-            }
-            else
-            {
-                // Default to Keycloak authentication
-                string validIssuers = builder.Configuration["Keycloak:ValidIssuers"]
-                                      ?? throw new InvalidOperationException(
-                                          "Keycloak ValidIssuers is not configured.");
+            string realm = builder.Configuration["Keycloak:Realm"]
+                           ?? throw new InvalidOperationException("Keycloak Realm is not configured.");
 
-                string realm = builder.Configuration["Keycloak:Realm"]
-                               ?? throw new InvalidOperationException("Keycloak Realm is not configured.");
+            string[] audience = builder.Configuration["Keycloak:Audience"]?.Split(",")
+                                ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
 
-                string[] audience = builder.Configuration["Keycloak:Audience"]?.Split(",")
-                                    ?? throw new InvalidOperationException("Keycloak Audience is not configured.");
+            bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
 
-                bool? requireHttpsMetadata = builder.Configuration.GetValue<bool?>("Keycloak:RequireHttpsMetadata");
-
-                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddKeycloakJwtBearer(
-                        serviceName: "keycloak",
-                        realm: realm,
-                        options =>
-                        {
-                            options.TokenValidationParameters.ValidAudiences = audience;
-                            options.TokenValidationParameters.ValidIssuers = [validIssuers];
-                            options.RequireHttpsMetadata = requireHttpsMetadata ?? !builder.Environment.IsDevelopment();
-                        });
-            }
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddKeycloakJwtBearer(
+                    serviceName: "keycloak",
+                    realm: realm,
+                    options =>
+                    {
+                        options.TokenValidationParameters.ValidAudiences = audience;
+                        options.TokenValidationParameters.ValidIssuers = [validIssuers];
+                        options.RequireHttpsMetadata = requireHttpsMetadata ?? !builder.Environment.IsDevelopment();
+                    });
         }
 
         // Authorization policies are registered by AddInfrastructureServices. They name no
@@ -79,7 +66,6 @@ internal static class DependencyInjection
         {
             // Store these for use in OpenApi configuration
             string authorizationUrl;
-            string authProvider = builder.Configuration["Authentication:Provider"] ?? "Keycloak";
 
             if (authProvider.Equals("Entra", StringComparison.OrdinalIgnoreCase))
             {

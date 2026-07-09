@@ -301,19 +301,3 @@ dotnet_diagnostic.ca1062.severity = none
 dotnet_diagnostic.ca1860.severity = none
 dotnet_diagnostic.ca1861.severity = none
 dotnet_analyzer_diagnostic.severity = none
-
-[Tests/CleanArchitecture.IntegrationTests/**.cs]
-# CA1515: Consider making public types internal
-dotnet_diagnostic.ca1515.severity = none
-# CA1063: Implement IDisposable correctly
-dotnet_diagnostic.ca1063.severity = none
-# CA2007: Do not directly await a Task
-dotnet_diagnostic.ca2007.severity = none
-# S3881: "IDisposable" should be implemented correctly
-dotnet_diagnostic.s3881.severity = suggestion
-# CA2000: Dispose objects before losing scope
-dotnet_diagnostic.CA2000.severity = none
-# CA2234: Pass System.Uri objects instead of strings
-dotnet_diagnostic.CA2234.severity = none
-# CS8618: Resolve nullable warnings
-dotnet_diagnostic.CS8618.severity = none

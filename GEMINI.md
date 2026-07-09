@@ -38,7 +38,7 @@ This project is a modern, cloud-native template based on **.NET 10**, **Clean Ar
 │   ├── API/                          # .NET Minimal API (C#)
 │   └── admin/                        # Next.js Admin Portal (BFF)
 ├── CleanArchitecture.DbMigrator/     # Standalone project for applying DB migrations
-└── Tests/                            # Unit, Integration, and Architecture tests
+└── Tests/                            # Unit and Architecture tests
 ```
 
 ---

@@ -65,10 +65,9 @@ When modifying the `.AppHost` project:
 | Environment | Services |
 |---|---|
 | Development | API, Next.js admin, Postgres + PgAdmin, Keycloak (realm auto-imported) |
-| Testing | API + ephemeral Postgres only. `TestAuthHandler` grants all roles — no Keycloak needed |
 | Production | Azure Container Apps, PostgreSQL Flexible Server, Key Vault, Application Insights |
 
-Integration tests use `DistributedApplicationTestingBuilder` and share the Aspire fixture via `[Collection("DistributedApplication collection")]`.
+Tests are in-process only — `Tests/Domain.UnitTests`, `Tests/Application.UnitTests`, and `Tests/Architecture.UnitTests`. Nothing boots the Aspire host or a container to run a test.
 
 ## Code Quality Standards
 

@@ -23,8 +23,8 @@ internal static class EmailServiceCollectionExtensions
     {
         IConfigurationSection section = configuration.GetSection(BrevoOptions.SectionName);
 
-        // The Testing environment supplies no Brevo credentials. Binding BrevoOptions there would
-        // fail ValidateOnStart and take the whole host down, so fall back to the null object.
+        // Binding BrevoOptions without an API key would fail ValidateOnStart and take the whole
+        // host down, so an environment that supplies no credentials falls back to the null object.
         if (string.IsNullOrWhiteSpace(section[nameof(BrevoOptions.ApiKey)]))
         {
             services.AddSingleton<IEmailService, NullEmailService>();

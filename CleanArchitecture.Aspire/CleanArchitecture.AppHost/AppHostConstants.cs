@@ -2,8 +2,6 @@ namespace CleanArchitecture.AppHost;
 
 internal static class AppHostConstants
 {
-    internal const string TestingEnvironment = "Testing";
-
     internal const int AdminHostPort = 65499;
     internal const int AdminTargetPort = 3000;
     internal const int KeycloakPort = 8080;
