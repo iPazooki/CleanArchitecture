@@ -1,3 +1,4 @@
+using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Infrastructure.Email;
 using CleanArchitecture.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,9 @@ public static class DependencyInjection
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
         return services
             .AddSecurityServices()

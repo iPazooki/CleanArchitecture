@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using CleanArchitecture.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using CleanArchitecture.Infrastructure.Persistence.Data;
 using CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
@@ -53,7 +54,13 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddScoped<ICurrentUser, SystemCurrentUser>();
 
         return services;
+    }
+
+    private sealed class SystemCurrentUser : ICurrentUser
+    {
+        public string? UserName => null;
     }
 }

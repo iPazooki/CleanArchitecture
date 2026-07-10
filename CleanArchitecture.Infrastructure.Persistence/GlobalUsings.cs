@@ -1,5 +1,6 @@
 global using Microsoft.EntityFrameworkCore;
 global using CleanArchitecture.Domain.Entities;
 global using CleanArchitecture.Application.Common;
+global using CleanArchitecture.Application.Common.Interfaces;
 global using CleanArchitecture.Application.Errors;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;

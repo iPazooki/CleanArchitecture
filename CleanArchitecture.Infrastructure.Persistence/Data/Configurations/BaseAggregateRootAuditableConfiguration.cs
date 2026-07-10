@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Domain.Common;
+using CleanArchitecture.Domain.Common;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data.Configurations;
 
@@ -13,6 +13,10 @@ internal abstract class BaseAggregateRootAuditableConfiguration<T> : IEntityType
 
         builder.Property(x => x.UpdatedDate)
             .IsRequired();
+
+        builder.Property(x => x.UpdatedBy)
+            .HasMaxLength(256)
+            .IsRequired(false);
 
         builder.Ignore(o => o.DomainEvents);
     }

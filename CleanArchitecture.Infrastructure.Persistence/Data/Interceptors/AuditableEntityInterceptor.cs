@@ -1,4 +1,5 @@
 using CleanArchitecture.Domain.Common;
+using CleanArchitecture.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -8,7 +9,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;
 /// Stamps auditable entities with creation and update timestamps before changes are saved.
 /// </summary>
 /// <param name="timeProvider">The provider for getting the current time.</param>
-internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
+internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider, ICurrentUser currentUser) : SaveChangesInterceptor
 {
     /// <summary>
     /// Called before changes are saved to the database synchronously.
@@ -64,6 +65,7 @@ internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider) : Sa
             }
 
             entry.Property(auditable => auditable.UpdatedDate).CurrentValue = utcNow;
+            entry.Property(auditable => auditable.UpdatedBy).CurrentValue = currentUser.UserName;
         }
     }
 
