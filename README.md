@@ -209,7 +209,7 @@ dotnet test --configuration Release
 
 ---
 
-## ☁️ Deploy to Azure with `azd`
+## ☁️ Deploy to Azure with `aspire`
 
 Thanks to .NET Aspire integration, deploying the entire stack to Azure is fully automated. The deployment provisions:
 * 🚢 **Azure Container Apps** — Hosts the API and Admin Next.js portal.
