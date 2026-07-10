@@ -191,10 +191,10 @@ The Aspire AppHost provisions everything for you:
 ### Deploy
 
 ```bash
-azd up
+aspire publish
 ```
 
-or you could use
+and then after entering you desired values, run:
 ```bash
 aspire deploy
 ```
