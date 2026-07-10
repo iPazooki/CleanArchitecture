@@ -68,52 +68,43 @@ export function getFieldErrors<TFieldName extends string>(
   return fieldErrors;
 }
 
+/** Reads the response body of a failed API call, whether parsed or still a string. */
+function extractResponseErrors(data: unknown): DomainError[] | undefined {
+  if (typeof data === "string" && data.length > 0) {
+    try {
+      const parsedData: unknown = JSON.parse(data);
+      if (isProblemDetails(parsedData)) {
+        return extractErrors(parsedData);
+      }
+    } catch {
+      // Not JSON — surface the raw string.
+    }
+
+    return [{ code: "RequestError", message: data }];
+  }
+
+  if (isProblemDetails(data)) {
+    return extractErrors(data);
+  }
+
+  return undefined;
+}
+
+/**
+ * A 401 is not special-cased here: QueryProvider owns re-authentication, so this
+ * only has to describe what went wrong.
+ */
 export function extractApiErrors(error: unknown): DomainError[] {
   if (isApiError(error)) {
-    if (error.status === 401) {
-      return [
-        {
-          code: "Unauthorized",
-          message: "Your session has expired. Please sign in again.",
-        },
-      ];
-    }
-
-    if (typeof error.data === "string" && error.data.length > 0) {
-      try {
-        const parsedData = JSON.parse(error.data);
-        if (isProblemDetails(parsedData)) {
-          return extractErrors(parsedData);
-        }
-      } catch {
-        // Not JSON — fall through to return the raw string.
-      }
-      return [
-        {
-          code: "RequestError",
-          message: error.data,
-        },
-      ];
-    }
-
-    if (isProblemDetails(error.data)) {
-      return extractErrors(error.data);
+    const responseErrors = extractResponseErrors(error.data);
+    if (responseErrors) {
+      return responseErrors;
     }
   }
 
   if (error instanceof Error && error.message) {
-    return [
-      {
-        code: "UnexpectedError",
-        message: error.message,
-      },
-    ];
+    return [{ code: "UnexpectedError", message: error.message }];
   }
 
-  return [
-    {
-      code: "NetworkError",
-      message: "Network error occurred. Please try again.",
-    },
-  ];
+  return [{ code: "NetworkError", message: "Network error occurred. Please try again." }];
 }

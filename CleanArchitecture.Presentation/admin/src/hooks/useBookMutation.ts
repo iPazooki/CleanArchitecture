@@ -1,27 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
 import {
-  getGetApiV1BooksIdQueryKey,
-  getGetApiV1BooksQueryKey,
+  useDeleteApiV1BooksId,
   usePostApiV1Books,
   usePutApiV1BooksId,
 } from "@/lib/api/books/books";
-import type { CreateBookCommand, UpdateBookCommand } from "@/lib/api/model";
-import {
-  extractApiErrors,
-  getFieldErrors,
-  type DomainError,
-} from "@/lib/utils/error-handler";
+import { bookQueryKeys } from "@/lib/books/book-queries";
+import type { CreateBookCommand } from "@/lib/api/model";
+import { extractApiErrors, getFieldErrors, type DomainError } from "@/lib/utils/error-handler";
 import type { BookFormValues } from "@/lib/validations/book";
 
 const fieldErrorMap = {
   Title: "title",
   Genre: "genre",
 } satisfies Record<string, keyof CreateBookCommand>;
+
+const unexpectedResponseError: DomainError = {
+  code: "UnexpectedResponse",
+  message: "unexpected_response",
+};
+
+/** Invalidates the list, plus the detail entry when one book was touched. */
+function useInvalidateBooks() {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    async (bookId?: string): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: bookQueryKeys.list() });
+
+      if (bookId) {
+        await queryClient.invalidateQueries({ queryKey: bookQueryKeys.detail(bookId) });
+      }
+    },
+    [queryClient],
+  );
+}
 
 interface UseBookMutationOptions {
   id?: string;
@@ -32,20 +49,8 @@ export function useBookMutation({ id, setError }: UseBookMutationOptions) {
   const isEditMode = Boolean(id);
   const bookId = id ?? "";
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const invalidateBooks = useInvalidateBooks();
   const [serverErrors, setServerErrors] = useState<DomainError[]>([]);
-
-  async function invalidateBookQueries(): Promise<void> {
-    await queryClient.invalidateQueries({
-      queryKey: getGetApiV1BooksQueryKey(),
-    });
-
-    if (isEditMode) {
-      await queryClient.invalidateQueries({
-        queryKey: getGetApiV1BooksIdQueryKey(bookId),
-      });
-    }
-  }
 
   function applyDomainErrors(domainErrors: DomainError[]): void {
     const fieldErrors = getFieldErrors(domainErrors, fieldErrorMap);
@@ -53,10 +58,7 @@ export function useBookMutation({ id, setError }: UseBookMutationOptions) {
     (Object.keys(fieldErrors) as Array<keyof CreateBookCommand>).forEach((fieldName) => {
       const message = fieldErrors[fieldName];
       if (message) {
-        setError(fieldName, {
-          type: "server",
-          message,
-        });
+        setError(fieldName, { type: "server", message });
       }
     });
   }
@@ -67,56 +69,68 @@ export function useBookMutation({ id, setError }: UseBookMutationOptions) {
     applyDomainErrors(domainErrors);
   }
 
+  async function handleSaved(status: number, expectedStatus: number): Promise<void> {
+    if (status !== expectedStatus) {
+      setServerErrors([unexpectedResponseError]);
+      return;
+    }
+
+    await invalidateBooks(isEditMode ? bookId : undefined);
+    router.push("/book/list");
+  }
+
   const createMutation = usePostApiV1Books({
     mutation: {
-      onSuccess: async (response) => {
-        if (response.status === 201) {
-          await invalidateBookQueries();
-          router.push("/book/list");
-        }
-      },
+      onSuccess: (response) => handleSaved(response.status, 201),
       onError: handleMutationError,
     },
   });
 
   const updateMutation = usePutApiV1BooksId({
     mutation: {
-      onSuccess: async (response) => {
-        if (response.status === 204) {
-          await invalidateBookQueries();
-          router.push("/book/list");
-        }
-      },
+      onSuccess: (response) => handleSaved(response.status, 204),
       onError: handleMutationError,
     },
   });
-
-  const isSaving = createMutation.isPending || updateMutation.isPending;
 
   function submit(formData: BookFormValues): void {
     setServerErrors([]);
 
     if (isEditMode) {
-      const updateCommand: UpdateBookCommand = {
-        id: bookId,
-        title: formData.title,
-        genre: formData.genre,
-      };
-
-      updateMutation.mutate({
-        id: bookId,
-        data: updateCommand,
-      });
+      updateMutation.mutate({ id: bookId, data: { id: bookId, ...formData } });
       return;
     }
 
-    createMutation.mutate({ data: formData as CreateBookCommand });
+    createMutation.mutate({ data: formData });
   }
 
   return {
     submit,
-    isSaving,
+    isSaving: createMutation.isPending || updateMutation.isPending,
     serverErrors,
     setServerErrors,
+  };
+}
+
+interface UseDeleteBookOptions {
+  onDeleted: () => void;
+}
+
+export function useDeleteBook({ onDeleted }: UseDeleteBookOptions) {
+  const invalidateBooks = useInvalidateBooks();
+
+  const deleteMutation = useDeleteApiV1BooksId({
+    mutation: {
+      onSuccess: async () => {
+        await invalidateBooks();
+        onDeleted();
+      },
+    },
+  });
+
+  return {
+    deleteBook: (bookId: string) => deleteMutation.mutate({ id: bookId }),
+    isDeleting: deleteMutation.isPending,
+    error: deleteMutation.error,
   };
 }

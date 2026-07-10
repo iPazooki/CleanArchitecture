@@ -101,5 +101,9 @@
   "project": "مشروع",
   "min_ago": "منذ دقيقة",
   "hr_ago": "منذ ساعة",
-  "view_all_notifications": "عرض كل الإشعارات"
+  "view_all_notifications": "عرض كل الإشعارات",
+  "previous": "السابق",
+  "next": "التالي",
+  "genre_invalid": "اختر نوعًا صالحًا.",
+  "unexpected_response": "أرجع الخادم استجابة غير متوقعة."
 }

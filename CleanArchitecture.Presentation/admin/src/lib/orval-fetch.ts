@@ -1,61 +1,17 @@
-import { getServerSession } from "next-auth";
-import { getSession, signIn } from "next-auth/react";
-import { getAuthOptions } from "@/lib/auth/auth-options";
 import { ApiError } from "@/lib/utils/api-error";
-import { getEnvVars } from "@/config/env-vars";
 
-const apiRoutePrefix = "/api/v1";
-
-function isAbsoluteUrl(url: string): boolean {
-  return /^https?:\/\//i.test(url);
-}
-
-function normalizeRequestPath(url: string): string {
-  return url.startsWith("/") ? url : `/${url}`;
-}
-
-function buildServerApiUrl(path: string): string {
-  const apiBaseUrl = getEnvVars().API_BASE_URL.trim().replace(/\/+$/, "");
-
-  if (!apiBaseUrl) {
-    throw new Error("API_BASE_URL must be configured for server-side API requests.");
-  }
-
-  const normalizedPath = normalizeRequestPath(path);
-
-  if (apiBaseUrl.endsWith(apiRoutePrefix) && normalizedPath === apiRoutePrefix) {
-    return apiBaseUrl;
-  }
-
-  if (apiBaseUrl.endsWith(apiRoutePrefix) && normalizedPath.startsWith(`${apiRoutePrefix}/`)) {
-    return `${apiBaseUrl}${normalizedPath.slice(apiRoutePrefix.length)}`;
-  }
-
-  return `${apiBaseUrl}${normalizedPath}`;
-}
-
-async function resolveAccessToken(): Promise<string | undefined> {
-  if (typeof window === "undefined") {
-    const session = await getServerSession(getAuthOptions());
-    return session?.accessToken;
-  }
-
-  const session = await getSession();
-  return session?.accessToken;
-}
+const requestTimeoutMs = 10_000;
 
 function resolveRequestUrl(url: string): string {
-  if (isAbsoluteUrl(url)) {
+  if (/^https?:\/\//i.test(url)) {
     return url;
   }
 
-  const normalizedPath = normalizeRequestPath(url);
+  return url.startsWith("/") ? url : `/${url}`;
+}
 
-  if (typeof window !== "undefined") {
-    return normalizedPath;
-  }
-
-  return buildServerApiUrl(normalizedPath);
+function resolveLocale(): string | null {
+  return localStorage.getItem("locale") || document.documentElement.lang || null;
 }
 
 async function parseResponseBody(response: Response): Promise<unknown> {
@@ -69,42 +25,39 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   }
 
   const contentType = response.headers.get("content-type") ?? "";
-  if (contentType.includes("application/json")) {
-    return JSON.parse(body);
-  }
-
-  return body;
+  return contentType.includes("application/json") ? JSON.parse(body) : body;
 }
 
+/**
+ * The mutator every orval-generated client calls. It runs in the browser and
+ * targets this app's own /api/v1 proxy — which is what attaches the backend
+ * access token. Nothing here reads or forwards credentials, and nothing here
+ * navigates: a 401 surfaces as an ApiError and QueryProvider decides what to do.
+ */
 export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
-  const accessToken = await resolveAccessToken();
-  const headers = new Headers(options.headers);
-
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+  if (typeof window === "undefined") {
+    throw new Error(
+      "orvalFetch runs in the browser only. Server Components must call the .NET API " +
+        "directly with an access token from lib/auth/access-token, not through the proxy.",
+    );
   }
 
-  if (typeof window !== "undefined") {
-    const locale = localStorage.getItem("locale") || document.documentElement.lang;
-    if (locale) {
-      headers.set("Accept-Language", locale);
-    }
+  const headers = new Headers(options.headers);
+  const locale = resolveLocale();
+
+  if (locale) {
+    headers.set("Accept-Language", locale);
   }
 
   const response = await fetch(resolveRequestUrl(url), {
     ...options,
     headers,
-    signal: options.signal ?? AbortSignal.timeout(10_000),
+    signal: options.signal ?? AbortSignal.timeout(requestTimeoutMs),
   });
 
   const data = await parseResponseBody(response);
 
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== "undefined") {
-      const callbackUrl = `${window.location.pathname}${window.location.search}`;
-      void signIn(undefined, { callbackUrl });
-    }
-
     throw new ApiError(response.status, data, response.headers);
   }
 

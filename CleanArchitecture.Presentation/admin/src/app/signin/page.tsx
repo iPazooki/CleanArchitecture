@@ -28,9 +28,7 @@ function SignInContent() {
   const [provider, setProvider] = useState<string | null>(null);
 
   useEffect(() => {
-    getAuthProviderAction().then(providerName => {
-      setProvider(providerName.toLowerCase() === "entra" ? "azure-ad" : "keycloak");
-    });
+    void getAuthProviderAction().then(setProvider);
   }, []);
 
   useEffect(() => {

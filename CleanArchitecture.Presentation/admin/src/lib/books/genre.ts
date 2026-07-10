@@ -6,6 +6,9 @@ const genreLabelByValue = {
 
 export type BookGenre = keyof typeof genreLabelByValue;
 
+/** Non-empty tuple, as `z.enum` requires. */
+export const genreValues = Object.keys(genreLabelByValue) as [BookGenre, ...BookGenre[]];
+
 export const genreOptions = Object.entries(genreLabelByValue).map(([value, label]) => ({
   value: value as BookGenre,
   label,

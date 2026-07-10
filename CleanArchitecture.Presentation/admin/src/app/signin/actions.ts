@@ -1,8 +1,7 @@
 "use server";
 
-import { getEnvVars } from "@/config/env-vars";
+import { getNextAuthProviderId, type NextAuthProviderId } from "@/lib/auth/provider";
 
-export async function getAuthProviderAction(): Promise<string> {
-  const { AUTH_PROVIDER } = getEnvVars();
-  return AUTH_PROVIDER;
+export async function getAuthProviderAction(): Promise<NextAuthProviderId> {
+  return getNextAuthProviderId();
 }

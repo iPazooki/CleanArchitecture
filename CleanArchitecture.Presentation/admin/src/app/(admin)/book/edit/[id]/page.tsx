@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
-import BookForm from "@/components/book/BookForm";
+import PageContent from "../PageContent";
 
 interface EditBookPageProps {
   params: Promise<{ id: string }>;
@@ -14,12 +13,5 @@ export const metadata: Metadata = {
 export default async function EditBookPage({ params }: EditBookPageProps) {
   const { id } = await params;
 
-  return (
-    <div>
-      <PageBreadcrumb pageTitle="Edit Book" />
-      <div className="space-y-6">
-        <BookForm id={id} />
-      </div>
-    </div>
-  );
+  return <PageContent id={id} />;
 }

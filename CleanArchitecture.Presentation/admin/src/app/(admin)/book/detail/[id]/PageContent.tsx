@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useGetApiV1BooksId } from "@/lib/api/books/books";
-import {
-  extractApiErrors,
-  formatErrorMessages,
-} from "@/lib/utils/error-handler";
 import ComponentCard from "@/components/common/ComponentCard";
+import ErrorAlert from "@/components/common/ErrorAlert";
+import useGoBack from "@/hooks/useGoBack";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useBook } from "@/lib/books/book-queries";
 import { getGenreLabel } from "@/lib/books/genre";
+import { extractApiErrors } from "@/lib/utils/error-handler";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PageContentProps {
@@ -17,29 +15,19 @@ interface PageContentProps {
 }
 
 export default function PageContent({ id }: PageContentProps) {
-  const router = useRouter();
+  const goBack = useGoBack();
   const { canEdit } = useUserPermissions();
   const { t } = useLanguage();
-
-  const { data: response, error, isLoading } = useGetApiV1BooksId(id, {
-    query: {
-      enabled: Boolean(id),
-    },
-  });
+  const { book, error, isLoading } = useBook(id);
 
   if (isLoading) {
     return <div>{t("loading_book_details")}</div>;
   }
 
   if (error) {
-    return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        {formatErrorMessages(extractApiErrors(error))}
-      </div>
-    );
+    return <ErrorAlert errors={extractApiErrors(error)} />;
   }
 
-  const book = response?.status === 200 ? response.data : null;
   if (!book) {
     return <div>{t("book_not_found")}</div>;
   }
@@ -53,7 +41,9 @@ export default function PageContent({ id }: PageContentProps) {
         </div>
         <div>
           <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t("genre")}</h4>
-          <p className="text-lg font-semibold text-gray-800 dark:text-white/90">{getGenreLabel(book.genre)}</p>
+          <p className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            {getGenreLabel(book.genre)}
+          </p>
         </div>
         <div className="flex gap-4 pt-4">
           {canEdit ? (
@@ -66,7 +56,7 @@ export default function PageContent({ id }: PageContentProps) {
           ) : null}
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             {t("back_to_list")}

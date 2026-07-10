@@ -1,30 +1,33 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useGetApiV1BooksId } from "@/lib/api/books/books";
+import { useBook } from "@/lib/books/book-queries";
 import { extractApiErrors } from "@/lib/utils/error-handler";
 import { useBookMutation } from "@/hooks/useBookMutation";
+import useGoBack from "@/hooks/useGoBack";
 import ComponentCard from "../common/ComponentCard";
+import ErrorAlert from "../common/ErrorAlert";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
 import { bookSchema, type BookFormValues } from "@/lib/validations/book";
 import { genreOptions } from "@/lib/books/genre";
-import { useLanguage } from "@/context/LanguageContext";
-import type { TranslationKey } from "@/i18n";
+import { useLanguage, useTranslateMessage } from "@/context/LanguageContext";
 
 interface BookFormProps {
   id?: string;
 }
 
+const selectClassName =
+  "w-full rounded-lg border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary";
+
 export default function BookForm({ id }: BookFormProps) {
   const isEditMode = Boolean(id);
-  const bookId = id ?? "";
-  const router = useRouter();
+  const goBack = useGoBack();
   const { t } = useLanguage();
+  const translateMessage = useTranslateMessage();
 
   const {
     register,
@@ -35,56 +38,27 @@ export default function BookForm({ id }: BookFormProps) {
   } = useForm<BookFormValues>({
     resolver: zodResolver(bookSchema),
     mode: "onBlur",
-    defaultValues: {
-      title: "",
-      genre: "",
-    },
   });
 
   const { submit, isSaving, serverErrors } = useBookMutation({ id, setError });
-
-  const {
-    data: bookResponse,
-    error: bookError,
-    isLoading: isFetchingBook,
-  } = useGetApiV1BooksId(bookId, {
-    query: {
-      enabled: isEditMode,
-    },
-  });
+  const { book, error: bookError, isLoading: isFetchingBook } = useBook(id ?? "");
 
   useEffect(() => {
-    if (!isEditMode || bookResponse?.status !== 200) {
-      return;
+    if (book) {
+      reset({ title: book.title, genre: book.genre as BookFormValues["genre"] });
     }
-
-    reset({
-      title: bookResponse.data.title,
-      genre: bookResponse.data.genre,
-    });
-  }, [bookResponse, isEditMode, reset]);
+  }, [book, reset]);
 
   const displayedServerErrors = bookError ? extractApiErrors(bookError) : serverErrors;
 
-  if (isFetchingBook) {
+  if (isEditMode && isFetchingBook) {
     return <div>{t("loading_book_data")}</div>;
   }
 
   return (
     <ComponentCard title={isEditMode ? t("edit_book") : t("add_new_book")}>
       <form onSubmit={handleSubmit(submit)} className="space-y-6">
-        {displayedServerErrors.length > 0 ? (
-          <div className="rounded-md bg-red-50 p-4" aria-live="assertive">
-            <h3 className="text-sm font-medium text-red-800">{t("validation_errors")}</h3>
-            <div className="mt-2 text-sm text-red-700">
-              <ul className="list-disc space-y-1 pl-5">
-                {displayedServerErrors.map((error) => (
-                  <li key={`${error.code}-${error.message}`}>{error.message}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : null}
+        <ErrorAlert errors={displayedServerErrors} title={t("validation_errors")} />
 
         <div>
           <Label htmlFor="title">
@@ -98,8 +72,8 @@ export default function BookForm({ id }: BookFormProps) {
             disabled={isSaving}
             {...register("title")}
           />
-          {errors.title ? (
-            <p className="mt-1 text-sm text-red-600">{t(errors.title.message as TranslationKey)}</p>
+          {errors.title?.message ? (
+            <p className="mt-1 text-sm text-red-600">{translateMessage(errors.title.message)}</p>
           ) : null}
         </div>
 
@@ -110,8 +84,9 @@ export default function BookForm({ id }: BookFormProps) {
           <select
             id="genre"
             aria-invalid={errors.genre ? "true" : "false"}
-            className="w-full rounded-lg border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+            className={selectClassName}
             disabled={isSaving}
+            defaultValue=""
             {...register("genre")}
           >
             <option value="">{t("select_genre")}</option>
@@ -121,24 +96,17 @@ export default function BookForm({ id }: BookFormProps) {
               </option>
             ))}
           </select>
-          {errors.genre ? (
-            <p className="mt-1 text-sm text-red-600">{t(errors.genre.message as TranslationKey)}</p>
+          {errors.genre?.message ? (
+            <p className="mt-1 text-sm text-red-600">{translateMessage(errors.genre.message)}</p>
           ) : null}
-          <p className="mt-1 text-sm text-gray-500">
-            {t("genre_help_text")}
-          </p>
+          <p className="mt-1 text-sm text-gray-500">{t("genre_help_text")}</p>
         </div>
 
         <div className="flex items-center gap-3">
           <Button type="submit" disabled={isSaving}>
             {isSaving ? t("saving") : isEditMode ? t("update_book") : t("create_book")}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={isSaving}
-          >
+          <Button type="button" variant="outline" onClick={goBack} disabled={isSaving}>
             {t("cancel")}
           </Button>
         </div>

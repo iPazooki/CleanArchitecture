@@ -101,5 +101,9 @@
   "project": "پروژه",
   "min_ago": "دقیقه پیش",
   "hr_ago": "ساعت پیش",
-  "view_all_notifications": "مشاهده همه اعلان‌ها"
+  "view_all_notifications": "مشاهده همه اعلان‌ها",
+  "previous": "قبلی",
+  "next": "بعدی",
+  "genre_invalid": "یک ژانر معتبر انتخاب کنید.",
+  "unexpected_response": "سرور پاسخ غیرمنتظره‌ای برگرداند."
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEnvVars } from "@/config/env-vars";
+import { getAccessToken } from "@/lib/auth/access-token";
 
 export const dynamic = "force-dynamic";
 
@@ -9,53 +10,68 @@ type RouteHandlerContext = {
   params: Promise<{ path: string[] }>;
 };
 
-function normalizeRequestPath(path: readonly string[]): string {
-  return path.join("/");
-}
+/**
+ * Headers the browser must not be able to dictate, plus hop-by-hop headers that
+ * are meaningless to the upstream connection.
+ *
+ * `authorization` is stripped because this proxy is the sole issuer of it — a
+ * client-supplied bearer token is never forwarded. `cookie` is stripped because
+ * the NextAuth session cookie is ours, not the backend's.
+ */
+const strippedRequestHeaders = [
+  "authorization",
+  "cookie",
+  "connection",
+  "content-length",
+  "host",
+  "accept-encoding",
+];
+
+const strippedResponseHeaders = ["content-encoding", "content-length", "transfer-encoding"];
 
 function createTargetUrl(request: NextRequest, path: readonly string[]): URL {
-  const apiBaseUrl = getEnvVars().API_BASE_URL.trim().replace(/\/+$/, "");
+  const baseUrl = getEnvVars().API_BASE_URL.trim().replace(/\/+$/, "");
+  const prefixedBaseUrl = baseUrl.endsWith(apiRoutePrefix)
+    ? baseUrl
+    : `${baseUrl}${apiRoutePrefix}`;
 
-  if (!apiBaseUrl) {
-    throw new Error("API_BASE_URL must be configured for API proxy requests.");
-  }
-
-  const normalizedBaseUrl = apiBaseUrl.endsWith(apiRoutePrefix)
-    ? apiBaseUrl
-    : `${apiBaseUrl}${apiRoutePrefix}`;
-
-  return new URL(`${normalizedBaseUrl}/${normalizeRequestPath(path)}${request.nextUrl.search}`);
+  return new URL(`${prefixedBaseUrl}/${path.join("/")}${request.nextUrl.search}`);
 }
 
-function createProxyHeaders(requestHeaders: Headers): Headers {
+function createProxyHeaders(requestHeaders: Headers, accessToken: string): Headers {
   const headers = new Headers(requestHeaders);
 
-  headers.delete("connection");
-  headers.delete("content-length");
-  headers.delete("host");
-  headers.delete("accept-encoding");
+  strippedRequestHeaders.forEach((header) => headers.delete(header));
+  headers.set("Authorization", `Bearer ${accessToken}`);
 
   return headers;
 }
 
 async function proxyRequest(request: NextRequest, context: RouteHandlerContext) {
-  const { path } = await context.params;
-  const targetUrl = createTargetUrl(request, path);
-  const body = request.method === "GET" || request.method === "HEAD"
-    ? undefined
-    : await request.arrayBuffer();
+  const accessToken = await getAccessToken(request);
 
-  const response = await fetch(targetUrl, {
+  if (!accessToken) {
+    return NextResponse.json(
+      { title: "Unauthorized", status: 401, detail: "No active session." },
+      { status: 401 },
+    );
+  }
+
+  const { path } = await context.params;
+  const body =
+    request.method === "GET" || request.method === "HEAD"
+      ? undefined
+      : await request.arrayBuffer();
+
+  const response = await fetch(createTargetUrl(request, path), {
     method: request.method,
-    headers: createProxyHeaders(request.headers),
+    headers: createProxyHeaders(request.headers, accessToken),
     body,
     cache: "no-store",
   });
 
   const responseHeaders = new Headers(response.headers);
-  responseHeaders.delete("content-encoding");
-  responseHeaders.delete("content-length");
-  responseHeaders.delete("transfer-encoding");
+  strippedResponseHeaders.forEach((header) => responseHeaders.delete(header));
 
   return new NextResponse(response.body, {
     status: response.status,

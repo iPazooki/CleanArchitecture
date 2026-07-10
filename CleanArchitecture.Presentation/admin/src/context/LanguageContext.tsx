@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Locale, defaultLocale, isRtl, dictionaries } from "@/i18n";
+import { Locale, defaultLocale, isRtl, dictionaries, isTranslationKey } from "@/i18n";
 
 const localeStorageKey = "locale";
 const localeCookieName = "admin-locale";
@@ -69,4 +69,17 @@ export const useLanguage = () => {
     throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
+};
+
+/**
+ * Error messages reach the UI either as translation keys (raised by our zod
+ * schemas) or as already-worded prose (raised by the backend). Resolve both.
+ */
+export const useTranslateMessage = () => {
+  const { t } = useLanguage();
+
+  return useCallback(
+    (message: string): string => (isTranslationKey(message) ? t(message) : message),
+    [t],
+  );
 };

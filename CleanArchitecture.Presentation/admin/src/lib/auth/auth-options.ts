@@ -1,8 +1,10 @@
-import type {NextAuthOptions} from "next-auth";
-import type {Provider} from "next-auth/providers/index";
+import type { Account, NextAuthOptions } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import type { Provider } from "next-auth/providers/index";
 import KeycloakProvider from "next-auth/providers/keycloak";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import {getEnvVars} from "@/config/env-vars";
+import { getEnvVars } from "@/config/env-vars";
+import { getOAuthClientCredentials, getOAuthEndpoints } from "@/lib/auth/provider";
 
 type JwtPayload = {
     roles?: string[];
@@ -10,6 +12,18 @@ type JwtPayload = {
         roles?: string[];
     };
 };
+
+type RefreshTokenResponse = {
+    access_token?: string;
+    refresh_token?: string;
+    expires_in?: number;
+    id_token?: string;
+};
+
+/**
+ * Refresh a little early so a token cannot expire while a request is in flight.
+ */
+const refreshSkewMs = 30_000;
 
 function parseJwtPayload(token: string): JwtPayload | null {
     try {
@@ -32,57 +46,137 @@ function extractRoles(accessToken: string): string[] {
     return Array.isArray(roles) ? roles : [];
 }
 
-export function getAuthOptions(): NextAuthOptions {
-    const {
-        AUTH_PROVIDER,
-        KEYCLOAK_ISSUER,
-        KEYCLOAK_CLIENT_ID,
-        KEYCLOAK_CLIENT_SECRET,
-        NEXTAUTH_SECRET,
-        KEYCLOAK_SCOPES,
-        ENTRA_CLIENT_ID,
-        ENTRA_CLIENT_SECRET,
-        ENTRA_TENANT_ID,
-        ENTRA_SCOPES,
-        ENTRA_OPENID_CONNECT,
-    } = getEnvVars();
+function buildProviders(): Provider[] {
+    const env = getEnvVars();
 
-    const providers: Provider[] = [];
-
-    if (AUTH_PROVIDER === "Keycloak" && KEYCLOAK_ISSUER && KEYCLOAK_CLIENT_ID && KEYCLOAK_CLIENT_SECRET) {
-        providers.push(
-            KeycloakProvider({
-                clientId: KEYCLOAK_CLIENT_ID,
-                clientSecret: KEYCLOAK_CLIENT_SECRET,
-                issuer: KEYCLOAK_ISSUER.replace(/\/+$/, ""),
-                authorization: {
-                    params: {
-                        scope: KEYCLOAK_SCOPES,
-                    },
-                },
-            })
-        );
-    }
-
-    if (AUTH_PROVIDER === "Entra" && ENTRA_CLIENT_ID && ENTRA_CLIENT_SECRET && ENTRA_TENANT_ID) {
-        providers.push(
+    if (env.AUTH_PROVIDER === "entra") {
+        return [
             AzureADProvider({
-                clientId: ENTRA_CLIENT_ID,
-                clientSecret: ENTRA_CLIENT_SECRET,
-                tenantId: ENTRA_TENANT_ID,
-                wellKnown: ENTRA_OPENID_CONNECT,
+                clientId: env.ENTRA_CLIENT_ID,
+                clientSecret: env.ENTRA_CLIENT_SECRET,
+                tenantId: env.ENTRA_TENANT_ID,
+                wellKnown: env.ENTRA_OPENID_CONNECT,
                 authorization: {
                     params: {
-                        scope: ENTRA_SCOPES,
+                        scope: env.ENTRA_SCOPES,
                         prompt: "select_account",
                     },
                 },
-            })
-        );
+            }),
+        ];
     }
 
+    return [
+        KeycloakProvider({
+            clientId: env.KEYCLOAK_CLIENT_ID,
+            clientSecret: env.KEYCLOAK_CLIENT_SECRET,
+            issuer: env.KEYCLOAK_ISSUER.replace(/\/+$/, ""),
+            authorization: {
+                params: {
+                    scope: env.KEYCLOAK_SCOPES,
+                },
+            },
+        }),
+    ];
+}
+
+/** Seed the JWT from the tokens the IdP returned on sign-in. */
+function applyAccount(token: JWT, account: Account): JWT {
+    const next: JWT = { ...token };
+
+    if (account.access_token) {
+        next.accessToken = account.access_token;
+        next.roles = extractRoles(account.access_token);
+    }
+
+    // Entra ID typically puts App Roles on the id_token rather than the access token.
+    if (account.id_token && !next.roles?.length) {
+        next.roles = extractRoles(account.id_token);
+    }
+
+    if (account.id_token) {
+        next.idToken = account.id_token;
+    }
+
+    if (account.refresh_token) {
+        next.refreshToken = account.refresh_token;
+    }
+
+    if (typeof account.expires_at === "number") {
+        next.expiresAt = account.expires_at * 1000;
+    }
+
+    return next;
+}
+
+function isAccessTokenValid(token: JWT): boolean {
+    if (!token.accessToken) {
+        return false;
+    }
+
+    // An IdP that omits expires_at gives us nothing to check against; trust the token.
+    if (typeof token.expiresAt !== "number") {
+        return true;
+    }
+
+    return Date.now() < token.expiresAt - refreshSkewMs;
+}
+
+/**
+ * Never return a token we know to be expired: on any failure the caller gets an
+ * `error` and no access token, which the proxy turns into a 401.
+ */
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+    if (!token.refreshToken) {
+        return { ...token, accessToken: undefined, error: "RefreshAccessTokenError" };
+    }
+
+    try {
+        const { clientId, clientSecret } = getOAuthClientCredentials();
+
+        const response = await fetch(getOAuthEndpoints().tokenEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: token.refreshToken,
+                client_id: clientId,
+                client_secret: clientSecret,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Token endpoint returned ${response.status}`);
+        }
+
+        const refreshed = (await response.json()) as RefreshTokenResponse;
+
+        if (!refreshed.access_token) {
+            throw new Error("Token endpoint returned no access_token");
+        }
+
+        return {
+            ...token,
+            accessToken: refreshed.access_token,
+            // Providers that rotate refresh tokens invalidate the previous one.
+            refreshToken: refreshed.refresh_token ?? token.refreshToken,
+            idToken: refreshed.id_token ?? token.idToken,
+            expiresAt: refreshed.expires_in
+                ? Date.now() + refreshed.expires_in * 1000
+                : undefined,
+            roles: extractRoles(refreshed.access_token),
+            error: undefined,
+        };
+    } catch {
+        return { ...token, accessToken: undefined, error: "RefreshAccessTokenError" };
+    }
+}
+
+export function getAuthOptions(): NextAuthOptions {
+    const { NEXTAUTH_SECRET } = getEnvVars();
+
     return {
-        providers,
+        providers: buildProviders(),
         pages: {
             signIn: "/signin",
         },
@@ -91,31 +185,28 @@ export function getAuthOptions(): NextAuthOptions {
             strategy: "jwt",
         },
         callbacks: {
-            async jwt({token, account}) {
-                if (account?.access_token) {
-                    token.accessToken = account.access_token;
-                    token.roles = extractRoles(account.access_token);
+            async jwt({ token, account }) {
+                if (account) {
+                    return applyAccount(token, account);
                 }
 
-                // Fallback: Entra ID often puts App Roles in the id_token for the BFF
-                if (account?.id_token && (!token.roles || token.roles.length === 0)) {
-                    token.roles = extractRoles(account.id_token);
+                if (isAccessTokenValid(token)) {
+                    return token;
                 }
 
-                if (account?.id_token) {
-                    token.idToken = account.id_token;
-                }
-
-                return token;
+                return refreshAccessToken(token);
             },
-            async session({session, token}) {
+            async session({ session, token }) {
                 if (session.user && token.sub) {
                     session.user.id = token.sub;
                     session.user.roles = Array.isArray(token.roles) ? token.roles : [];
                 }
 
-                if (typeof token.accessToken === "string") {
-                    session.accessToken = token.accessToken;
+                // `token.accessToken` is deliberately NOT copied here. Everything on the
+                // session is readable by the browser via GET /api/auth/session; the access
+                // token stays on the encrypted JWT cookie and is attached server-side only.
+                if (token.error) {
+                    session.error = token.error;
                 }
 
                 return session;

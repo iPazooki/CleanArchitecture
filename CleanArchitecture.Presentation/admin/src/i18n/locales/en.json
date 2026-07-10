@@ -101,5 +101,9 @@
   "project": "Project",
   "min_ago": "min ago",
   "hr_ago": "hr ago",
-  "view_all_notifications": "View All Notifications"
+  "view_all_notifications": "View All Notifications",
+  "previous": "Previous",
+  "next": "Next",
+  "genre_invalid": "Select a valid genre.",
+  "unexpected_response": "The server returned an unexpected response."
 }

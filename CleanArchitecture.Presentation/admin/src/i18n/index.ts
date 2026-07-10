@@ -21,3 +21,11 @@ export const isRtl = (locale: Locale) => {
 export function isLocale(value: string | null | undefined): value is Locale {
   return Boolean(value) && supportedLocales.includes(value as Locale);
 }
+
+/**
+ * Error messages reach the UI from two sources: our zod schemas, which carry
+ * translation keys, and the backend, which carries already-worded prose.
+ */
+export function isTranslationKey(value: string): value is TranslationKey {
+  return value in dictionaries.en;
+}
