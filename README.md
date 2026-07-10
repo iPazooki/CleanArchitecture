@@ -2,228 +2,240 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/ipazooki/CleanArchitecture)
 [![.NET Aspire CI](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml/badge.svg)](https://github.com/iPazooki/CleanArchitecture/actions/workflows/dotnet.yml)
 
-# 🧱 Clean Architecture
+```text
+  ┌────────────────────────────────────────────────────────┐
+  │  ______ _                  ___           _             │
+  │ / ____/ /__  ____ _____   /   |  _______/ /_           │
+  │/ /   / / _ \/ __ `/ __ \ / /| | / ___/ __  /           │
+  │/ /___/ /  __/ /_/ / / / // ___ |/ /  / /_/ /           │
+  │\____/_/\___/\__,_/_/ /_//_/  |_/_/   \__,_/            │
+  │                                                        │
+  │      🧱 CLEAN ARCHITECTURE & MICROSOFT ENTRA ID 🧱      │
+  │         🚀 Orchestrated by .NET Aspire 10 & 13         │
+  └────────────────────────────────────────────────────────┘
+```
 
-A production-ready **.NET 10 + Next.js 16** Clean Architecture template, orchestrated by **.NET Aspire** and ready to deploy to Azure with `azd`. It ships with a Minimal API, an admin dashboard, dual authentication providers, and PostgreSQL — all wired up out of the box.
+A production-ready, cloud-native template built on **.NET 10** and **Next.js 16 (React 19)**, orchestrated by **.NET Aspire** and configured for instant Azure containerized deployment. 
+
+It features a C# Minimal API backend, a Next.js Admin Portal acting as a secure **Backend-for-Frontend (BFF)**, integrated authentication (Microsoft Entra ID / Keycloak), and a PostgreSQL database.
 
 ---
 
-## ✨ Highlights
+## ✨ Highlights & Features
 
-- 🎯 **Clean Architecture** — strict layer boundaries enforced by architecture tests
-- ⚡ **.NET 10 Minimal API** — versioned endpoints, output caching, `Result<T>` pattern
-- 🧩 **CQRS** via the [Mediator](https://github.com/martinothamar/Mediator) source generator (no MediatR runtime cost)
-- 🌐 **Next.js 16 Admin Panel** — App Router BFF with i18n (en / fa / ar + RTL)
-- 🔐 **Pluggable Authentication** — switch between **Keycloak** and **Microsoft Entra ID** via config
-- 📜 **Scalar API Reference** — interactive OpenAPI UI with implicit OAuth flow (no client secret needed)
-- 🛠️ **Orval-generated API client** — typed React hooks regenerated from the OpenAPI spec
-- 🐘 **PostgreSQL** via EF Core 10 with auto-applied migrations
-- ☁️ **.NET Aspire** — orchestrates all services locally and provisions Azure infrastructure
-- 🧪 **Robust Testing** — Domain unit tests and architecture tests
-- 🛡️ **Polly** — retries, circuit breakers, fallbacks for outbound calls
+- 🧱 **Clean Architecture** — Strict layer boundaries enforced via automated architecture unit tests.
+- ⚡ **.NET 10 Minimal API** — Type-safe versioned endpoints (`/api/v1/...`), result pattern, and OpenAPI integration.
+- 🧩 **CQRS via Source Generator** — Powered by the [Mediator](https://github.com/martinothamar/Mediator) source generator, eliminating runtime reflection cost.
+- 🔐 **Secure BFF Auth** — Next.js server handles authentication (NextAuth.js) and token exchanges, keeping tokens safe from the browser.
+- 🌐 **Next.js 16 Admin Panel** — Styled with **Tailwind CSS 4**, full i18n support (English, Persian, Arabic with RTL direction), and responsive layouts.
+- ⚡ **Orval-Generated Client** — Auto-generated TypeScript types and TanStack Query hooks from the backend OpenAPI spec.
+- 🔑 **Pluggable Identity** — Supports **Microsoft Entra ID** (default CIAM/AD) and **Keycloak** (OIDC/JWT) switchable via configuration.
+- 🐘 **PostgreSQL & EF Core 10** — Robust persistence, change-tracked auditing, and a dedicated startup migrator project (`DbMigrator`).
+- 📧 **Brevo Email Service** — Out-of-the-box transactional email client with automatic fallback to a null service.
+- ☁️ **.NET Aspire Orchestration** — Streamlined developer experience, local service discovery, and zero-effort Azure provisioning via `azd`.
+- 🛡️ **Polly Resilience** — HTTP retries, timeouts, and circuit breakers automatically configured via Service Defaults.
+- 📜 **Scalar API Docs** — Sleek, interactive API reference interface with built-in OAuth authentication support.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architectural Overview
 
-```
-Domain ← Application ← Infrastructure / Infrastructure.Persistence ← Presentation
+```text
+       ┌────────────────────────┐
+       │   Presentation (API)   │ ──┐
+       └────────────────────────┘   │
+                    │               │
+                    ▼               │
+       ┌────────────────────────┐   │
+       │      Application       │   │
+       └────────────────────────┘   │
+                    │               │
+                    ▼               ▼
+       ┌────────────────────────┐ ┌──────────────────────────────────────┐
+       │         Domain         │ │ Infrastructure / Persistence (EF Core)│
+       └────────────────────────┘ └──────────────────────────────────────┘
 ```
 
-| Layer | Responsibility |
+| Layer | Responsibility & Details |
 |---|---|
-| **Domain** | Entities, Value Objects, Specifications, Domain Events |
-| **Application** | CQRS commands/queries, validators, `Result<T>` |
-| **Infrastructure** | External integrations (email, etc.) with Polly resilience |
-| **Infrastructure.Persistence** | EF Core `DbContext`, Postgres, migrations, interceptors |
-| **Presentation/API** | Minimal API, versioned at `/api/v1/...`, Scalar UI |
-| **Presentation/admin** | Next.js admin dashboard (BFF + NextAuth.js) |
-| **Aspire AppHost** | Orchestrates the full stack and Azure deployment |
+| 🌌 **Domain** | Entities, Value Objects, Domain Events, validations (`DomainValidation.NET`). Free of dependencies. |
+| ⚙️ **Application** | CQRS Commands/Queries, validators (`FluentValidation`), and `Result<T>` handlers. |
+| 🛡️ **Infrastructure** | Integrations like Brevo Email Service, policies, and outbound Polly resilience. |
+| 🐘 **Persistence** | EF Core 10 DbContext, auditing interceptors, migrations, and PostgreSQL schemas. |
+| 🔵 **Presentation (API)** | Minimal API, versioned route groups, Result unwrapping, and Scalar UI docs. |
+| 🟣 **Presentation (Admin)** | Next.js admin dashboard (NextAuth.js BFF, Orval-generated query hooks). |
+| 🚀 **Aspire AppHost** | Orchestrates services locally and generates infrastructure manifests for Azure. |
 
 ---
 
-## ✅ Prerequisites
+## 🛠️ Prerequisites
 
-- 📦 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- 🐳 Docker Desktop (for Postgres, Keycloak, PgAdmin containers)
-- 🟢 [Node.js 20+](https://nodejs.org/) and [pnpm](https://pnpm.io/installation)
-- 🌩️ (Optional) [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) + [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) for cloud deployment
+Make sure you have the following installed on your machine:
+* 📦 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+* 🐳 [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Postgres database)
+* 🟢 [Node.js 20+](https://nodejs.org/) & [pnpm](https://pnpm.io/)
+* 🌩️ *Optional:* [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) for cloud deployments.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Local Run)
+
+Get up and running in minutes:
 
 ```bash
-# 1. Clone
+# 1. Clone the repository
 git clone https://github.com/iPazooki/CleanArchitecture.git
 cd CleanArchitecture
 
 # 2. Restore .NET dependencies
 dotnet restore
 
-# 3. Install admin panel dependencies
-cd CleanArchitecture.Presentation/admin && pnpm install && cd ../..
+# 3. Install admin portal node modules
+cd CleanArchitecture.Presentation/admin
+pnpm install
+cd ../..
 
-# 4. Run the full stack with Aspire
+# 4. Run the entire stack with .NET Aspire
 dotnet run --project CleanArchitecture.Aspire/CleanArchitecture.AppHost/CleanArchitecture.AppHost.csproj
 ```
 
-Aspire will spin up everything you need:
-
-| Service | What it does |
-|---|---|
-| 🔵 **API** | .NET Minimal API |
-| 🟣 **Admin** | Next.js dashboard |
-| 🐘 **Postgres** + **PgAdmin** | Database & UI |
-| 🔑 **Keycloak** | Local identity provider (realm auto-imported) |
-
-The Aspire dashboard prints the URLs for every resource (API, Scalar UI, admin, Keycloak, PgAdmin).
+### 🛰️ Orchestrated Services
+Once Aspire starts, open the **Aspire Dashboard** link in your terminal to monitor and access all services:
+* 🔵 **API Service** — C# Backend Minimal API
+* 🟣 **Admin Portal** — Next.js Dashboard
+* 🐘 **Postgres + PgAdmin** — Database and management UI
+* 📜 **Scalar UI** — Live API reference docs
 
 ---
 
-## 🔐 Authentication
+## 🔐 Authentication Config
 
-The app supports **two providers** and switches between them via configuration.
+The project is designed with a pluggable authentication setup. You can switch between **Microsoft Entra ID** and **Keycloak**. 
 
-| Environment | Default Provider | Why |
-|---|---|---|
-| 🛠️ Development | **Keycloak** | Runs as a local container, realm auto-imported, no cloud setup needed |
-| ☁️ Production | **Microsoft Entra ID** | Managed identity, no secrets to rotate for the API |
-
-### Switching providers
-
-In `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings.*.json`:
-
-```jsonc
+### ⚙️ AppHost Configuration
+In `CleanArchitecture.Aspire/CleanArchitecture.AppHost/appsettings.json` (or your local environment secrets):
+```json
 {
-  "UseKeycloak": true   // false → Entra
+  "UseKeycloak": false // Set to true to use Keycloak; false uses Entra ID
 }
 ```
 
-The AppHost wires the right environment variables (`Authentication__Provider`, issuer URLs, audiences, NextAuth client config) into the API and admin projects automatically.
-
-> 📘 Scalar uses the **OAuth 2.0 implicit flow**, so no client secret is needed for the API reference UI. Just sign in from the Scalar page.
-
----
-
-## 📜 API Reference (Scalar)
-
-Once running, open the **Scalar** UI from the Aspire dashboard's API resource. It renders the OpenAPI spec at `/openapi/v1.json` and lets you authenticate and call endpoints interactively.
-
----
-
-## 🖥️ Admin Panel
-
-The admin dashboard lives in `CleanArchitecture.Presentation/admin` (Next.js 16, App Router, Tailwind, NextAuth.js, TanStack Query).
-
-```bash
-cd CleanArchitecture.Presentation/admin
-pnpm dev        # dev server (Aspire normally runs this for you)
-pnpm build      # production build
-pnpm lint       # ESLint with --max-warnings=0
-pnpm generate   # regenerate the typed API client from the live OpenAPI spec
-```
-
-### ⚙️ Required Configuration (.env.local)
-
-Create a `.env.local` file in the `CleanArchitecture.Presentation/admin` directory with the following required configuration:
+### ⚙️ Admin Portal Config (`.env.local`)
+Create a `.env.local` inside `CleanArchitecture.Presentation/admin/` to authenticate the Next.js server side:
 
 ```env
 API_BASE_URL=http://localhost:5049/
-
 NEXTAUTH_URL=http://localhost:65499
-NEXTAUTH_SECRET=<Secret> you can use: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))" to generate a secret code
+# Generate a secret: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+NEXTAUTH_SECRET=your-random-32-byte-base64-secret
 
-AUTH_PROVIDER=Entra //or Keycloak
+AUTH_PROVIDER=Entra # Set to "Entra" or "Keycloak"
 
-KEYCLOAK_CLIENT_ID=<Client ID>
-KEYCLOAK_CLIENT_SECRET=<Client Secret>
-KEYCLOAK_ISSUER=<Issuer URL>
+# Microsoft Entra ID Config (CIAM/AD)
+ENTRA_CLIENT_ID=<Your-Entra-Client-ID>
+ENTRA_CLIENT_SECRET=<Your-Entra-Client-Secret>
+ENTRA_TENANT_ID=<Your-Entra-Tenant-ID>
+ENTRA_SCOPES=openid profile email offline_access api://<Your-Audience-ID>/permissions
+ENTRA_OPENID_CONNECT=https://<Your-Domain>.ciamlogin.com/<Your-Tenant-ID>/v2.0/.well-known/openid-configuration
+
+# Keycloak Config (Optional)
+KEYCLOAK_CLIENT_ID=mrpanel
+KEYCLOAK_CLIENT_SECRET=<Your-Keycloak-Client-Secret>
+KEYCLOAK_ISSUER=http://localhost:8080/realms/clean-api
 KEYCLOAK_SCOPES=openid profile email permissions
-
-ENTRA_CLIENT_ID=<Client ID>
-ENTRA_CLIENT_SECRET=<Client Secret>
-ENTRA_TENANT_ID=<Tenant ID>
-ENTRA_SCOPES=openid profile email <Scopes>
-ENTRA_OPENID_CONNECT=<OpenID Connect URL>
 ```
-
-### 🤖 Orval — generated API client
-
-The React Query hooks and TypeScript DTOs under `src/lib/api/` are **generated by Orval** from the API's OpenAPI document. **Never edit them by hand.** After changing an endpoint or DTO, run:
-
-```bash
-pnpm generate
-```
-
-(Make sure the API is running on `http://localhost:5049` so Orval can fetch the spec.)
 
 ---
 
-## 🗄️ Database
+## 🖥️ Next.js 16 Admin Portal
 
-- **Engine**: PostgreSQL
-- **ORM**: EF Core 10 (`Npgsql.EntityFrameworkCore.PostgreSQL`)
-- **Migrations**: live in `CleanArchitecture.Infrastructure.Persistence`
-- **Auto-apply**: the dedicated `CleanArchitecture.DbMigrator` project runs migrations at startup before the API boots
+The UI resides in `CleanArchitecture.Presentation/admin` and connects to the backend through the Next.js API route BFF.
 
-### Add a migration
+### Useful Commands
+```bash
+# Start Next.js development server manually
+pnpm dev
 
+# Produce a production build
+pnpm build
+
+# Run linting with warnings treated as errors
+pnpm lint
+
+# Regenerate API client and TanStack Query hooks from the OpenAPI spec
+pnpm generate
+```
+
+> [!IMPORTANT]
+> The TypeScript API client and queries located in `src/lib/api/` are **automatically generated by Orval** from the OpenAPI document. **Do not modify these files manually.** Run `pnpm generate` whenever you alter endpoints or backend DTOs.
+
+---
+
+## 🗄️ Database & Migrations
+
+Database operations use **EF Core 10** with **Npgsql** targeting **PostgreSQL**.
+A dedicated container project (`CleanArchitecture.DbMigrator`) runs at startup to automatically apply pending migrations.
+
+### Add a New EF Migration
+If you modify your DB context or entities in persistence, generate a migration:
 ```bash
 dotnet ef migrations add <MigrationName> \
   --project CleanArchitecture.Infrastructure.Persistence \
   --startup-project CleanArchitecture.Presentation/API
 ```
 
-> 💡 An `ApplicationDbContextFactory` provides a design-time connection string so EF tools work without Aspire running.
+---
+
+## 📧 Transactional Emails (Brevo)
+
+The template includes integration with **Brevo Email Service** for transaction emails.
+* **Fallback Behavior**: If `Brevo:ApiKey` is not configured, the application falls back to `NullEmailService` rather than crashing, ensuring a seamless local experience.
+* **Secrets Configuration**: Set your Brevo key locally:
+  ```bash
+  dotnet user-secrets set "Brevo:ApiKey" "<your-key>" --project CleanArchitecture.Presentation/API
+  ```
+
+---
+
+## 🧪 Testing Strategy
+
+Run all tests from the repository root:
+```bash
+dotnet test --configuration Release
+```
+
+* **Domain Unit Tests** — Validates invariants, aggregates, and value object behaviors.
+* **Architecture Tests** — Enforces clean layer dependency flow (Domain has zero dependencies, Application depends only on Domain, etc.). If a forbidden dependency leaks into a layer, the build fails.
 
 ---
 
 ## ☁️ Deploy to Azure with `azd`
 
-The Aspire AppHost provisions everything for you:
+Thanks to .NET Aspire integration, deploying the entire stack to Azure is fully automated. The deployment provisions:
+* 🚢 **Azure Container Apps** — Hosts the API and Admin Next.js portal.
+* 🐘 **Azure Database for PostgreSQL (Flexible Server)**.
+* 🔒 **Azure Key Vault** — Stores database credentials, secrets, and auth provider tokens.
+* 📊 **Azure Application Insights & Log Analytics** — Log, trace, and metric collection.
 
-- 🚢 **Azure Container Apps** — API, admin, (optionally Keycloak)
-- 🐘 **Azure Database for PostgreSQL Flexible Server**
-- 🔒 **Azure Key Vault** — all secrets stored here automatically
-- 📊 **Azure Application Insights**
-
-### Deploy
-
+### Deploy Command
 ```bash
+# 1. Initialize config and secrets
 aspire publish
-```
 
-and then after entering you desired values, run:
-```bash
+# 2. Deploy infrastructure and code
 aspire deploy
 ```
-
-> 🔐 All secret parameters (`*Secret`, `*Password`, `nextAuthSecret`) are written to **Azure Key Vault** automatically — they never live in plain text in your container apps.
-
----
-
-## 🧪 Testing
-
-```bash
-dotnet test --configuration Release
-```
-
-- 🧬 **Domain unit tests** — `Tests/Domain.UnitTests`
-- 🏛️ **Architecture tests** — enforce layer dependencies
-
-Every test runs in-process, so `dotnet test` needs no Docker daemon and no running services.
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an [issue](https://github.com/iPazooki/CleanArchitecture/issues) first to discuss what you'd like to change.
+Contributions are welcome! Please open an [issue](https://github.com/iPazooki/CleanArchitecture/issues) first to discuss proposed changes.
 
-⭐ If you find this template useful, please **star the repo** — it really helps!
+⭐ If you find this template helpful, please **star the repo** — it helps others find it!
 
 ---
 
 ## 📄 License
 
-[MIT](LICENSE) — use it freely as a foundation for your own projects.
+This project is licensed under the [MIT License](LICENSE) - free for personal and commercial use.
