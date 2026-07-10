@@ -1,4 +1,3 @@
-using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Infrastructure.Email;
 using CleanArchitecture.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;

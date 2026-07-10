@@ -1,6 +1,4 @@
-﻿using CleanArchitecture.Domain.Common;
-
-namespace CleanArchitecture.Domain.Validations;
+﻿namespace CleanArchitecture.Domain.Validations;
 
 /// <summary>
 /// Contains all domain errors related to the Book aggregate.

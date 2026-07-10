@@ -1,5 +1,4 @@
 using CleanArchitecture.Application.Common.Interfaces;
-using CleanArchitecture.Domain.Common;
 using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Domain.ValueObjects;
 using CleanArchitecture.Infrastructure.Persistence.Data;

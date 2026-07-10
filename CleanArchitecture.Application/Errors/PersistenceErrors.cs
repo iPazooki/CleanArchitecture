@@ -1,5 +1,3 @@
-using CleanArchitecture.Domain.Common;
-
 namespace CleanArchitecture.Application.Errors;
 
 /// <summary>

@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using CleanArchitecture.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using CleanArchitecture.Infrastructure.Persistence.Data;
 using CleanArchitecture.Infrastructure.Persistence.Data.Interceptors;

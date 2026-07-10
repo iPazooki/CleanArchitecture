@@ -1,5 +1,4 @@
 using CleanArchitecture.Domain.Common;
-using CleanArchitecture.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
