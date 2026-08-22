@@ -4,5 +4,9 @@
       "Bash(pnpm build *)",
       "Bash(pnpm lint *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "aspire"
+  ],
+  "enableAllProjectMcpServers": true
 }

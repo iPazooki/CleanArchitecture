@@ -21,8 +21,10 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
-    - name: Install .NET Aspire workload
-      run: dotnet workload install aspire
+    - name: Install Aspire CLI
+      run: |
+        curl -sSL https://aspire.dev/install.sh | bash
+        echo "$HOME/.aspire/bin" >> $GITHUB_PATH
 
     - name: Restore dependencies
       run: dotnet restore

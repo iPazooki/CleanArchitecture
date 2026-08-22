@@ -95,8 +95,8 @@ cd CleanArchitecture.Presentation/admin
 pnpm install
 cd ../..
 
-# 4. Run the entire stack with .NET Aspire
-dotnet run --project CleanArchitecture.Aspire/CleanArchitecture.AppHost/CleanArchitecture.AppHost.csproj
+# 4. Run the entire stack with Aspire
+aspire run
 ```
 
 ### 🛰️ Orchestrated Services

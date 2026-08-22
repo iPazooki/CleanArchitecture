@@ -55,7 +55,7 @@ internal static class ProductionEnvironmentExtensions
                 };
             });
 
-        IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "mrpaneldb");
+        IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "cleanarchitecturedb");
 
 #pragma warning disable ASPIREAZURE002 // PublishAsAzureContainerAppJob is evaluation-only in 13.2.4
         builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)

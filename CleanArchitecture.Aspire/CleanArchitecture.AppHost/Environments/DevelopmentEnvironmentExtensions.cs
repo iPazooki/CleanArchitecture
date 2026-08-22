@@ -8,7 +8,7 @@ internal static class DevelopmentEnvironmentExtensions
             .WithDataVolume("postgres-data")
             .WithPgAdmin()
             .WithLifetime(ContainerLifetime.Persistent)
-            .AddDatabase(ResourceNames.PostgresDatabase, "mrpaneldb");
+            .AddDatabase(ResourceNames.PostgresDatabase, "cleanarchitecturedb");
 
         IResourceBuilder<ParameterResource> username =
             builder.AddParameter("keycloakAdminUsername", "admin");
