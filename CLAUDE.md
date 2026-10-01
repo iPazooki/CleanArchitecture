@@ -30,7 +30,7 @@ dotnet test Tests/Domain.UnitTests/Domain.UnitTests.csproj --configuration Relea
 ```
 Filter to a single test class or method:
 ```bash
-dotnet test Tests/Domain.UnitTests/Domain.UnitTests.csproj --filter "FullyQualifiedName~BookTests"
+dotnet test --project Tests/Domain.UnitTests/Domain.UnitTests.csproj --filter-class "*BookTests"
 ```
 
 ### Frontend (Next.js admin)

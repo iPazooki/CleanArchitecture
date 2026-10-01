@@ -49,17 +49,18 @@ internal static class DependencyInjection
                     });
         }
 
-        // Authorization policies are registered by AddInfrastructureServices. They name no
-        // authentication scheme, so each request is evaluated against the default scheme
-        // configured above, regardless of registration order.
-
         // Add API Versioning - URL segment only
-        services.AddApiVersioning(options =>
+        Asp.Versioning.IApiVersioningBuilder apiVersioning = services.AddApiVersioning(options =>
         {
             options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.ReportApiVersions = true;
             options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
+        })
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
         });
 
         if (builder.Environment.IsDevelopment())
@@ -78,10 +79,10 @@ internal static class DependencyInjection
                 authorizationUrl = builder.Configuration["Keycloak:AuthorizationUrl"]
                                    ?? throw new InvalidOperationException("Keycloak AuthorizationUrl is not configured.");
             }
-
-            services.AddOpenApi("v1", options =>
+            
+            apiVersioning.AddOpenApi(versionedOptions =>
             {
-                options.AddDocumentTransformer((document, _, _) =>
+                versionedOptions.Document.AddDocumentTransformer((document, _, _) =>
                 {
                     string[] scopes = builder.Configuration["ScalarApi:Scopes"]?.Split(',') ?? [];
 
@@ -89,22 +90,6 @@ internal static class DependencyInjection
 
                     document.Info.Title = "Clean Architecture API";
                     document.Info.Version = "v1";
-
-                    // Replace {version} placeholder with actual version in all paths
-                    Dictionary<string, IOpenApiPathItem> updatedPaths = new();
-                    foreach (KeyValuePair<string, IOpenApiPathItem> path in document.Paths)
-                    {
-                        string updatedPath = path.Key.Replace("{version}", "1", StringComparison.OrdinalIgnoreCase);
-                        updatedPaths[updatedPath] = path.Value;
-                    }
-
-                    document.Paths = new OpenApiPaths();
-
-                    foreach (KeyValuePair<string, IOpenApiPathItem> path in updatedPaths)
-                    {
-                        document.Paths.Add(path.Key, path.Value);
-                    }
-
                     document.Components ??= new OpenApiComponents();
                     document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
 

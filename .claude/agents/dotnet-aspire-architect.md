@@ -97,7 +97,7 @@ Frontend: `pnpm lint` runs ESLint with `--max-warnings=0`.
 **Testing Reminders:**
 - When modifying an entity, remind the user to update `Tests/Domain.UnitTests`
 - When modifying a command/query, remind the user to update Application and Integration tests
-- Provide the specific `dotnet test --filter` command for the affected test class
+- Provide the specific `dotnet test --filter-class` command (xunit v4 on Microsoft.Testing.Platform) for the affected test class
 
 **Documentation:**
 - Proactively use Context7 MCP when working with any library in this stack (.NET Aspire, EF Core, NextAuth, TanStack Query, Orval, FluentValidation, Keycloak, Polly, Serilog, OpenTelemetry)

@@ -13,7 +13,7 @@ apply: always
 - Use `dotnet build` as the .NET lint gate. `Directory.Build.props` enables `AnalysisMode=All`, `EnforceCodeStyleInBuild`, `TreatWarningsAsErrors`, and SonarAnalyzer across all `.csproj` files.
 - Run all tests: `dotnet test --configuration Release`
 - Run one test project: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release`
-- Run a single test class or method: `dotnet test Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release --filter "FullyQualifiedName~Domain.UnitTests.BookTests"`
+- Run a single test class or method: `dotnet test --project Tests\Domain.UnitTests\Domain.UnitTests.csproj --configuration Release --filter-class "Domain.UnitTests.BookTests"` (xunit v4 runs on Microsoft.Testing.Platform, opted in via `global.json`; use `--filter-method` for a single test)
 - Run the full local stack through Aspire: `dotnet run --project CleanArchitecture.Aspire\CleanArchitecture.AppHost\CleanArchitecture.AppHost.csproj`
 - Run only the API: `dotnet run --project CleanArchitecture.Presentation\API\CleanArchitecture.Api.csproj`
 - Add a migration: `dotnet ef migrations add <Name> --project CleanArchitecture.Infrastructure.Persistence --startup-project CleanArchitecture.Presentation\API`

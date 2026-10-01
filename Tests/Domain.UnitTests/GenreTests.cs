@@ -12,7 +12,7 @@ public class GenreTests
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Equal(code, result.Value!.Code);
+        Assert.Equal(code, result.Value.Code);
     }
 
     [Fact]

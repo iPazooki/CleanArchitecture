@@ -21,7 +21,7 @@ internal static class WebApplicationExtensions
             string authorizationUrl = app.Configuration["ScalarApi:AuthorizationUrl"] ??
                               throw new ArgumentException("Scalar API AuthorizationUrl is not configured.");
 
-            app.MapOpenApi();
+            app.MapOpenApi().WithDocumentPerVersion();
 
             app.MapScalarApiReference(options => options
                 .WithTitle("Clean Architecture API - v1")
