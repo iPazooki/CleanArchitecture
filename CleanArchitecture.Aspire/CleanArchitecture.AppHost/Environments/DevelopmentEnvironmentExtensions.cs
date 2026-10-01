@@ -16,8 +16,18 @@ internal static class DevelopmentEnvironmentExtensions
         IResourceBuilder<ParameterResource> password =
             builder.AddParameter("keycloakAdminPassword", "admin", secret: true);
 
+        // Persisted so it stays stable across runs: the realm import is IGNORE_EXISTING,
+        // so Keycloak keeps whatever secret it saw on first import.
+        IResourceBuilder<ParameterResource> adminClientSecret = builder.AddParameter(
+            "keycloakClientSecret",
+            new GenerateParameterDefault { MinLength = 32, Special = false },
+            secret: true,
+            persist: true);
+
         IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakPort, username, password)
             .WithRealmImport("./Realms")
+            .WithEnvironment(AppHostConstants.KeycloakClientSecretVariable, adminClientSecret)
+            .WithBindMount("./Keycloak/quarkus.properties", "/opt/keycloak/conf/quarkus.properties", isReadOnly: true)
             .WithDataVolume()
             .WithOtlpExporter()
             .WithLifetime(ContainerLifetime.Persistent);
@@ -37,6 +47,7 @@ internal static class DevelopmentEnvironmentExtensions
             .WithHttpEndpoint(targetPort: AppHostConstants.AdminTargetPort, port: AppHostConstants.AdminHostPort)
             .WithArgs("dev")
             .WithPnpm()
+            .WithEnvironment(AppHostConstants.KeycloakClientSecretVariable, adminClientSecret)
             .WithReference(apiProject)
             .WaitFor(apiProject);
     }

@@ -2,11 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(pnpm build *)",
-      "Bash(pnpm lint *)"
+      "Bash(pnpm lint *)",
+      "mcp__aspire__list_resources",
+      "mcp__aspire__list_console_logs"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "aspire"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

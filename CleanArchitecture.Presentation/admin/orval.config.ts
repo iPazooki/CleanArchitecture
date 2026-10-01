@@ -13,7 +13,7 @@ export default defineConfig({
       httpClient: "fetch",
       indexFiles: true,
       clean: true,
-      prettier: true,
+      formatter: "prettier",
       override: {
         mutator: {
           path: "./src/lib/orval-fetch.ts",

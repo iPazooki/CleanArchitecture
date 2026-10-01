@@ -404,3 +404,5 @@ CleanArchitecture.Presentation/app.db-shm
 CleanArchitecture.Presentation/app.db-wal
 /CleanArchitecture.Presentation/admin/obj/*
 .azure
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
