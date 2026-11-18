@@ -3,5 +3,9 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
-overrides:
-  undici: ^7.29.1
+peerDependencyRules:
+  allowedVersions:
+    "@react-jvectormap/core>react": "^19"
+    "@react-jvectormap/core>react-dom": "^19"
+    "@react-jvectormap/world>react": "^19"
+    "@react-jvectormap/world>react-dom": "^19"
