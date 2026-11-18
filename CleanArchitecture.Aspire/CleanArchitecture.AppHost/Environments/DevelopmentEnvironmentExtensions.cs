@@ -1,3 +1,5 @@
+using Aspire.Hosting.Dotnet;
+
 namespace CleanArchitecture.AppHost.Environments;
 
 internal static class DevelopmentEnvironmentExtensions
@@ -24,7 +26,7 @@ internal static class DevelopmentEnvironmentExtensions
             secret: true,
             persist: true);
 
-        IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakPort, username, password)
+        IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakDevelopmentPort, username, password)
             .WithRealmImport("./Realms")
             .WithEnvironment(AppHostConstants.KeycloakClientSecretVariable, adminClientSecret)
             .WithBindMount("./Keycloak/quarkus.properties", "/opt/keycloak/conf/quarkus.properties", isReadOnly: true)
@@ -32,11 +34,11 @@ internal static class DevelopmentEnvironmentExtensions
             .WithOtlpExporter()
             .WithLifetime(ContainerLifetime.Persistent);
 
-        IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
+        IResourceBuilder<DotnetProjectResource> migrator = builder.AddDotnetProject(ResourceNames.DbMigrator, AppHostConstants.DbMigratorProjectPath)
             .WithReference(postgres)
             .WaitFor(postgres);
 
-        IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
+        IResourceBuilder<DotnetProjectResource> apiProject = builder.AddDotnetProject(ResourceNames.Api, AppHostConstants.ApiProjectPath)
             .WithReference(postgres)
             .WaitFor(postgres)
             .WaitFor(migrator)

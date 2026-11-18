@@ -117,7 +117,7 @@ Open the **Aspire Dashboard** link printed in your terminal to monitor every ser
 | 🟣 Admin Portal (Next.js) | http://localhost:65499 |
 | 🔵 API | https://localhost:7281 · http://localhost:5049 |
 | 📜 Scalar API reference | https://localhost:7281/scalar |
-| 🔑 Keycloak (realm `clean-api`) | https://localhost:8080 — admin console login `admin` / `admin` |
+| 🔑 Keycloak (realm `clean-api`) | https://localhost:8180 — admin console login `admin` / `admin` |
 | 🐘 PostgreSQL + PgAdmin | Linked from the Aspire dashboard |
 | 🗃️ DbMigrator | Runs once, before the API starts |
 
@@ -125,7 +125,7 @@ Open the **Aspire Dashboard** link printed in your terminal to monitor every ser
 
 The imported realm has no users. Before you sign in to the admin portal:
 
-1. Open the Keycloak admin console at https://localhost:8080 and switch to the **`clean-api`** realm.
+1. Open the Keycloak admin console at https://localhost:8180 and switch to the **`clean-api`** realm.
 2. Create a user and set a (non-temporary) password.
 3. Under **Role mapping**, assign the realm roles the user needs:
 
@@ -161,7 +161,7 @@ NEXTAUTH_SECRET=your-random-32-byte-base64-secret
 AUTH_PROVIDER=Keycloak # "Keycloak" or "Entra" (case-insensitive)
 
 KEYCLOAK_CLIENT_ID=mrpanel
-KEYCLOAK_ISSUER=https://localhost:8080/realms/clean-api
+KEYCLOAK_ISSUER=https://localhost:8180/realms/clean-api
 KEYCLOAK_SCOPES=openid profile email permissions
 # KEYCLOAK_CLIENT_SECRET is injected by the AppHost; a value already in the
 # environment takes precedence over .env.local.

@@ -1,4 +1,5 @@
 using Aspire.Hosting.Azure;
+using Aspire.Hosting.Dotnet;
 using Aspire.Hosting.JavaScript;
 using Azure.Provisioning.AppContainers;
 using Azure.Provisioning.PostgreSql;
@@ -58,7 +59,7 @@ internal static class ProductionEnvironmentExtensions
         IResourceBuilder<AzurePostgresFlexibleServerDatabaseResource> appDb = postgres.AddDatabase(ResourceNames.PostgresDatabase, "cleanarchitecturedb");
 
 #pragma warning disable ASPIREAZURE002 // PublishAsAzureContainerAppJob is evaluation-only in 13.2.4
-        builder.AddProject<Projects.CleanArchitecture_DbMigrator>(ResourceNames.DbMigrator)
+        builder.AddDotnetProject(ResourceNames.DbMigrator, AppHostConstants.DbMigratorProjectPath)
             .WithReference(appDb)
             .WaitFor(appDb)
             .PublishAsAzureContainerAppJob((_, job) =>
@@ -70,7 +71,7 @@ internal static class ProductionEnvironmentExtensions
             });
 #pragma warning restore ASPIREAZURE002
 
-        IResourceBuilder<ProjectResource> apiProject = builder.AddProject<Projects.CleanArchitecture_Api>(ResourceNames.Api)
+        IResourceBuilder<DotnetProjectResource> apiProject = builder.AddDotnetProject(ResourceNames.Api, AppHostConstants.ApiProjectPath)
             .WithReference(appDb)
             .WaitFor(appDb)
             .WithReference(applicationInsights)
@@ -126,7 +127,7 @@ internal static class ProductionEnvironmentExtensions
     private static void ConfigureBrevo(
         IDistributedApplicationBuilder builder,
         IResourceBuilder<AzureKeyVaultResource> keyVault,
-        IResourceBuilder<ProjectResource> apiProject)
+        IResourceBuilder<DotnetProjectResource> apiProject)
     {
         IResourceBuilder<ParameterResource> brevoApiKey = builder.AddParameter("brevoApiKey", secret: true);
         IResourceBuilder<ParameterResource> brevoSenderName = builder.AddParameter("brevoSenderName");
@@ -144,7 +145,7 @@ internal static class ProductionEnvironmentExtensions
         IDistributedApplicationBuilder builder,
         IResourceBuilder<AzureKeyVaultResource> keyVault,
         IResourceBuilder<AzurePostgresFlexibleServerResource> postgres,
-        IResourceBuilder<ProjectResource> apiProject,
+        IResourceBuilder<DotnetProjectResource> apiProject,
         IResourceBuilder<NodeAppResource> adminApp,
         EndpointReference apiInternalEndpoint,
         EndpointReference adminPublicEndpoint)
@@ -164,7 +165,7 @@ internal static class ProductionEnvironmentExtensions
         keyVault.AddSecret("kv-keycloakAdminPassword", keycloakAdminPassword);
         keyVault.AddSecret("kv-keycloakDbPassword", keycloakDbPassword);
 
-        IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakPort, keycloakAdminUsername, keycloakAdminPassword)
+        IResourceBuilder<KeycloakResource> keycloak = builder.AddKeycloak("keycloak", AppHostConstants.KeycloakProductionPort, keycloakAdminUsername, keycloakAdminPassword)
             .WithEnvironment("KC_DB", "postgres")
             .WithEnvironment("KC_DB_URL_DATABASE", keycloakDb.Resource.DatabaseName)
             .WithEndpoint("http", endpoint => endpoint.IsExternal = true, createIfNotExists: false)
@@ -218,7 +219,7 @@ internal static class ProductionEnvironmentExtensions
     private static void ConfigureEntra(
         IDistributedApplicationBuilder builder,
         IResourceBuilder<AzureKeyVaultResource> keyVault,
-        IResourceBuilder<ProjectResource> apiProject,
+        IResourceBuilder<DotnetProjectResource> apiProject,
         IResourceBuilder<NodeAppResource> adminApp,
         EndpointReference apiInternalEndpoint,
         EndpointReference adminPublicEndpoint)

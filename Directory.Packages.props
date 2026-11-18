@@ -5,15 +5,17 @@
   <ItemGroup>
     <PackageVersion Include="Asp.Versioning.Http" Version="10.2.3" />
     <PackageVersion Include="Asp.Versioning.OpenApi" Version="10.2.3" />
-    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.ApplicationInsights" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.KeyVault" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Keycloak" Version="13.6.0-preview.1.26479.8" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Keycloak.Authentication" Version="13.6.0-preview.1.26479.8" />
-    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.ApplicationInsights" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.KeyVault" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Keycloak" Version="17.0.0-preview.1.26567.5" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Keycloak.Authentication" Version="17.0.0-preview.1.26567.5" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="17.0.0-preview.1.26567.5" />
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
     <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
     <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.11.1" />
@@ -22,12 +24,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Identity.Web" Version="4.15.0" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Identity.Web" Version="4.18.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.13.1" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.19.1" />
     <PackageVersion Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.19.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.17.12" />
@@ -37,7 +39,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     <PackageVersion Include="Scriban" Version="7.2.5" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.12" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.15" />
     <PackageVersion Include="Polly" Version="8.8.0" />
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <PackageVersion Include="DomainValidation.NET" Version="3.0.0" />
@@ -47,11 +49,11 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
